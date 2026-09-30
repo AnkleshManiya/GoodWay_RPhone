@@ -122,6 +122,8 @@ class CallLogViewModel(
     }
 
     override fun onCleared() {
+        debounceJob?.cancel()
+        filterJob?.cancel()
         super.onCleared()
         try {
             contentResolver.unregisterContentObserver(callLogObserver)

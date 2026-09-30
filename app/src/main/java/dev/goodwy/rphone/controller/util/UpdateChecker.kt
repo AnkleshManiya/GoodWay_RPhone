@@ -149,9 +149,10 @@ fun enqueueApkDownload(context: Context, apkUrl: String): Long? {
  * Trigger the PackageInstaller UI immediately and delete the APK only on a successful install.
  */
 fun installApkAndScheduleDelete(context: Context, file: File) {
+    val appContext = context.applicationContext
     try {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            val packageInstaller = context.packageManager.packageInstaller
+            val packageInstaller = appContext.packageManager.packageInstaller
             val params = PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL)
             val sessionId = packageInstaller.createSession(params)
             val session = packageInstaller.openSession(sessionId)
@@ -163,7 +164,7 @@ fun installApkAndScheduleDelete(context: Context, file: File) {
                 }
             }
 
-            val installResultAction = "${context.packageName}.INSTALL_RESULT"
+            val installResultAction = "${appContext.packageName}.INSTALL_RESULT"
 
             val handler = Handler(Looper.getMainLooper())
             var receiverUnregistered = false
@@ -181,14 +182,14 @@ fun installApkAndScheduleDelete(context: Context, file: File) {
                         }
                         if (confirmIntent != null) {
                             confirmIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                            try { context.startActivity(confirmIntent) } catch (_: Exception) {}
+                            try { appContext.startActivity(confirmIntent) } catch (_: Exception) {}
                         }
                         return
                     }
 
                     if (!receiverUnregistered) {
                         receiverUnregistered = true
-                        try { context.unregisterReceiver(this) } catch (_: Exception) {}
+                        try { appContext.unregisterReceiver(this) } catch (_: Exception) {}
                     }
                     if (status == PackageInstaller.STATUS_SUCCESS) {
                         try { file.delete() } catch (_: Exception) {}
@@ -197,25 +198,25 @@ fun installApkAndScheduleDelete(context: Context, file: File) {
             }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                context.registerReceiver(resultReceiver, IntentFilter(installResultAction), Context.RECEIVER_NOT_EXPORTED)
+                appContext.registerReceiver(resultReceiver, IntentFilter(installResultAction), Context.RECEIVER_NOT_EXPORTED)
             } else {
                 @Suppress("UnspecifiedRegisterReceiverFlag")
-                context.registerReceiver(resultReceiver, IntentFilter(installResultAction))
+                appContext.registerReceiver(resultReceiver, IntentFilter(installResultAction))
             }
 
             // Fallback unregister timeout after 5 minutes to prevent memory leaks if user abandons installation
             handler.postDelayed({
                 if (!receiverUnregistered) {
                     receiverUnregistered = true
-                    try { context.unregisterReceiver(resultReceiver) } catch (_: Exception) {}
+                    try { appContext.unregisterReceiver(resultReceiver) } catch (_: Exception) {}
                 }
             }, 5 * 60 * 1000L)
             
             val intent = Intent(installResultAction)
             val pi = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                PendingIntent.getBroadcast(context, sessionId, intent, PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+                PendingIntent.getBroadcast(appContext, sessionId, intent, PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
             } else {
-                PendingIntent.getBroadcast(context, sessionId, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+                PendingIntent.getBroadcast(appContext, sessionId, intent, PendingIntent.FLAG_UPDATE_CURRENT)
             }
 
             session.commit(pi.intentSender)

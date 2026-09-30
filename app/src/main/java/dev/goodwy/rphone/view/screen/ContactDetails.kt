@@ -229,8 +229,9 @@ fun ContactDetailsScreen(
         } else if (phoneNumber != null) {
             contactsViewModel.getFullContactByNumber(phoneNumber)
         } else null
-        contactAccount = if (contact != null) availableAccounts.find {
-            it.name == contact!!.accountName && it.type == contact!!.accountType
+        val currentContact = contact
+        contactAccount = if (currentContact != null) availableAccounts.find {
+            it.name == currentContact.accountName && it.type == currentContact.accountType
         } else null
 
         if (contact == null && contactId != null && contactId != "null") {
@@ -253,18 +254,22 @@ fun ContactDetailsScreen(
         ?: contact?.phoneNumbers?.firstOrNull()
         ?: unknownLabel
 
-    val companyAndJob = when {
-        contact == null -> ""
-        contact!!.company.isNotBlank() && contact!!.jobTitle.isNotBlank() -> contact!!.jobTitle + " • " + contact!!.company
-        contact!!.company.isNotBlank() -> contact!!.company
-        contact!!.jobTitle.isNotBlank() -> contact!!.jobTitle
-        else -> ""
+    val companyAndJob = run {
+        val c = contact
+        when {
+            c == null -> ""
+            c.company.isNotBlank() && c.jobTitle.isNotBlank() -> c.jobTitle + " • " + c.company
+            c.company.isNotBlank() -> c.company
+            c.jobTitle.isNotBlank() -> c.jobTitle
+            else -> ""
+        }
     }
 
     var contactSources by remember { mutableStateOf<List<ContactsRepository.ContactSource>>(emptyList()) }
     LaunchedEffect(contact) {
-        if (contact != null && !contact!!.isPrivate) {
-            val rawContacts = contactsViewModel.getContactSources(contact!!.id)
+        val c = contact
+        if (c != null && !c.isPrivate) {
+            val rawContacts = contactsViewModel.getContactSources(c.id)
             contactSources = rawContacts
         } else {
             contactSources = emptyList()
@@ -275,13 +280,14 @@ fun ContactDetailsScreen(
     val videoLauncher = rememberVideoLauncher()
 
     fun updateDefaultPhone(phoneNumber: String, isPrimary: Boolean) {
+        val c = contact ?: return
         contactsViewModel.setDefaultPhoneNumber(
-            contactId = contact!!.id,
+            contactId = c.id,
             phoneNumber = phoneNumber,
             isPrimary = isPrimary
         )
-        contact = contact!!.copy(
-            phoneDetails = contact!!.phoneDetails.map { detail ->
+        contact = c.copy(
+            phoneDetails = c.phoneDetails.map { detail ->
                 if (detail.number == phoneNumber) {
                     detail.copy(isPrimary = isPrimary)
                 } else if (isPrimary) {
@@ -450,9 +456,10 @@ fun ContactDetailsScreen(
     ) { result ->
         if (result.resultCode == android.app.Activity.RESULT_OK) {
             val uri = result.data?.getParcelableExtra<Uri>(RingtoneManager.EXTRA_RINGTONE_PICKED_URI)
-            if (contact != null) {
-                contactsViewModel.setCustomRingtone(contact!!.id, uri?.toString())
-                contact = contact!!.copy(customRingtone = uri?.toString())
+            val currentContact = contact
+            if (currentContact != null) {
+                contactsViewModel.setCustomRingtone(currentContact.id, uri?.toString())
+                contact = currentContact.copy(customRingtone = uri?.toString())
             }
         }
     }
@@ -475,27 +482,28 @@ fun ContactDetailsScreen(
         context.startActivity(Intent.createChooser(intent, shareText))
     }
 
-    if (showSharePicker && contact != null) {
-        NumberPickerDialog(numbers = contact!!.phoneNumbers, onDismissRequest = { showSharePicker = false }, onNumberSelected = { showSharePicker = false; shareContact(it) })
+    val dialogContact = contact
+    if (showSharePicker && dialogContact != null) {
+        NumberPickerDialog(numbers = dialogContact.phoneNumbers, onDismissRequest = { showSharePicker = false }, onNumberSelected = { showSharePicker = false; shareContact(it) })
     }
-    if (showNumberPicker && contact != null) {
-        NumberPickerDialog(numbers = contact!!.phoneNumbers, onDismissRequest = { showNumberPicker = false }, onNumberSelected = { showNumberPicker = false; initiateCall(it) })
+    if (showNumberPicker && dialogContact != null) {
+        NumberPickerDialog(numbers = dialogContact.phoneNumbers, onDismissRequest = { showNumberPicker = false }, onNumberSelected = { showNumberPicker = false; initiateCall(it) })
     }
-    if (showMessagePicker && contact != null) {
-        NumberPickerDialog(numbers = contact!!.phoneNumbers, onDismissRequest = { showMessagePicker = false }, onNumberSelected = { showMessagePicker = false; initiateMessage(it) })
+    if (showMessagePicker && dialogContact != null) {
+        NumberPickerDialog(numbers = dialogContact.phoneNumbers, onDismissRequest = { showMessagePicker = false }, onNumberSelected = { showMessagePicker = false; initiateMessage(it) })
     }
-    if (showEmailPicker && contact != null) {
-        NumberPickerDialog(numbers = contact!!.emails.map {it.value}, onDismissRequest = { showEmailPicker = false }, onNumberSelected = { showEmailPicker = false; initiateEmail(it) }, icon = Icons.Rounded.Email)
+    if (showEmailPicker && dialogContact != null) {
+        NumberPickerDialog(numbers = dialogContact.emails.map {it.value}, onDismissRequest = { showEmailPicker = false }, onNumberSelected = { showEmailPicker = false; initiateEmail(it) }, icon = Icons.Rounded.Email)
     }
     if (showSimPicker && pendingNumber != null) {
-        SimPickerDialog(onDismissRequest = { showSimPicker = false }, onSimSelected = { handle -> makeCall(context, pendingNumber!!, handle); showSimPicker = false })
+        SimPickerDialog(onDismissRequest = { showSimPicker = false }, onSimSelected = { handle -> pendingNumber?.let { makeCall(context, it, handle) }; showSimPicker = false })
     }
     if (showQrDialog) {
         QrCodeDialog(name = displayName, phone = pendingQrNumber ?: displayPhone, email = contact?.emails?.firstOrNull()?.value, onDismiss = { showQrDialog = false })
     }
-    if (showQrDialogPicker) {
+    if (showQrDialogPicker && dialogContact != null) {
         NumberPickerDialog(
-            numbers = contact!!.phoneNumbers,
+            numbers = dialogContact.phoneNumbers,
             onDismissRequest = { showQrDialogPicker = false },
             onNumberSelected = { pendingQrNumber = it; showQrDialogPicker = false; showQrDialog = true }
         )
@@ -838,12 +846,13 @@ fun ContactDetailsScreen(
                                         icon = Icons.Rounded.Phone,
                                         label = stringResource(R.string.call),
                                         containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                        enabled = (contact != null && contact!!.phoneNumbers.isNotEmpty()) || displayPhone != unknownLabel,
+                                        enabled = (contact != null && contact?.phoneNumbers?.isNotEmpty() == true) || displayPhone != unknownLabel,
                                         onClick = {
-                                            if (contact != null && defaultPhone != null) initiateCall(
+                                            val c = contact
+                                            if (c != null && defaultPhone != null) initiateCall(
                                                 defaultPhone.number
                                             )
-                                            else if (contact != null && contact!!.phoneNumbers.size > 1) showNumberPicker =
+                                            else if (c != null && c.phoneNumbers.size > 1) showNumberPicker =
                                                 true
                                             else if (displayPhone != unknownLabel) initiateCall(displayPhone)
                                         })
@@ -854,12 +863,13 @@ fun ContactDetailsScreen(
                                         icon = messageImageVector,
                                         label = stringResource(R.string.message),
                                         containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                        enabled = (contact != null && contact!!.phoneNumbers.isNotEmpty()) || displayPhone != unknownLabel,
+                                        enabled = (contact != null && contact?.phoneNumbers?.isNotEmpty() == true) || displayPhone != unknownLabel,
                                         onClick = {
-                                            if (contact != null && defaultPhone != null) initiateMessage(
+                                            val c = contact
+                                            if (c != null && defaultPhone != null) initiateMessage(
                                                 defaultPhone.number
                                             )
-                                            else if (contact != null && contact!!.phoneNumbers.size > 1) showMessagePicker =
+                                            else if (c != null && c.phoneNumbers.size > 1) showMessagePicker =
                                                 true
                                             else if (displayPhone != unknownLabel) initiateMessage(displayPhone)
                                         })
@@ -870,7 +880,7 @@ fun ContactDetailsScreen(
                                         icon = videoImageVector,
                                         label = stringResource(R.string.video),
                                         containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                        enabled = (contact != null && contact!!.phoneNumbers.isNotEmpty()) || displayPhone != unknownLabel,
+                                        enabled = (contact != null && contact?.phoneNumbers?.isNotEmpty() == true) || displayPhone != unknownLabel,
                                         onClick = {
                                             videoLauncher.startVideoCall(displayPhone, contact)
                                         })
@@ -879,12 +889,13 @@ fun ContactDetailsScreen(
                                         icon = Icons.Rounded.Email,
                                         label = stringResource(R.string.email),
                                         containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                        enabled = contact != null && contact!!.emails.isNotEmpty(),
+                                        enabled = contact?.emails?.isNotEmpty() == true,
                                         onClick = {
-                                            if (contact != null && contact!!.emails.size > 1) showEmailPicker =
+                                            val c = contact
+                                            if (c != null && c.emails.size > 1) showEmailPicker =
                                                 true
-                                            else if (contact != null && contact!!.emails.isNotEmpty()) initiateEmail(
-                                                contact!!.emails.first().value
+                                            else if (c != null && c.emails.isNotEmpty()) initiateEmail(
+                                                c.emails.first().value
                                             )
                                         })
                                 }
