@@ -41,6 +41,8 @@
     <string name="sim_picker_title">اختيار بطاقة SIM</string>
     <string name="label_unknown_number">رقم غير معروف</string>
     <string name="reset">إعادة تعيين</string>
+    <string name="add">إضافة</string>
+    <string name="use_number">استخدام الرقم: %s</string>
 
     <!-- Search -->
     <string name="search">بحث</string>
@@ -105,13 +107,17 @@
     <string name="check_for_updates">التحقق من التحديثات</string>
     <string name="check_for_updates_subtitle">تحقق مما إذا كان هناك إصدار جديد متاح</string>
     <string name="auto_check_for_updates">التحقق التلقائي من التحديثات</string>
-    <string name="auto_check_for_updates_subtitle">التحقق تلقائيًا من التحديثات</string>
+    <string name="auto_check_for_updates_subtitle">التحقق تلقائيًا من الإصدارات الجديدة عند تشغيل التطبيق</string>
     <string name="checking_for_updates">جارٍ التحقق من التحديثات…</string>
     <string name="up_to_date">محدَّث</string>
-    <string name="up_to_date_subtitle">التطبيق يعمل بأحدث إصدار (v%1$s).</string>
+    <string name="up_to_date_subtitle">التطبيق يعمل بأحدث إصدار %1$s.</string>
     <string name="update_available">تحديث متاح</string>
-    <string name="update_available_subtitle">الإصدار v%1$s متاح.</string>
-    <string name="update_available_description">هل تريد تنزيل ملف APK إلى مجلد التنزيلات؟</string>
+    <string name="update_available_subtitle">الإصدار %1$s متاح.</string>
+    <string name="update_available_subtitle_dialog">إصدار أحدث من Rill Phone جاهز للتنزيل والاستكشاف.</string>
+    <string name="download_update">تنزيل التحديث؟</string>
+    <string name="download_update_subtitle">Rill Phone v%1$s متاح (لديك v%2$s). سيتم تنزيل ملف APK إلى مجلد التنزيلات.</string>
+    <string name="install_update">تثبيت التحديث؟</string>
+    <string name="install_update_subtitle">تم تنزيل التحديث v%1$s بالفعل. هل تريد تثبيته الآن؟</string>
     <string name="download">تنزيل</string>
     <string name="not_now">ليس الآن</string>
     <string name="downloading_update">جارٍ تنزيل التحديث</string>
@@ -121,7 +127,15 @@
     <string name="download_complete">اكتمل التنزيل</string>
     <string name="download_complete_subtitle">تم تنزيل التحديث إلى الإصدار %1$s بنجاح.</string>
     <string name="open_downloads_folder_manually">افتح مجلد التنزيلات يدويًا</string>
-    <string name="file_saved_to_downloads_folder">تم حفظ الملف في مجلد التنزيلات.</string>
+    <string name="try_again">حاول مرة أخرى</string>
+    <string name="couldnt_check_for_updates">تعذر التحقق من التحديثات</string>
+    <string name="couldnt_check_for_updates_subtitle">تعذر الوصول إلى مستودع إصدارات GitHub. يرجى التحقق من اتصالك.</string>
+    <string name="no_release_notes">لم يتم تقديم ملاحظات الإصدار لهذا الإصدار.</string>
+    <string name="installed">مثبَّت</string>
+    <string name="latest">الأحدث</string>
+    <string name="later">لاحقًا</string>
+    <string name="view_update">عرض التحديث</string>
+
 
     <!-- Contributors -->
     <string name="contributors">المساهمون</string>
@@ -422,6 +436,9 @@
     <string name="add_call">إضافة مكالمة</string>
     <string name="resume">استئناف</string>
     <string name="swap">تبديل</string>
+    <string name="merge">دمج</string>
+    <string name="manage">إدارة</string>
+    <string name="conference">مؤتمر</string>
     <string name="more">المزيد</string>
     <string name="hold">تعليق</string>
     <string name="call_status_on_hold">معلقة</string>
@@ -662,4 +679,23 @@
     <string name="pocket_mode_active">وضع الجيب نشط</string>
     <string name="pocket_mode_active_description">تم قفل لمسات الشاشة لمنع اللمس العرضي في جيبك.</string>
     <string name="pocket_mode_dismiss">إيقاف حماية اللمس</string>
+
+    <!-- Call Analytics -->
+    <string name="settings_call_analytics_title">تحليلات المكالمات</string>
+    <string name="settings_call_analytics_supporting">تتبع مقاييس المكالمات وإحصاءات وقت التحدث وساعات الذروة ومعلومات جهات الاتصال المتكررة</string>
+    <string name="call_analytics_disabled_title">تحليلات المكالمات معطلة</string>
+    <string name="call_analytics_disabled_desc">تحليلات المكالمات وتتبع وقت التحدث معطلة حاليًا. قم بتفعيل هذا الخيار لحساب وقت التحدث وساعات الذروة ومعلومات جهات الاتصال.</string>
+    <string name="call_analytics_enable_action">تفعيل التحليلات</string>
+    <string name="this_week">هذا الأسبوع</string>
+    <string name="this_month">هذا الشهر</string>
+    <string name="all_time">كل الوقت</string>
+    <string name="total_talk_time">إجمالي وقت التحدث</string>
+    <string name="total_calls">إجمالي المكالمات</string>
+    <string name="avg_duration">متوسط المدة</string>
+    <string name="call_volume">حجم المكالمات</string>
+    <string name="call_breakdown">تفصيل المكالمات</string>
+    <string name="sim_usage_breakdown">استخدام SIM</string>
+    <string name="most_talked_persons">الأشخاص الأكثر تواصلًا</string>
+    <string name="no_call_records_this_period">لم يتم العثور على سجلات مكالمات لهذه الفترة</string>
+    <string name="total_calls_in_number">%1$s مكالمة (واردة: %2$s، صادرة: %3$s، فائتة: %4$s)</string>
 </resources>

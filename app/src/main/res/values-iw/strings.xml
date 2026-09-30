@@ -41,6 +41,8 @@
     <string name="sim_picker_title">בחר כרטיס SIM</string>
     <string name="label_unknown_number">מספר לא ידוע</string>
     <string name="reset">איפוס</string>
+    <string name="add">הוסף</string>
+    <string name="use_number">השתמש במספר: %s</string>
 
     <!-- Search -->
     <string name="search">חיפוש</string>
@@ -105,13 +107,17 @@
     <string name="check_for_updates">בדוק עדכונים</string>
     <string name="check_for_updates_subtitle">בדוק אם גרסה חדשה זמינה</string>
     <string name="auto_check_for_updates">בדיקת עדכונים אוטומטית</string>
-    <string name="auto_check_for_updates_subtitle">בדוק עדכונים באופן אוטומטי</string>
+    <string name="auto_check_for_updates_subtitle">בדוק אוטומטית גרסאות חדשות בעת הפעלת האפליקציה</string>
     <string name="checking_for_updates">בודק עדכונים…</string>
     <string name="up_to_date">מעודכן</string>
-    <string name="up_to_date_subtitle">האפליקציה מריצה את הגרסה האחרונה (v%1$s).</string>
+    <string name="up_to_date_subtitle">האפליקציה מריצה את הגרסה האחרונה %1$s.</string>
     <string name="update_available">עדכון זמין</string>
-    <string name="update_available_subtitle">גרסה v%1$s זמינה.</string>
-    <string name="update_available_description">האם ברצונך להוריד את קובץ ה-APK לתיקיית ההורדות?</string>
+    <string name="update_available_subtitle">גרסה %1$s זמינה.</string>
+    <string name="update_available_subtitle_dialog">גרסה חדשה יותר של Rill Phone מוכנה להורדה ולגילוי.</string>
+    <string name="download_update">להוריד עדכון?</string>
+    <string name="download_update_subtitle">Rill Phone v%1$s זמין (יש לך v%2$s). קובץ ה-APK יורד לתיקיית ההורדות שלך.</string>
+    <string name="install_update">להתקין עדכון?</string>
+    <string name="install_update_subtitle">העדכון v%1$s כבר הורד. האם ברצונך להתקין אותו עכשיו?</string>
     <string name="download">הורד</string>
     <string name="not_now">לא עכשיו</string>
     <string name="downloading_update">מוריד עדכון</string>
@@ -121,7 +127,15 @@
     <string name="download_complete">ההורדה הושלמה</string>
     <string name="download_complete_subtitle">העדכון לגרסה %1$s הורד בהצלחה.</string>
     <string name="open_downloads_folder_manually">פתח את תיקיית ההורדות ידנית</string>
-    <string name="file_saved_to_downloads_folder">הקובץ נשמר בתיקיית ההורדות.</string>
+    <string name="try_again">נסה שוב</string>
+    <string name="couldnt_check_for_updates">לא ניתן היה לבדוק עדכונים</string>
+    <string name="couldnt_check_for_updates_subtitle">לא ניתן להגיע למאגר הגרסאות של GitHub. אנא בדוק את החיבור שלך.</string>
+    <string name="no_release_notes">לא סופקו הערות גרסה עבור גרסה זו.</string>
+    <string name="installed">מותקן</string>
+    <string name="latest">האחרונה</string>
+    <string name="later">מאוחר יותר</string>
+    <string name="view_update">הצג עדכון</string>
+
 
     <!-- Contributors -->
     <string name="contributors">תורמים</string>
@@ -422,6 +436,9 @@
     <string name="add_call">הוסף שיחה</string>
     <string name="resume">המשך</string>
     <string name="swap">החלף</string>
+    <string name="merge">מזג</string>
+    <string name="manage">נהל</string>
+    <string name="conference">ועידה</string>
     <string name="more">עוד</string>
     <string name="hold">העמדת המתנה</string>
     <string name="call_status_on_hold">בהמתנה</string>
@@ -653,4 +670,23 @@
     <string name="pocket_mode_active">מצב כיס פעיל</string>
     <string name="pocket_mode_active_description">נעילות מגע במסך ננעלו כדי למנוע נגיעות מקריות בכיס.</string>
     <string name="pocket_mode_dismiss">בטל הגנת מגע</string>
+
+    <!-- Call Analytics -->
+    <string name="settings_call_analytics_title">ניתוח שיחות</string>
+    <string name="settings_call_analytics_supporting">עקוב אחר מדדי שיחות, סטטיסטיקות זמן דיבור, שעות שיא ומידע על אנשי קשר תכופים</string>
+    <string name="call_analytics_disabled_title">ניתוח שיחות מושבת</string>
+    <string name="call_analytics_disabled_desc">ניתוח שיחות ומעקב זמן דיבור מושבתים כעת. הפעל אפשרות זו כדי לחשב זמן דיבור, שעות שיא ומידע על אנשי קשר.</string>
+    <string name="call_analytics_enable_action">הפעל ניתוח</string>
+    <string name="this_week">השבוע</string>
+    <string name="this_month">החודש</string>
+    <string name="all_time">כל הזמן</string>
+    <string name="total_talk_time">סה"כ זמן דיבור</string>
+    <string name="total_calls">סה"כ שיחות</string>
+    <string name="avg_duration">משך ממוצע</string>
+    <string name="call_volume">נפח שיחות</string>
+    <string name="call_breakdown">פירוט שיחות</string>
+    <string name="sim_usage_breakdown">שימוש ב-SIM</string>
+    <string name="most_talked_persons">האנשים שדיברת איתם הכי הרבה</string>
+    <string name="no_call_records_this_period">לא נמצאו רשומות שיחות לתקופה זו</string>
+    <string name="total_calls_in_number">%1$s שיחות (נכנס: %2$s, יוצא: %3$s, הוחמץ: %4$s)</string>
 </resources>

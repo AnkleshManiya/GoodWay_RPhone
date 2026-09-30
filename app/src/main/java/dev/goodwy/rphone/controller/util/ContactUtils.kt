@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import dev.goodwy.rphone.R
+import dev.goodwy.rphone.modal.data.Contact
 
 object ContactUtils {
     fun getAccountName(account: Account?): String {
@@ -17,7 +18,7 @@ object ContactUtils {
             account == null -> "Local (Device Only)"
             account.type.contains("telegram", ignoreCase = true) -> "Telegram (${account.name})"
             account.type.contains("xiaomi", ignoreCase = true) -> "Mi Account (${account.name})"
-            else -> account.name
+            else -> account.name.ifBlank{ account.type.ifBlank{ "Local" } }
         }
     }
 
@@ -30,7 +31,7 @@ object ContactUtils {
             account.type.contains("telegram", ignoreCase = true) -> "Telegram"
             account.type.contains("xiaomi", ignoreCase = true) -> "Mi Account"
             account.type.contains("sim", ignoreCase = true) -> "SIM Card"
-            else -> account.name
+            else -> account.name.ifBlank{ account.type.ifBlank{ "Local" } }
         }
     }
 
@@ -53,5 +54,10 @@ object ContactUtils {
             account == null -> null
             else -> "${account.name}|${account.type}"
         }
+    }
+
+    fun getPhoneNumber(contact: Contact): String? {
+        return contact.phoneDetails.firstOrNull { it.isPrimary }?.number
+            ?: contact.phoneDetails.firstOrNull()?.number ?: contact.phoneNumbers.firstOrNull()
     }
 }

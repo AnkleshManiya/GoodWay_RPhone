@@ -6,12 +6,12 @@ import android.telecom.TelecomManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.goodwy.rphone.R
-import dev.goodwy.rphone.data.manager.CallStateManager
-import dev.goodwy.rphone.domain.model.CallerMetadata
+import dev.goodwy.rphone.modal.data.CallerMetadata
 import dev.goodwy.rphone.modal.`interface`.CallSession
 import dev.goodwy.rphone.modal.`interface`.ICallRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class CallViewModel(
@@ -41,7 +41,7 @@ class CallViewModel(
                 while (true) {
                     val duration = if (connectTime > 0) (System.currentTimeMillis() - connectTime) / 1000 else 0L
                     emit(duration)
-                    delay(1000)
+                    delay(1000.milliseconds)
                 }
             }
         }
@@ -62,6 +62,7 @@ class CallViewModel(
     fun declineCall() = callRepository.declineCall()
     fun toggleMute() = callRepository.toggleMute()
     fun cycleAudioRoute() = callRepository.cycleAudioRoute()
+    fun mergeCalls() = callRepository.mergeCalls()
     fun setAudioRoute(route: Int) = callRepository.setAudioRoute(route)
     fun setPreferredCall(call: Call?) = callRepository.setPreferredCall(call)
     fun setIsActivityVisible(visible: Boolean) = callRepository.setIsActivityVisible(visible)

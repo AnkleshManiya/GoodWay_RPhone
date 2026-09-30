@@ -111,6 +111,8 @@ class ContactsRepository(
             ContactsContract.Data.MIMETYPE,
             ContactsContract.Data.DATA1,
             ContactsContract.Data.STARRED,
+            ContactsContract.Data.IS_PRIMARY,
+            ContactsContract.Data.IS_SUPER_PRIMARY,
             CommonDataKinds.StructuredName.PREFIX,
             CommonDataKinds.StructuredName.GIVEN_NAME,
             CommonDataKinds.StructuredName.MIDDLE_NAME,
@@ -132,6 +134,8 @@ class ContactsRepository(
                 val mimeIdx = cursor.getColumnIndex(ContactsContract.Data.MIMETYPE)
                 val data1Idx = cursor.getColumnIndex(ContactsContract.Data.DATA1)
                 val starredIdx = cursor.getColumnIndex(ContactsContract.Data.STARRED)
+                val isPrimaryIdx = cursor.getColumnIndex(ContactsContract.Data.IS_PRIMARY)
+                val isSuperPrimaryIdx = cursor.getColumnIndex(ContactsContract.Data.IS_SUPER_PRIMARY)
 
                 val prefixIdx = cursor.getColumnIndex(CommonDataKinds.StructuredName.PREFIX)
                 val givenNameIdx = cursor.getColumnIndex(CommonDataKinds.StructuredName.GIVEN_NAME)
@@ -168,9 +172,15 @@ class ContactsRepository(
                     val updatedContact = when (mimeType) {
                         CommonDataKinds.Phone.CONTENT_ITEM_TYPE -> {
                             if (current.phoneNumbers.none { areNumbersEqual(it, data1) }) {
+                                // We consider it primary if at least one of the flags is set (typically, IS_SUPER_PRIMARY == 1 implies IS_PRIMARY == 1)
+                                val isPrimary = cursor.getInt(isPrimaryIdx) == 1 || cursor.getInt(isSuperPrimaryIdx) == 1
+
                                 current.copy(
                                     phoneNumbers = current.phoneNumbers + data1,
-                                    phoneDetails = (current.phoneDetails + ContactPhoneDetail(number = data1)).distinctBy { it.number }
+                                    phoneDetails = (current.phoneDetails + ContactPhoneDetail(
+                                        number = data1,
+                                        isPrimary = isPrimary
+                                    )).distinctBy { it.number }
                                 )
                             } else current
                         }
@@ -268,6 +278,7 @@ class ContactsRepository(
             ContactsContract.Data.DATA3,
             ContactsContract.Data.DATA4,
             ContactsContract.Data.IS_PRIMARY,
+            ContactsContract.Data.IS_SUPER_PRIMARY,
             ContactsContract.Data.STARRED,
             ContactsContract.Data.RAW_CONTACT_ID,
             CommonDataKinds.StructuredName.PREFIX,
@@ -294,6 +305,7 @@ class ContactsRepository(
                 val data2Idx = cursor.getColumnIndex(ContactsContract.Data.DATA2)
                 val data3Idx = cursor.getColumnIndex(ContactsContract.Data.DATA3)
                 val isPrimaryIdx = cursor.getColumnIndex(ContactsContract.Data.IS_PRIMARY)
+                val isSuperPrimaryIdx = cursor.getColumnIndex(ContactsContract.Data.IS_SUPER_PRIMARY)
                 val starredIdx = cursor.getColumnIndex(ContactsContract.Data.STARRED)
 //                val rawIdIdx = cursor.getColumnIndex(ContactsContract.Data.RAW_CONTACT_ID)
 
@@ -346,7 +358,8 @@ class ContactsRepository(
                         CommonDataKinds.Phone.CONTENT_ITEM_TYPE -> {
                             val type = cursor.getInt(data2Idx)
                             val label = cursor.getString(data3Idx)
-                            val isPrimary = cursor.getInt(isPrimaryIdx) == 1
+                            // We consider it primary if at least one of the flags is set (typically, IS_SUPER_PRIMARY == 1 implies IS_PRIMARY == 1)
+                            val isPrimary = cursor.getInt(isPrimaryIdx) == 1 || cursor.getInt(isSuperPrimaryIdx) == 1
 
                             val phoneDetail = ContactPhoneDetail(
                                 number = data1,
@@ -447,6 +460,7 @@ class ContactsRepository(
             ContactsContract.Data.DATA3,
             ContactsContract.Data.DATA4,
             ContactsContract.Data.IS_PRIMARY,
+            ContactsContract.Data.IS_SUPER_PRIMARY,
             ContactsContract.Data.STARRED,
             ContactsContract.Data.CUSTOM_RINGTONE,
             ContactsContract.Data.RAW_CONTACT_ID,
@@ -476,6 +490,7 @@ class ContactsRepository(
                 val data2Idx = cursor.getColumnIndex(ContactsContract.Data.DATA2)
                 val data3Idx = cursor.getColumnIndex(ContactsContract.Data.DATA3)
                 val isPrimaryIdx = cursor.getColumnIndex(ContactsContract.Data.IS_PRIMARY)
+                val isSuperPrimaryIdx = cursor.getColumnIndex(ContactsContract.Data.IS_SUPER_PRIMARY)
                 val starredIdx = cursor.getColumnIndex(ContactsContract.Data.STARRED)
                 val ringtoneIdx = cursor.getColumnIndex(ContactsContract.Data.CUSTOM_RINGTONE)
 
@@ -526,7 +541,7 @@ class ContactsRepository(
                         CommonDataKinds.Phone.CONTENT_ITEM_TYPE -> {
                             val type = cursor.getInt(data2Idx)
                             val label = cursor.getString(data3Idx)
-                            val isPrimary = cursor.getInt(isPrimaryIdx) == 1
+                            val isPrimary = cursor.getInt(isPrimaryIdx) == 1 || cursor.getInt(isSuperPrimaryIdx) == 1
 
                             val phoneDetail = ContactPhoneDetail(
                                 number = data1,
@@ -602,30 +617,31 @@ class ContactsRepository(
     }
 
     override suspend fun setDefaultPhoneNumber(contactId: String, phoneNumber: String, isPrimary: Boolean) = withContext(Dispatchers.IO) {
-        val rawContactId = getRawContactId(contactId) ?: return@withContext
-
+        if (contactId.startsWith("p")) return@withContext
         val ops = ArrayList<ContentProviderOperation>()
 
-        // Reset all phone numbers for this contact
+        // 1. Clear the flags for ALL contact numbers (all sources)
         ops.add(
             ContentProviderOperation.newUpdate(ContactsContract.Data.CONTENT_URI)
                 .withSelection(
-                    "${ContactsContract.Data.RAW_CONTACT_ID} = ? AND ${ContactsContract.Data.MIMETYPE} = ?",
-                    arrayOf(rawContactId, CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+                    "${ContactsContract.Data.CONTACT_ID} = ? AND ${ContactsContract.Data.MIMETYPE} = ?",
+                    arrayOf(contactId, CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
                 )
                 .withValue(CommonDataKinds.Phone.IS_PRIMARY, 0)
+                .withValue(CommonDataKinds.Phone.IS_SUPER_PRIMARY, 0)
                 .build()
         )
 
-        // Set primary for selected number
+        // 2. Set flags for the selected number
         if (isPrimary) {
             ops.add(
                 ContentProviderOperation.newUpdate(ContactsContract.Data.CONTENT_URI)
                     .withSelection(
-                        "${ContactsContract.Data.RAW_CONTACT_ID} = ? AND ${ContactsContract.Data.MIMETYPE} = ? AND ${CommonDataKinds.Phone.NUMBER} = ?",
-                        arrayOf(rawContactId, CommonDataKinds.Phone.CONTENT_ITEM_TYPE, phoneNumber)
+                        "${ContactsContract.Data.CONTACT_ID} = ? AND ${ContactsContract.Data.MIMETYPE} = ? AND ${CommonDataKinds.Phone.NUMBER} = ?",
+                        arrayOf(contactId, CommonDataKinds.Phone.CONTENT_ITEM_TYPE, phoneNumber)
                     )
                     .withValue(CommonDataKinds.Phone.IS_PRIMARY, 1)
+                    .withValue(CommonDataKinds.Phone.IS_SUPER_PRIMARY, 1)
                     .build()
             )
         }
@@ -1272,16 +1288,7 @@ class ContactsRepository(
                 while (cursor.moveToNext()) {
                     val accountName = cursor.getString(accountNameIdx)
                     val accountType = cursor.getString(accountTypeIdx)
-
-                    // We exclude null accounts (they will be processed separately as "Device only")
-//                    if (accountName != null && accountType != null) {
-//                        sources.add(Account(accountName, accountType))
-//                    }
-                    if (accountName == null && accountType == null) {
-                        sources.add(Account(device_only, device_only))
-                    } else if (accountName != null && accountType != null) {
-                        sources.add(Account(accountName, accountType))
-                    }
+                    sources.add(Account(accountName ?: device_only, accountType ?: device_only))
                 }
             }
         } catch (e: SecurityException) {
@@ -1314,6 +1321,8 @@ class ContactsRepository(
     }
 
     override suspend fun getContactByNumber(number: String): Contact? = withContext(Dispatchers.IO) {
+        if (number.isBlank()) return@withContext null
+
 //        if (isVoicemailNumber(context, number)) {
 //            return@withContext Contact(
 //                id = "voicemail",
@@ -2205,6 +2214,7 @@ class ContactsRepository(
             ContactsContract.Data.DATA3,
             ContactsContract.Data.DATA4,
             ContactsContract.Data.IS_PRIMARY,
+            ContactsContract.Data.IS_SUPER_PRIMARY,
             ContactsContract.Data.STARRED,
             CommonDataKinds.StructuredName.PREFIX,
             CommonDataKinds.StructuredName.GIVEN_NAME,
@@ -2235,6 +2245,7 @@ class ContactsRepository(
                 val data2Idx = cursor.getColumnIndex(ContactsContract.Data.DATA2)
                 val data3Idx = cursor.getColumnIndex(ContactsContract.Data.DATA3)
                 val isPrimaryIdx = cursor.getColumnIndex(ContactsContract.Data.IS_PRIMARY)
+                val isSuperPrimaryIdx = cursor.getColumnIndex(ContactsContract.Data.IS_SUPER_PRIMARY)
                 val starredIdx = cursor.getColumnIndex(ContactsContract.Data.STARRED)
 
                 while (cursor.moveToNext()) {
@@ -2296,7 +2307,7 @@ class ContactsRepository(
                         CommonDataKinds.Phone.CONTENT_ITEM_TYPE -> {
                             val type = cursor.getInt(data2Idx)
                             val label = cursor.getString(data3Idx)
-                            val isPrimary = cursor.getInt(isPrimaryIdx) == 1
+                            val isPrimary = cursor.getInt(isPrimaryIdx) == 1 || cursor.getInt(isSuperPrimaryIdx) == 1
 
                             val phoneDetail = ContactPhoneDetail(
                                 number = data1,

@@ -16,7 +16,6 @@ import android.widget.Toast
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.controller.util.toast
-import dev.goodwy.rphone.data.manager.CallStateManager
 import dev.goodwy.rphone.modal.`interface`.CallSession
 import dev.goodwy.rphone.modal.`interface`.ICallRepository
 import dev.goodwy.rphone.modal.repository.CallRepositoryImpl
@@ -28,8 +27,10 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.android.ext.android.inject
 import kotlin.getValue
 import kotlin.time.Duration.Companion.milliseconds
@@ -188,9 +189,21 @@ class CallService : InCallService() {
 
         if (isIncoming && wasNeverConnected && (cause?.code == DisconnectCause.MISSED || cause?.code == DisconnectCause.REMOTE || cause?.code == DisconnectCause.REJECTED)) {
             serviceScope.launch {
-                if (!isNumberBlocked(number) || preferenceManager.getInt(PreferenceManager.KEY_BLOCK_LOG_VISIBILITY, 0) == 1) {
-                    val contactName = getContactNameFromCache(number)
-                    val photoUri = getContactPhotoFromCache(number)
+                val isBlocked = isNumberBlocked(number)
+                val showBlocked = preferenceManager.getInt(PreferenceManager.KEY_BLOCK_LOG_VISIBILITY, 0) == 1
+                if (!isBlocked || showBlocked) {
+//                    val contactName = getContactNameFromCache(number)
+//                    val photoUri = getContactPhotoFromCache(number)
+//                    notificationManager.showMissedCallNotification(call, contactName, photoUri)
+
+                    val metadata = withTimeoutOrNull(2000L.milliseconds) {
+                        callStateManager.onNewCallReceived(number, null)
+                        callStateManager.callerMetadataMap.first { map ->
+                            map.containsKey(number)
+                        }[number]
+                    }
+                    val contactName = metadata?.name?.takeIf { it.isNotEmpty() } ?: number
+                    val photoUri = metadata?.photoUri
                     notificationManager.showMissedCallNotification(call, contactName, photoUri)
                 }
             }
@@ -225,11 +238,7 @@ class CallService : InCallService() {
     private fun getContactNameFromCache(number: String): String {
         if (number.isEmpty()) return getString(R.string.label_unknown_number)
         val metadata = callStateManager.callerMetadataMap.value[number]
-        return if (metadata != null && metadata.name.isNotEmpty()) {
-            metadata.name
-        } else {
-            number
-        }
+        return metadata?.name?.takeIf { it.isNotEmpty() } ?: number
     }
 
     private fun getContactPhotoFromCache(number: String): String? {
@@ -263,6 +272,7 @@ class CallService : InCallService() {
 
         val priorityCall = callsList.find { it.state == Call.STATE_RINGING }
             ?: activePreferred
+            ?: callsList.find { it.details.hasProperty(Call.Details.PROPERTY_CONFERENCE) && it.state != Call.STATE_DISCONNECTED }
             ?: callsList.find { it.state == Call.STATE_DIALING || it.state == Call.STATE_CONNECTING }
             ?: callsList.find { it.state == Call.STATE_ACTIVE }
             ?: callsList.find { it == preferred }

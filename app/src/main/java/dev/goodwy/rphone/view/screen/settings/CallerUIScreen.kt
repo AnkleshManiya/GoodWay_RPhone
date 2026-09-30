@@ -203,7 +203,7 @@ fun CallerUIScreen(navigator: DestinationsNavigator) {
                                             stringResource(R.string.settings_call_default_background_none)
                                         },
                                         style = MaterialTheme.typography.bodySmall,
-                                        lineHeight = 14.sp,
+                                        lineHeight = MaterialTheme.typography.bodyMedium.fontSize, //14.sp
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
@@ -358,7 +358,7 @@ fun CallerUIScreen(navigator: DestinationsNavigator) {
                                             Text(
                                                 stringResource(R.string.customize_width_subtitle),
                                                 style = MaterialTheme.typography.bodySmall,
-                                                lineHeight = 14.sp,
+                                                lineHeight = MaterialTheme.typography.bodyMedium.fontSize, //14.sp
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
                                         }

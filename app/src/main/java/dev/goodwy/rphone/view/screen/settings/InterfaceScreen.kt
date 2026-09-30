@@ -100,6 +100,7 @@ import dev.goodwy.rphone.view.theme.color_default_primary
 import dev.goodwy.rphone.view.theme.customColors
 import com.ramcosta.composedestinations.generated.destinations.DonateScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.LiquidGlassElementsScreenDestination
+import dev.goodwy.rphone.bottomBarHeight
 import dev.goodwy.rphone.controller.PurchaseHelper
 import dev.goodwy.rphone.view.components.RillSliderListItem
 import dev.goodwy.rphone.view.components.Title
@@ -152,6 +153,14 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
     var blurEffects         by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_BLUR_EFFECTS, false)) }
     var cardRoundness       by remember(settingsState) { mutableStateOf(prefs.getInt(PreferenceManager.KEY_CARD_ROUNDNESS, RillShapeDefaults.DefaultRoundness)) }
     var blurIntensity       by remember(settingsState) { mutableStateOf(prefs.getInt(PreferenceManager.KEY_BLUR_INTENSITY, 20)) }
+
+    val favoritesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, false)
+    val contactsEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_CONTACTS, true)
+    val dialpadEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_DIALPAD, true)
+    val notesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_NOTES, false)
+    val searchEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_SEARCH, false)
+    val settingsEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_SETTINGS, true)
+    val showBottomBar = favoritesEnabled || contactsEnabled || dialpadEnabled ||notesEnabled || searchEnabled || settingsEnabled
 
     // Call UI section checkboxes dialog
     var showCallUIDialog   by remember(settingsState) { mutableStateOf(false) }
@@ -634,7 +643,7 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                                     else stringResource(R.string.custom_font_subtitle),
                                                 style = MaterialTheme.typography.bodyMedium,
                                                 lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.8f)
                                             )
                                         }
                                         if (hasFontSet) {
@@ -951,7 +960,7 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                 exit = slideOutVertically { it } + fadeOut()
             ) {
                 Snackbar(
-                    modifier = Modifier.navigationBarsPadding().padding(24.dp),
+                    modifier = Modifier.navigationBarsPadding().padding(24.dp).padding(bottom = if (showBottomBar) bottomBarHeight else 0.dp),
                     shape = MaterialTheme.shapes.large,
                     containerColor = MaterialTheme.colorScheme.surfaceVariant,
                     action = {

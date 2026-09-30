@@ -5,10 +5,12 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.ui.Alignment
 import androidx.navigation.NavBackStackEntry
 import com.ramcosta.composedestinations.animations.NavHostAnimatedDestinationStyle
 
@@ -35,14 +37,22 @@ object TabTransitionStyle : NavHostAnimatedDestinationStyle() {
     }
 
     private fun isTabRoute(route: String?): Boolean = routeOrder(route) >= 0
+    private fun isSearchRoute(route: String?): Boolean = route?.contains("search", ignoreCase = true) == true
 
     override val enterTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = {
+        val targetIsSearch = isSearchRoute(targetState.destination.route)
         val fromTab = isTabRoute(initialState.destination.route)
         val toTab   = isTabRoute(targetState.destination.route)
         val fromIdx = routeOrder(initialState.destination.route)
         val toIdx   = routeOrder(targetState.destination.route)
 
         when {
+            targetIsSearch -> {
+                expandVertically(
+                    animationSpec = tween(500, easing = EaseOutExpo),
+                    expandFrom = Alignment.Bottom
+                ) + fadeIn(tween(300, easing = EaseOutExpo))
+            }
             fromTab && toTab && !isLandscapeMode -> {
                 val goRight = toIdx > fromIdx
                 slideInHorizontally(

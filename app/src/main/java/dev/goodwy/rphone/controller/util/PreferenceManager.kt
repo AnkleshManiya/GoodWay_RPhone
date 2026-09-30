@@ -484,6 +484,8 @@ class PreferenceManager(context: Context) {
         const val KEY_AUTO_DECLINE_NON_CONTACTS = "auto_decline_non_contacts"
         const val KEY_DUAL_SIM_DIALPAD_BUTTONS = "dual_sim_dialpad_buttons"
 
+        const val KEY_CALL_ANALYTICS_TRACKING = "call_analytics_tracking"
+
         // Ever
         const val KEY_BLOCK_UNKNOWN         = "block_unknown_callers"
         const val KEY_BLOCK_HIDDEN          = "block_hidden_callers"
@@ -564,6 +566,8 @@ class PreferenceManager(context: Context) {
         const val KEY_BIOMETRICS_CALL_LOCK     = "biometrics_call_lock"
         const val KEY_BIOMETRICS_CALL_LOCK_MODE    = "biometrics_call_lock_mode"    // "all" | "specified" | "skip_specified"
         const val KEY_BIOMETRICS_CALL_LOCK_NUMBERS = "biometrics_call_lock_numbers" // comma-separated phone numbers
+        // Updates — version tag of the APK currently sitting in Downloads (if any)
+        const val KEY_DOWNLOADED_UPDATE_VERSION = "downloaded_update_version"
         // Search filter (Dialpad / Calls / Contacts / Favourites search bars) — the "Filter"
         // button beside the search bar. All four default to true (checked) so search behaves
         // as broadly as possible until the user deliberately narrows it down. Persisted here
@@ -589,6 +593,9 @@ class PreferenceManager(context: Context) {
         const val KEY_DIALPAD_ANIMATION        = "dialpad_animation_enabled"
         const val KEY_HIDE_VOICE_SEARCH        = "hide_voice_search"
     }
+
+    fun isCallAnalyticsTrackingEnabled(): Boolean = getBoolean(KEY_CALL_ANALYTICS_TRACKING, true)
+    fun setCallAnalyticsTrackingEnabled(enabled: Boolean) = setBoolean(KEY_CALL_ANALYTICS_TRACKING, enabled)
 
     fun isAppLockEnabled(): Boolean = getBoolean(KEY_BIOMETRICS_APP_LOCK, false) && getString(KEY_BIOMETRICS_TYPE, "")?.isNotEmpty() ?: false
     fun setAppLockEnabled(enabled: Boolean) = setBoolean(KEY_APP_LOCK_ENABLED, enabled)

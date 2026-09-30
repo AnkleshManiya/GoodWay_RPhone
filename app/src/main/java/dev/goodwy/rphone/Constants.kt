@@ -2,6 +2,7 @@ package dev.goodwy.rphone
 
 import androidx.compose.ui.unit.dp
 
+val APP_VERSION = BuildConfig.VERSION_NAME
 val GITHUB_DEV = "https://github.com/Goodwy"
 val GITHUB_URL = "https://github.com/Goodwy/RPhone"
 val SITE_URL = "https://www.goodwy.dev"
@@ -11,6 +12,7 @@ val COFFEE_URL = "https://buymeacoffee.com/goodwy"
 val DONATE_URL = "https://www.goodwy.dev/support-project"
 val GITHUB_RELEASES_URL = "https://github.com/Goodwy/RPhone/releases"
 val GITHUB_API_RELEASES = "https://api.github.com/repos/Goodwy/RPhone/releases/latest"
+val GITHUB_API_RELEASES_LIST = "https://api.github.com/repos/Goodwy/RPhone/releases"
 val PRIVACY_POLICY = "https://www.goodwy.dev/privacy-policy/privacy-policy-rill-dialer"
 
 // Goodwy

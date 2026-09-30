@@ -1,20 +1,21 @@
 package dev.goodwy.rphone
 
 import androidx.room.Room
+import dev.goodwy.rphone.controller.CallAnalyticsViewModel
 import dev.goodwy.rphone.controller.CallLogViewModel
 import dev.goodwy.rphone.controller.CallNotificationManager
+import dev.goodwy.rphone.controller.CallStateManager
 import dev.goodwy.rphone.controller.ContactsViewModel
 import dev.goodwy.rphone.controller.PurchaseHelper
 import dev.goodwy.rphone.controller.RuStoreViewModel
+import dev.goodwy.rphone.modal.`interface`.ICallerRepository
 import dev.goodwy.rphone.modal.`interface`.ICallLogRepository
 import dev.goodwy.rphone.modal.`interface`.IContactsRepository
+import dev.goodwy.rphone.modal.repository.CallerRepositoryImpl
 import dev.goodwy.rphone.modal.repository.CallLogRepository
 import dev.goodwy.rphone.modal.repository.ContactsRepository
-import dev.goodwy.rphone.domain.repository.ICallerRepository
-import dev.goodwy.rphone.domain.usecase.GetCallerNameUseCase
-import dev.goodwy.rphone.data.repository.CallerRepositoryImpl
-import dev.goodwy.rphone.data.manager.CallStateManager
 import dev.goodwy.rphone.controller.CallViewModel
+import dev.goodwy.rphone.controller.GetCallerNameUseCase
 import dev.goodwy.rphone.controller.MainViewModel
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.modal.db.RillDatabase
@@ -57,6 +58,7 @@ val appModule = module {
     viewModel { CallLogViewModel(androidApplication(), get(), androidContext().contentResolver, get()) }
     viewModel { CallViewModel(androidContext(), get(), get()) }
     viewModel { MainViewModel(get()) }
+    viewModel { CallAnalyticsViewModel(get(), get()) }
     single<PurchaseHelper> {
         RuStoreViewModel(androidApplication(), get())
     }

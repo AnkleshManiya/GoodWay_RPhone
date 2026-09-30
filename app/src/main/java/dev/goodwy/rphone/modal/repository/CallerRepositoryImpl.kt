@@ -1,7 +1,7 @@
-package dev.goodwy.rphone.data.repository
+package dev.goodwy.rphone.modal.repository
 
-import dev.goodwy.rphone.domain.repository.ICallerRepository
 import dev.goodwy.rphone.modal.data.Contact
+import dev.goodwy.rphone.modal.`interface`.ICallerRepository
 import dev.goodwy.rphone.modal.`interface`.IContactsRepository
 
 class CallerRepositoryImpl(

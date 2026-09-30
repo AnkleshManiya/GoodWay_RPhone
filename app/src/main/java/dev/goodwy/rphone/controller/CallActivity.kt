@@ -39,8 +39,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.CallBackgroundStore
 import dev.goodwy.rphone.controller.util.PreferenceManager
+import dev.goodwy.rphone.controller.util.isConference
 import dev.goodwy.rphone.liquidglass.LocalLiquidGlassBackdrop
 import dev.goodwy.rphone.liquidglass.backdrops.rememberLayerBackdrop
+import dev.goodwy.rphone.modal.data.getDisplayName
 import dev.goodwy.rphone.modal.`interface`.CallSession
 import dev.goodwy.rphone.modal.`interface`.IContactsRepository
 import dev.goodwy.rphone.view.screen.ExpressiveCallScreen
@@ -246,6 +248,7 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
 
                             val liquidGlassBackdrop = rememberLayerBackdrop()
                             CompositionLocalProvider(LocalLiquidGlassBackdrop provides liquidGlassBackdrop) {
+                                val isConference = targetCall.isConference()
                                 ExpressiveCallScreen(
                                     call = targetCall,
                                     callState = targetState,
@@ -256,6 +259,7 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
                                     initialConnectTime = connectTime,
                                     backgroundUri = targetIdentity.backgroundUri,
                                     skipIncomingScreen = answeredFromNotification,
+                                    isConference = isConference,
                                     liquidGlassBackdrop = liquidGlassBackdrop
                                 )
                             }
@@ -270,7 +274,12 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
     private fun rememberCallIdentity(call: Call, settingsState: Int): CallIdentity {
         val context = LocalContext.current
         val unknownLabel = stringResource(R.string.label_unknown)
-        val number = remember(call) { call.details?.handle?.schemeSpecificPart.orEmpty() }
+        val details = call.details
+        val isConference = call.isConference()
+
+        val number = remember(call, details) {
+            if (isConference) "" else details?.handle?.schemeSpecificPart.orEmpty()
+        }
 
         val cnam = remember(call.details?.callerDisplayName, call.details?.callerDisplayNamePresentation) {
             try {
@@ -282,9 +291,14 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
             }
         }
 
+        val conference = stringResource(R.string.conference)
         var identity by remember(number, cnam, unknownLabel) {
-            val base = cachedIdentity(number, settingsState)
-                ?: CallIdentity(number, cnam ?: number.ifEmpty { unknownLabel }, null, null)
+            val base = if (isConference) {
+                CallIdentity("", conference, null, null)
+            } else {
+                cachedIdentity(number, settingsState)
+                    ?: CallIdentity(number, cnam ?: number.ifEmpty { unknownLabel }, null, null)
+            }
             mutableStateOf(
                 if (base.backgroundUri == null) {
                     base.copy(backgroundUri = CallBackgroundStore.defaultModel(context))
@@ -294,7 +308,13 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
             )
         }
 
-        LaunchedEffect(number, cnam, settingsState) {
+        if (isConference) {
+            return identity
+        }
+
+        val displayOrder = preferenceManager.getInt(PreferenceManager.KEY_CONTACT_DISPLAY_ORDER, 0)
+
+        LaunchedEffect(number, cnam, settingsState, displayOrder) {
             val handle = number.ifEmpty { null }
 
             val handleResult = CallBackgroundStore.resolveResult(context, handle, null)
@@ -330,7 +350,8 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
 
             val resolved = CallIdentity(
                 number = number,
-                name = contact?.displayName?.takeIf { it.isNotBlank() }
+                name = contact?.let { getDisplayName(it, displayOrder) }
+                    ?.takeIf { it.isNotBlank() }
                     ?: cnam
                     ?: identity.name.takeIf { contactFailed && it.isNotBlank() }
                     ?: number.ifEmpty { unknownLabel },

@@ -290,10 +290,8 @@ fun ContactDetailsScreen(
             phoneDetails = c.phoneDetails.map { detail ->
                 if (detail.number == phoneNumber) {
                     detail.copy(isPrimary = isPrimary)
-                } else if (isPrimary) {
-                    detail.copy(isPrimary = false)
                 } else {
-                    detail
+                    detail.copy(isPrimary = false)
                 }
             }
         )
@@ -1670,12 +1668,13 @@ fun ContactDetailsScreen(
                                     icon = Icons.Rounded.Phone,
                                     label = stringResource(R.string.call),
                                     containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                    enabled = (contact != null && contact!!.phoneNumbers.isNotEmpty()) || displayPhone != unknownLabel,
+                                    enabled = (contact != null && contact?.phoneNumbers?.isNotEmpty() == true) || displayPhone != unknownLabel,
                                     onClick = {
-                                        if (contact != null && defaultPhone != null) initiateCall(
+                                        val c = contact
+                                        if (c != null && defaultPhone != null) initiateCall(
                                             defaultPhone.number
                                         )
-                                        else if (contact != null && contact!!.phoneNumbers.size > 1) showNumberPicker =
+                                        else if (c != null && c.phoneNumbers.size > 1) showNumberPicker =
                                             true
                                         else if (displayPhone != unknownLabel) initiateCall(displayPhone)
                                     })
@@ -1686,12 +1685,13 @@ fun ContactDetailsScreen(
                                     icon = messageImageVector,
                                     label = stringResource(R.string.message),
                                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                    enabled = (contact != null && contact!!.phoneNumbers.isNotEmpty()) || displayPhone != unknownLabel,
+                                    enabled = (contact != null && contact?.phoneNumbers?.isNotEmpty() == true) || displayPhone != unknownLabel,
                                     onClick = {
-                                        if (contact != null && defaultPhone != null) initiateMessage(
+                                        val c = contact
+                                        if (c != null && defaultPhone != null) initiateMessage(
                                             defaultPhone.number
                                         )
-                                        else if (contact != null && contact!!.phoneNumbers.size > 1) showMessagePicker =
+                                        else if (c != null && c.phoneNumbers.size > 1) showMessagePicker =
                                             true
                                         else if (displayPhone != unknownLabel) initiateMessage(displayPhone)
                                     })
@@ -1702,7 +1702,7 @@ fun ContactDetailsScreen(
                                     icon = videoImageVector,
                                     label = stringResource(R.string.video),
                                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                    enabled = (contact != null && contact!!.phoneNumbers.isNotEmpty()) || displayPhone != unknownLabel,
+                                    enabled = (contact != null && contact?.phoneNumbers?.isNotEmpty() == true) || displayPhone != unknownLabel,
                                     onClick = {
                                         videoLauncher.startVideoCall(displayPhone, contact)
                                     })
@@ -1711,12 +1711,13 @@ fun ContactDetailsScreen(
                                     icon = Icons.Rounded.Email,
                                     label = stringResource(R.string.email),
                                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                    enabled = contact != null && contact!!.emails.isNotEmpty(),
+                                    enabled = contact?.emails?.isNotEmpty() == true,
                                     onClick = {
-                                        if (contact != null && contact!!.emails.size > 1) showEmailPicker =
+                                        val c = contact
+                                        if (c != null && c.emails.size > 1) showEmailPicker =
                                             true
-                                        else if (contact != null && contact!!.emails.isNotEmpty()) initiateEmail(
-                                            contact!!.emails.first().value
+                                        else if (c != null && c.emails.isNotEmpty()) initiateEmail(
+                                            c.emails.first().value
                                         )
                                     })
                             }

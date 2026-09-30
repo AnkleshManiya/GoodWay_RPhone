@@ -17,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -150,6 +151,15 @@ private fun buildCustomColorScheme(primary: Color, dark: Boolean): ColorScheme {
     }
 }
 
+// A feature to bring colors to life on Android 12 and 13
+fun Color.vibrantCopy(darkTheme: Boolean): Color {
+    val hsv = FloatArray(3)
+    android.graphics.Color.colorToHSV(this.toArgb(), hsv)
+    hsv[1] = (hsv[1] + 0.15f).coerceIn(0.0f, 1.0f)
+    hsv[2] = if (darkTheme) (hsv[2] * 1.2f).coerceIn(0.0f, 1.0f) else (hsv[2] * 0.95f).coerceIn(0.0f, 1.0f)
+    return Color(android.graphics.Color.HSVToColor(hsv))
+}
+
 @Composable
 fun Rill4Theme(
     systemDark: Boolean = isSystemInDarkTheme(),
@@ -186,7 +196,17 @@ fun Rill4Theme(
                 surfaceContainerHighest = Color(0xFF1D1F27), // Dialpad
                 surfaceVariant = Color(0xFF23262E), // Header Card Contacts
                 surfaceBright = Color(0xFF292C34), // Card Contacts, Search
-            )
+            ).let {
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    val vibrantPrimary = it.primary.vibrantCopy(true)
+                    it.copy(
+                        primary = vibrantPrimary,
+//                    onPrimary = Color.White,
+                        primaryContainer = vibrantPrimary.copy(alpha = 0.25f).compositeOver(it.background),
+                        onPrimaryContainer = vibrantPrimary.copy(alpha = 0.95f)
+                    )
+                } else it.copy()
+            }
             else dynamicLightColorScheme(context).copy(
                 //Default color, Lighter -> Darker
                 background = Color(0xFFEDEDF6),
@@ -198,7 +218,17 @@ fun Rill4Theme(
                 surfaceContainerHighest = Color(0xFFE7E7F1), // Dialpad
                 surfaceVariant = Color(0xFFE1E2ED), // Header Card Contacts
                 surfaceBright = Color(0xFFFAF8FE), // Card, Search //0xFFFEFEFE
-            )
+            ).let {
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    val vibrantPrimary = it.primary.vibrantCopy(false)
+                    it.copy(
+                        primary = vibrantPrimary,
+//                    onPrimary = Color.White,
+                        primaryContainer = vibrantPrimary.copy(alpha = 0.30f).compositeOver(Color.White),
+                        onPrimaryContainer = vibrantPrimary
+                    )
+                } else it.copy()
+            }
         else -> {
             val primary = if (customPrimaryInt != 0) Color(customPrimaryInt.toLong() and 0xFFFFFFFFL)
                           else color_default_primary

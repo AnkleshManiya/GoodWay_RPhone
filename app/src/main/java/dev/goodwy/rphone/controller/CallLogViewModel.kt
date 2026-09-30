@@ -24,6 +24,7 @@ import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import kotlin.time.Duration.Companion.milliseconds
 
 class CallLogViewModel(
     application: Application,
@@ -59,7 +60,7 @@ class CallLogViewModel(
         override fun onChange(selfChange: Boolean) {
             debounceJob?.cancel()
             debounceJob = viewModelScope.launch {
-                delay(300)
+                delay(300.milliseconds)
                 fetchLogs(forceRefresh = true)
             }
         }
@@ -150,6 +151,7 @@ class CallLogViewModel(
     private suspend fun fetchLogsInternal() {
         if (isFetching) return
         isFetching = true
+        _isLoading.value = true
         try {
             val result = callLogRepo.getCallLogs()
             // Only push an update to the UI if the data actually changed.
@@ -167,6 +169,7 @@ class CallLogViewModel(
             }
         } finally {
             isFetching = false
+            _isLoading.value = false
         }
     }
 

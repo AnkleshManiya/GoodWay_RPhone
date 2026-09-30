@@ -40,6 +40,8 @@
     <string name="sim_picker_title">SIM-Karte auswählen</string>
     <string name="label_unknown_number">Unbekannte Nummer</string>
     <string name="reset">Zurücksetzen</string>
+    <string name="add">Hinzufügen</string>
+    <string name="use_number">Nummer verwenden: %s</string>
 
     <!-- Search -->
     <string name="search">Suche</string>
@@ -104,13 +106,17 @@
     <string name="check_for_updates">Nach Updates suchen</string>
     <string name="check_for_updates_subtitle">Prüfen, ob eine neue Version verfügbar ist</string>
     <string name="auto_check_for_updates">Automatisch nach Updates suchen</string>
-    <string name="auto_check_for_updates_subtitle">Automatisch nach Updates suchen</string>
+    <string name="auto_check_for_updates_subtitle">Beim Start der App automatisch nach neuen Versionen suchen</string>
     <string name="checking_for_updates">Suche nach Updates…</string>
     <string name="up_to_date">Auf dem neuesten Stand</string>
-    <string name="up_to_date_subtitle">Die App läuft auf der neuesten Version (v%1$s).</string>
+    <string name="up_to_date_subtitle">Die App läuft auf der neuesten Version %1$s.</string>
     <string name="update_available">Update verfügbar</string>
-    <string name="update_available_subtitle">Version v%1$s ist verfügbar.</string>
-    <string name="update_available_description">Möchten Sie die APK-Datei in den Downloads-Ordner herunterladen?</string>
+    <string name="update_available_subtitle">Version %1$s ist verfügbar.</string>
+    <string name="update_available_subtitle_dialog">Ein neuerer Build von Rill Phone steht zum Herunterladen und Entdecken bereit.</string>
+    <string name="download_update">Update herunterladen?</string>
+    <string name="download_update_subtitle">Rill Phone v%1$s ist verfügbar (Sie haben v%2$s). Die APK wird in Ihren Downloads-Ordner heruntergeladen.</string>
+    <string name="install_update">Update installieren?</string>
+    <string name="install_update_subtitle">Update v%1$s wurde bereits heruntergeladen. Möchten Sie es jetzt installieren?</string>
     <string name="download">Herunterladen</string>
     <string name="not_now">Nicht jetzt</string>
     <string name="downloading_update">Update wird heruntergeladen</string>
@@ -120,7 +126,15 @@
     <string name="download_complete">Download abgeschlossen</string>
     <string name="download_complete_subtitle">Das Update auf Version %1$s wurde erfolgreich heruntergeladen.</string>
     <string name="open_downloads_folder_manually">Downloads-Ordner manuell öffnen</string>
-    <string name="file_saved_to_downloads_folder">Die Datei wurde im Downloads-Ordner gespeichert.</string>
+    <string name="try_again">Erneut versuchen</string>
+    <string name="couldnt_check_for_updates">Updates konnten nicht überprüft werden</string>
+    <string name="couldnt_check_for_updates_subtitle">Das GitHub-Release-Repository ist nicht erreichbar. Bitte überprüfen Sie Ihre Verbindung.</string>
+    <string name="no_release_notes">Für diese Version wurden keine Versionshinweise bereitgestellt.</string>
+    <string name="installed">Installiert</string>
+    <string name="latest">Neueste</string>
+    <string name="later">Später</string>
+    <string name="view_update">Update anzeigen</string>
+
 
     <!-- Contributors -->
     <string name="contributors">Mitwirkende</string>
@@ -421,6 +435,9 @@
     <string name="add_call">Anruf hinzufügen</string>
     <string name="resume">Fortsetzen</string>
     <string name="swap">Wechseln</string>
+    <string name="merge">Zusammenführen</string>
+    <string name="manage">Verwalten</string>
+    <string name="conference">Konferenz</string>
     <string name="more">Mehr</string>
     <string name="hold">Halten</string>
     <string name="call_status_on_hold">Wartend</string>
@@ -649,4 +666,23 @@
     <string name="pocket_mode_active">Taschenmodus aktiv</string>
     <string name="pocket_mode_active_description">Die Bildschirmberührung ist gesperrt, um versehentliche Berührungen in der Tasche zu verhindern.</string>
     <string name="pocket_mode_dismiss">Berührungsschutz deaktivieren</string>
+
+    <!-- Call Analytics -->
+    <string name="settings_call_analytics_title">Anrufanalyse</string>
+    <string name="settings_call_analytics_supporting">Anrufmetriken, Sprechzeitstatistiken, Spitzenzeiten und Einblicke zu häufigen Kontakten verfolgen</string>
+    <string name="call_analytics_disabled_title">Anrufanalyse deaktiviert</string>
+    <string name="call_analytics_disabled_desc">Anrufanalyse und Sprechzeitverfolgung sind derzeit ausgeschaltet. Aktivieren Sie diese Option, um Sprechzeit, Spitzenzeiten und Kontaktei­nblicke zu berechnen.</string>
+    <string name="call_analytics_enable_action">Analyse aktivieren</string>
+    <string name="this_week">Diese Woche</string>
+    <string name="this_month">Diesen Monat</string>
+    <string name="all_time">Gesamt</string>
+    <string name="total_talk_time">Gesamte Sprechzeit</string>
+    <string name="total_calls">Anrufe insgesamt</string>
+    <string name="avg_duration">Durchschnittliche Dauer</string>
+    <string name="call_volume">Anrufvolumen</string>
+    <string name="call_breakdown">Anrufaufschlüsselung</string>
+    <string name="sim_usage_breakdown">SIM-Nutzung</string>
+    <string name="most_talked_persons">Häufigste Gesprächspartner</string>
+    <string name="no_call_records_this_period">Für diesen Zeitraum wurden keine Anrufaufzeichnungen gefunden</string>
+    <string name="total_calls_in_number">%1$s Anrufe (ein: %2$s, aus: %3$s, verp: %4$s)</string>
 </resources>

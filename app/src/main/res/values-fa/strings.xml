@@ -41,6 +41,8 @@
     <string name="sim_picker_title">انتخاب سیم‌کارت</string>
     <string name="label_unknown_number">شماره ناشناس</string>
     <string name="reset">بازنشانی</string>
+    <string name="add">افزودن</string>
+    <string name="use_number">استفاده از شماره: %s</string>
 
     <!-- Search -->
     <string name="search">جستجو</string>
@@ -105,13 +107,17 @@
     <string name="check_for_updates">بررسی به‌روزرسانی‌ها</string>
     <string name="check_for_updates_subtitle">بررسی کنید که آیا نسخه جدیدی موجود است</string>
     <string name="auto_check_for_updates">بررسی خودکار به‌روزرسانی‌ها</string>
-    <string name="auto_check_for_updates_subtitle">به‌طور خودکار به‌روزرسانی‌ها را بررسی کنید</string>
+    <string name="auto_check_for_updates_subtitle">هنگام اجرای برنامه به‌طور خودکار نسخه‌های جدید را بررسی کنید</string>
     <string name="checking_for_updates">در حال بررسی به‌روزرسانی‌ها…</string>
     <string name="up_to_date">به‌روز</string>
-    <string name="up_to_date_subtitle">برنامه آخرین نسخه (v%1$s) را اجرا می‌کند.</string>
+    <string name="up_to_date_subtitle">برنامه آخرین نسخه %1$s را اجرا می‌کند.</string>
     <string name="update_available">به‌روزرسانی موجود است</string>
-    <string name="update_available_subtitle">نسخه v%1$s موجود است.</string>
-    <string name="update_available_description">آیا می‌خواهید فایل APK را در پوشه Downloads دانلود کنید؟</string>
+    <string name="update_available_subtitle">نسخه %1$s موجود است.</string>
+    <string name="update_available_subtitle_dialog">نسخه جدیدتری از Rill Phone آماده دانلود و کاوش است.</string>
+    <string name="download_update">به‌روزرسانی دانلود شود؟</string>
+    <string name="download_update_subtitle">Rill Phone v%1$s موجود است (شما v%2$s را دارید). فایل APK در پوشه Downloads شما دانلود می‌شود.</string>
+    <string name="install_update">به‌روزرسانی نصب شود؟</string>
+    <string name="install_update_subtitle">به‌روزرسانی v%1$s قبلاً دانلود شده است. آیا می‌خواهید آن را اکنون نصب کنید؟</string>
     <string name="download">دانلود</string>
     <string name="not_now">اکنون نه</string>
     <string name="downloading_update">در حال دانلود به‌روزرسانی</string>
@@ -121,7 +127,14 @@
     <string name="download_complete">دانلود کامل شد</string>
     <string name="download_complete_subtitle">به‌روزرسانی به نسخه %1$s با موفقیت دانلود شد.</string>
     <string name="open_downloads_folder_manually">پوشه Downloads را به‌صورت دستی باز کنید</string>
-    <string name="file_saved_to_downloads_folder">فایل در پوشه Downloads ذخیره شد.</string>
+    <string name="try_again">دوباره تلاش کنید</string>
+    <string name="couldnt_check_for_updates">امکان بررسی به‌روزرسانی‌ها وجود نداشت</string>
+    <string name="couldnt_check_for_updates_subtitle">امکان دسترسی به مخزن انتشار GitHub وجود ندارد. لطفاً اتصال خود را بررسی کنید.</string>
+    <string name="no_release_notes">هیچ یادداشت انتشاری برای این نسخه ارائه نشده است.</string>
+    <string name="installed">نصب شده</string>
+    <string name="latest">جدیدترین</string>
+    <string name="later">بعداً</string>
+    <string name="view_update">مشاهده به‌روزرسانی</string>
 
     <!-- Contributors -->
     <string name="contributors">همکاران</string>
@@ -422,6 +435,9 @@
     <string name="add_call">افزودن تماس</string>
     <string name="resume">ادامه</string>
     <string name="swap">تعویض</string>
+    <string name="merge">ادغام</string>
+    <string name="manage">مدیریت</string>
+    <string name="conference">کنفرانس</string>
     <string name="more">بیشتر</string>
     <string name="hold">مکث</string>
     <string name="call_status_on_hold">در حالت مکث</string>
@@ -650,4 +666,23 @@
     <string name="pocket_mode_active">حالت جیب فعال است</string>
     <string name="pocket_mode_active_description">لمس‌های صفحه برای جلوگیری از لمس تصادفی در جیب شما قفل شده‌اند.</string>
     <string name="pocket_mode_dismiss">غیرفعال کردن محافظ لمس</string>
+
+    <!-- Call Analytics -->
+    <string name="settings_call_analytics_title">تحلیل تماس‌ها</string>
+    <string name="settings_call_analytics_supporting">ردیابی معیارهای تماس، آمار زمان مکالمه، ساعات اوج و اطلاعات مخاطبان مکرر</string>
+    <string name="call_analytics_disabled_title">تحلیل تماس‌ها غیرفعال است</string>
+    <string name="call_analytics_disabled_desc">تحلیل تماس‌ها و ردیابی زمان مکالمه در حال حاضر غیرفعال هستند. این گزینه را فعال کنید تا زمان مکالمه، ساعات اوج و اطلاعات مخاطبان محاسبه شود.</string>
+    <string name="call_analytics_enable_action">فعال‌سازی تحلیل</string>
+    <string name="this_week">این هفته</string>
+    <string name="this_month">این ماه</string>
+    <string name="all_time">همه زمان‌ها</string>
+    <string name="total_talk_time">کل زمان مکالمه</string>
+    <string name="total_calls">کل تماس‌ها</string>
+    <string name="avg_duration">میانگین مدت</string>
+    <string name="call_volume">حجم تماس‌ها</string>
+    <string name="call_breakdown">تفکیک تماس‌ها</string>
+    <string name="sim_usage_breakdown">استفاده از سیم‌کارت</string>
+    <string name="most_talked_persons">بیشترین مکالمه با</string>
+    <string name="no_call_records_this_period">هیچ سابقه تماسی برای این دوره یافت نشد</string>
+    <string name="total_calls_in_number">%1$s تماس (ورودی: %2$s، خروجی: %3$s، ازدست‌رفته: %4$s)</string>
 </resources>

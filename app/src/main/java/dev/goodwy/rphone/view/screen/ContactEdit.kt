@@ -2923,7 +2923,7 @@ fun FieldOption(
             Text(
                 text = description,
                 style = MaterialTheme.typography.bodySmall,
-                lineHeight = 14.sp,
+                lineHeight = MaterialTheme.typography.bodyMedium.fontSize, //14.sp
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }

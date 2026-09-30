@@ -3,6 +3,7 @@ package dev.goodwy.rphone.view.screen.settings
 import android.app.Activity
 import android.content.Context
 import android.net.Uri
+import android.os.Build
 import android.view.Surface
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -15,6 +16,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -27,11 +30,13 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Backup
+import androidx.compose.material.icons.rounded.BubbleChart
 import androidx.compose.material.icons.rounded.Call
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Error
 import androidx.compose.material.icons.rounded.Fingerprint
 import androidx.compose.material.icons.rounded.Layers
+import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.LogoDev
 import androidx.compose.material.icons.rounded.Merge
 import androidx.compose.material.icons.rounded.MoveUp
@@ -63,10 +68,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.BackupManager
 import dev.goodwy.rphone.controller.util.PreferenceManager
-import dev.goodwy.rphone.controller.util.UpdateDialogState
-import dev.goodwy.rphone.controller.util.UpdateDialogs
 import dev.goodwy.rphone.controller.util.getAppVersion
-import dev.goodwy.rphone.controller.util.performUpdateCheck
 import dev.goodwy.rphone.view.components.NavigationIcon
 import dev.goodwy.rphone.view.components.RillAnimatedSection
 import dev.goodwy.rphone.view.components.RillExpressiveCard
@@ -84,10 +86,12 @@ import dev.goodwy.rphone.GITHUB_URL
 import dev.goodwy.rphone.GP_DEV_URL
 import dev.goodwy.rphone.PRIVACY_POLICY
 import dev.goodwy.rphone.SITE_URL
+import dev.goodwy.rphone.bottomBarHeight
 import dev.goodwy.rphone.controller.PurchaseHelper
 import dev.goodwy.rphone.controller.util.ContactUtils.getAccountIcon
 import dev.goodwy.rphone.controller.util.openLink
 import dev.goodwy.rphone.view.components.Title
+import dev.goodwy.rphone.view.components.shake
 import dev.goodwy.rphone.view.theme.MyColors.cardColor
 import dev.goodwy.rphone.view.theme.RillShapeDefaults
 import dev.goodwy.rphone.view.theme.TabTransitionStyle
@@ -112,9 +116,18 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
 
     val listState = rememberLazyListState()
     val prefs: PreferenceManager = koinInject()
+    val settingsState by prefs.settingsChanged.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
 
-    val cardCorner  = remember { prefs.getInt(PreferenceManager.KEY_CARD_ROUNDNESS, RillShapeDefaults.DefaultRoundness) }
+    val cardCorner  = remember(settingsState) { prefs.getInt(PreferenceManager.KEY_CARD_ROUNDNESS, RillShapeDefaults.DefaultRoundness) }
+    val favoritesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, false)
+    val contactsEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_CONTACTS, true)
+    val dialpadEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_DIALPAD, true)
+    val notesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_NOTES, false)
+    val searchEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_SEARCH, false)
+    val settingsEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_SETTINGS, true)
+    val showBottomBar = favoritesEnabled || contactsEnabled || dialpadEnabled ||notesEnabled || searchEnabled || settingsEnabled
+
     val purchaseHelper: PurchaseHelper = koinInject()
     val isPro by purchaseHelper.isPro.collectAsStateWithLifecycle()
     val proCheckDone by purchaseHelper.proCheckDone.collectAsStateWithLifecycle()
@@ -129,8 +142,9 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
             purchaseHelper.checkProStatus()
         }
     }
+    var enabledShake by remember { mutableStateOf(false) }
+    var showSnackbar   by remember(settingsState) { mutableStateOf(false) }
 
-    var updateDialogState by remember { mutableStateOf<UpdateDialogState>(UpdateDialogState.Idle) }
     var backupState       by remember { mutableStateOf<BackupDialogState>(BackupDialogState.Idle) }
 
     var visible by remember { mutableStateOf(false) }
@@ -193,13 +207,6 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
         lifecycleOwner?.lifecycle?.addObserver(observer)
         onDispose { lifecycleOwner?.lifecycle?.removeObserver(observer) }
     }
-
-    // ── Update Dialogs ────────────────────────────────────────────────────────
-    UpdateDialogs(
-        updateDialogState = updateDialogState,
-        onStateChange = { updateDialogState = it },
-        appVersion = appVersion
-    )
 
     // ── Backup Dialogs ────────────────────────────────────────────────────────
     when (val state = backupState) {
@@ -507,6 +514,37 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 stringResource(R.string.after_1_minute),
             )
         ) { navigator.navigate(BiometricScreenDestination) },
+
+        SettingsSearchEntry(
+            headline = stringResource(R.string.settings_call_analytics_title),
+            supporting = stringResource(R.string.settings_call_analytics_supporting),
+            leadingIcon = Icons.Rounded.BubbleChart,
+            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
+            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
+            options = listOf(
+                stringResource(R.string.this_week),
+                stringResource(R.string.this_month),
+                stringResource(R.string.all_time),
+                stringResource(R.string.total_talk_time),
+                stringResource(R.string.avg_duration),
+                stringResource(R.string.call_volume),
+                stringResource(R.string.call_breakdown),
+                stringResource(R.string.sim_usage_breakdown),
+                stringResource(R.string.most_talked_persons),
+            )
+        ) {
+            val isBlurSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+            if (isPro || isBlurSupported) {
+                navigator.navigate(CallAnalyticsScreenDestination)
+            } else {
+                enabledShake = true
+                showSnackbar = true
+                scope.launch {
+                    delay(3000.milliseconds)
+                    showSnackbar = false
+                }
+            }
+        },
         SettingsSearchEntry(
             headline = stringResource(R.string.manage_contacts),
             supporting = stringResource(R.string.manage_contacts_subtitle),
@@ -564,8 +602,8 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
             headline = stringResource(R.string.support_development),
             supporting = stringResource(R.string.support_development_description3),
             leadingIcon = Icons.Rounded.VolunteerActivism,
-            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOliva,
-            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOliva,
+            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
+            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
             options = listOf(
                 stringResource(R.string.unlock_all_features),
                 stringResource(R.string.support_project_to_unlock),
@@ -576,8 +614,8 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
             headline = stringResource(R.string.create_backup),
             supporting = stringResource(R.string.create_backup_subtitle),
             leadingIcon = Icons.Rounded.Backup,
-            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
-            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
+            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPink,
+            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPink,
         ) { createBackup() },
         SettingsSearchEntry(
             headline = stringResource(R.string.restore_backup),
@@ -632,12 +670,15 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
         ) { navigator.navigate(AboutAppScreenDestination) }
     } else if (isFoss) {
         settingsSearchEntries + SettingsSearchEntry(
-            headline = stringResource(R.string.check_for_updates),
+            headline = stringResource(R.string.updates),
             supporting = stringResource(R.string.check_for_updates_subtitle),
             leadingIcon = Icons.Rounded.SystemUpdate,
             iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkBlue,
             iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorBlue,
-        ) { scope.launch { performUpdateCheck(appVersion) { updateDialogState = it } } }
+            options = listOf(
+                stringResource(R.string.download_update),
+            )
+        ) { navigator.navigate(UpdatesScreenDestination) }
     } else {
         settingsSearchEntries
     }
@@ -672,326 +713,381 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
     ) { padding ->
         BackHandler { navigateBack() }
         ScrollHapticsEffect(listState = listState)
-        LazyColumn(
-            state = listState,
-            modifier = Modifier
-                .fillMaxSize()
-//                .padding(padding)
-                .padding(
-                    top = padding.calculateTopPadding(),
-                    start = 0.dp,
-                    end = 0.dp,
-                    bottom = 0.dp
-                )
-                .alpha(alpha)
-                .offset(y = offsetY),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+        Box(modifier = Modifier
+//            .padding(padding)
+            .padding(
+                top = padding.calculateTopPadding(),
+                start = 0.dp,
+                end = 0.dp,
+                bottom = 0.dp
+            )
+            .fillMaxSize()
         ) {
-            item {
-                // Search bar
-                val shape = if (cardCorner > 12) CircleShape else MaterialTheme.shapes.extraExtraLarge
-                Surface(
-                    shape = shape,
-                    color = cardColor,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    TextField(
-                        value = settingsSearchQuery,
-                        onValueChange = { settingsSearchQuery = it },
-                        modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text(stringResource(R.string.search)) },
-                        leadingIcon = {
-                            Icon(Icons.Default.Search, contentDescription = stringResource(R.string.search),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier
-                                    .padding(start = 12.dp)
-                            )
-                        },
-                        trailingIcon = {
-                            AnimatedVisibility(
-                                visible = settingsSearchQuery.isNotEmpty(),
-                                enter = fadeIn() + scaleIn(),
-                                exit = fadeOut() + scaleOut()
-                            ) {
-                                IconButton(
-                                    onClick = { settingsSearchQuery = "" },
-                                    modifier = Modifier.padding(end = 4.dp)
+            LazyColumn(
+                state = listState,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .alpha(alpha)
+                    .offset(y = offsetY),
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                item {
+                    // Search bar
+                    val shape =
+                        if (cardCorner > 12) CircleShape else MaterialTheme.shapes.extraExtraLarge
+                    Surface(
+                        shape = shape,
+                        color = cardColor,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        TextField(
+                            value = settingsSearchQuery,
+                            onValueChange = { settingsSearchQuery = it },
+                            modifier = Modifier.fillMaxWidth(),
+                            placeholder = { Text(stringResource(R.string.search)) },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Default.Search,
+                                    contentDescription = stringResource(R.string.search),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier
+                                        .padding(start = 12.dp)
+                                )
+                            },
+                            trailingIcon = {
+                                AnimatedVisibility(
+                                    visible = settingsSearchQuery.isNotEmpty(),
+                                    enter = fadeIn() + scaleIn(),
+                                    exit = fadeOut() + scaleOut()
                                 ) {
-                                    Icon(Icons.Default.Close, contentDescription = stringResource(R.string.clear))
-                                }
-                            }
-                        },
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color.Transparent,
-                            unfocusedContainerColor = Color.Transparent,
-                            disabledContainerColor = Color.Transparent,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent
-                        ),
-                        singleLine = true
-                    )
-                }
-            }
-
-            if (settingsSearchQuery.isNotBlank()) {
-                item {
-                    if (filteredSettingsResults.isEmpty()) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 32.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                "No settings found for \"$settingsSearchQuery\"",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    } else {
-                        RillExpressiveCard {
-                            filteredSettingsResults.forEach { entry ->
-                                RillListItem(
-                                    headline = entry.headline,
-                                    supporting = entry.supporting,
-                                    leadingIcon = entry.leadingIcon,
-                                    modifierLeadingIcon = entry.modifierLeadingIcon,
-                                    iconContainerColor = entry.iconContainerColor,
-                                    iconBgContainerColor = entry.iconBgContainerColor,
-                                    trailingIcon = Icons.Default.ChevronRight,
-                                    onClick = {
-                                        settingsSearchQuery = ""
-                                        entry.onClick()
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
-
-                item { Spacer(modifier = Modifier
-                    .height(80.dp)
-                    .navigationBarsPadding()) }
-            } else {
-                if (!isPro && proCheckDone) {
-                    item {
-                        RillAnimatedSection(delayMs = 30L) {
-                            RillExpressiveCard {
-                                SupportProjectItem(
-                                    onClick = { navigator.navigate(DonateScreenDestination) }
-                                )
-                            }
-                        }
-                    }
-                }
-
-                // ── Appearance ───────────────────────────────────────────────────
-                item {
-                    RillAnimatedSection(delayMs = 60L) {
-                        Column {
-                            SettingsSectionLabel(stringResource(R.string.appearance))
-                            RillExpressiveCard {
-                                RillListItem(
-                                    headline = stringResource(R.string.interface_settings),
-                                    supporting = stringResource(R.string.interface_settings_subtitle),
-                                    leadingIcon = Icons.Rounded.Palette,
-                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkCyan,
-                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorCyan,
-                                    trailingIcon = Icons.Default.ChevronRight,
-                                    onClick = { navigator.navigate(InterfaceScreenDestination) })
-                                RillListItem(
-                                    headline = stringResource(R.string.navigations),
-                                    supporting = stringResource(R.string.navigations_subtitle),
-                                    leadingIcon = Icons.Rounded.MoveUp,
-                                    modifierLeadingIcon = Modifier.rotate(90f),
-                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkCyan,
-                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorCyan,
-                                    trailingIcon = Icons.Default.ChevronRight,
-                                    onClick = { navigator.navigate(NavigationScreenDestination) })
-                            }
-                        }
-                    }
-                }
-
-                // ── Calls & System ───────────────────────────────────────────────
-                item {
-                    RillAnimatedSection(delayMs = 140L) {
-                        Column {
-                            SettingsSectionLabel(stringResource(R.string.calls_and_system))
-                            RillExpressiveCard {
-                                RillListItem(
-                                    headline = stringResource(R.string.call_settings),
-                                    supporting = stringResource(R.string.call_settings_subtitle),
-                                    leadingIcon = Icons.Rounded.Call,
-                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkGreen,
-                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorGreen,
-                                    trailingIcon = Icons.Default.ChevronRight,
-                                    onClick = { navigator.navigate(CallSettingScreenDestination) }
-                                )
-                                RillListItem(
-                                    headline = stringResource(R.string.sound_and_vibration),
-                                    supporting = stringResource(R.string.sound_and_vibration_subtitle),
-                                    leadingIcon = Icons.AutoMirrored.Rounded.VolumeUp,
-                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
-                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
-                                    trailingIcon = Icons.Default.ChevronRight,
-                                    onClick = { navigator.navigate(SoundVibrationScreenDestination) }
-                                )
-                                RillListItem(
-                                    headline = stringResource(R.string.manage_blocked),
-                                    supporting = stringResource(R.string.manage_blocked_subtitle),
-                                    leadingIcon = Icons.Outlined.DoDisturb,
-                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
-                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
-                                    trailingIcon = Icons.Default.ChevronRight,
-                                    onClick = { navigator.navigate(BlockedNumbersScreenDestination) }
-                                )
-                                val biometricsType =
-                                    remember(prefs.settingsChanged.collectAsStateWithLifecycle().value) {
-                                        prefs.getString(PreferenceManager.KEY_BIOMETRICS_TYPE, "")
-                                            ?: ""
-                                    }
-                                val biometricsLabel = when (biometricsType) {
-                                    "system" -> stringResource(R.string.system_biometrics)
-                                    "pin" -> stringResource(R.string.custom_pin)
-                                    "password" -> stringResource(R.string.custom_password)
-                                    else -> stringResource(R.string.not_configured)
-                                }
-                                RillListItem(
-                                    headline = stringResource(R.string.authentication),
-                                    supporting = biometricsLabel,
-                                    leadingIcon = Icons.Rounded.Fingerprint,
-                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
-                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
-                                    trailingIcon = Icons.Default.ChevronRight,
-                                    onClick = { navigator.navigate(BiometricScreenDestination) }
-                                )
-                            }
-                        }
-                    }
-                }
-
-                // ── Contacts ────────────────────────────────────────────────────────
-                item {
-                    RillAnimatedSection(delayMs = 300L) {
-                        Column {
-                            SettingsSectionLabel(stringResource(R.string.contacts))
-                            RillExpressiveCard {
-                                RillListItem(
-                                    headline = stringResource(R.string.manage_contacts),
-                                    supporting = stringResource(R.string.manage_contacts_subtitle),
-                                    leadingIcon = Icons.Rounded.PeopleAlt,
-                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkBlue,
-                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorBlue,
-                                    trailingIcon = Icons.Default.ChevronRight,
-                                    onClick = {
-                                        navigator.navigate(
-                                            ContactManagementScreenDestination
+                                    IconButton(
+                                        onClick = { settingsSearchQuery = "" },
+                                        modifier = Modifier.padding(end = 4.dp)
+                                    ) {
+                                        Icon(
+                                            Icons.Default.Close,
+                                            contentDescription = stringResource(R.string.clear)
                                         )
-                                    })
+                                    }
+                                }
+                            },
+                            colors = TextFieldDefaults.colors(
+                                focusedContainerColor = Color.Transparent,
+                                unfocusedContainerColor = Color.Transparent,
+                                disabledContainerColor = Color.Transparent,
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent
+                            ),
+                            singleLine = true
+                        )
+                    }
+                }
+
+                if (settingsSearchQuery.isNotBlank()) {
+                    item {
+                        if (filteredSettingsResults.isEmpty()) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 32.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    "No settings found for \"$settingsSearchQuery\"",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        } else {
+                            RillExpressiveCard {
+                                filteredSettingsResults.forEach { entry ->
+                                    RillListItem(
+                                        headline = entry.headline,
+                                        supporting = entry.supporting,
+                                        leadingIcon = entry.leadingIcon,
+                                        modifierLeadingIcon = entry.modifierLeadingIcon,
+                                        iconContainerColor = entry.iconContainerColor,
+                                        iconBgContainerColor = entry.iconBgContainerColor,
+                                        trailingIcon = Icons.Default.ChevronRight,
+                                        onClick = {
+                                            settingsSearchQuery = ""
+                                            entry.onClick()
+                                        }
+                                    )
+                                }
                             }
                         }
                     }
-                }
 
-                // ── Backup & Restore ─────────────────────────────────────────────
-            item {
-                RillAnimatedSection(delayMs = 260L) {
-                    Column {
-                        SettingsSectionLabel(stringResource(R.string.backup_and_restore))
-                        RillExpressiveCard {
-                            RillListItem(
-                                headline   = stringResource(R.string.create_backup),
-                                supporting = stringResource(R.string.create_backup_subtitle),
-                                leadingIcon = Icons.Rounded.Backup,
-                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
-                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
-                                trailingIcon = Icons.Default.ChevronRight,
-                                onClick = { createBackup() }
-                            )
-                            RillListItem(
-                                headline   = stringResource(R.string.restore_backup),
-                                supporting = stringResource(R.string.restore_backup_subtitle),
-                                leadingIcon = Icons.Rounded.Restore,
-                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
-                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
-                                trailingIcon = Icons.Default.ChevronRight, onClick = { restoreBackup() })
+                    item {
+                        Spacer(
+                            modifier = Modifier
+                                .height(80.dp)
+                                .navigationBarsPadding()
+                        )
+                    }
+                } else {
+                    if (!isPro && proCheckDone) {
+                        item {
+                            RillAnimatedSection(delayMs = 30L) {
+                                RillExpressiveCard {
+                                    SupportProjectItem(
+                                        modifier = Modifier.shake(enabledShake) { enabledShake = false },
+                                        onClick = { navigator.navigate(DonateScreenDestination) }
+                                    )
+                                }
+                            }
                         }
                     }
-                }
-            }
 
-                // ── Other ────────────────────────────────────────────────────────
-                item {
-                    RillAnimatedSection(delayMs = 300L) {
-                        Column {
-                            SettingsSectionLabel(stringResource(R.string.other))
-                            RillExpressiveCard {
-                                if (isPro) {
+                    // ── Appearance ───────────────────────────────────────────────────
+                    item {
+                        RillAnimatedSection(delayMs = 60L) {
+                            Column {
+                                SettingsSectionLabel(stringResource(R.string.appearance))
+                                RillExpressiveCard {
                                     RillListItem(
-                                        headline = stringResource(R.string.support_development),
-                                        supporting = stringResource(R.string.support_development_description3),
-                                        leadingIcon = Icons.Rounded.VolunteerActivism,
+                                        headline = stringResource(R.string.interface_settings),
+                                        supporting = stringResource(R.string.interface_settings_subtitle),
+                                        leadingIcon = Icons.Rounded.Palette,
+                                        iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkCyan,
+                                        iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorCyan,
+                                        trailingIcon = Icons.Default.ChevronRight,
+                                        onClick = { navigator.navigate(InterfaceScreenDestination) })
+                                    RillListItem(
+                                        headline = stringResource(R.string.navigations),
+                                        supporting = stringResource(R.string.navigations_subtitle),
+                                        leadingIcon = Icons.Rounded.MoveUp,
+                                        modifierLeadingIcon = Modifier.rotate(90f),
+                                        iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkCyan,
+                                        iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorCyan,
+                                        trailingIcon = Icons.Default.ChevronRight,
+                                        onClick = { navigator.navigate(NavigationScreenDestination) })
+                                }
+                            }
+                        }
+                    }
+
+                    // ── Calls & System ───────────────────────────────────────────────
+                    item {
+                        RillAnimatedSection(delayMs = 140L) {
+                            Column {
+                                SettingsSectionLabel(stringResource(R.string.calls_and_system))
+                                RillExpressiveCard {
+                                    RillListItem(
+                                        headline = stringResource(R.string.call_settings),
+                                        supporting = stringResource(R.string.call_settings_subtitle),
+                                        leadingIcon = Icons.Rounded.Call,
+                                        iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkGreen,
+                                        iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorGreen,
+                                        trailingIcon = Icons.Default.ChevronRight,
+                                        onClick = { navigator.navigate(CallSettingScreenDestination) }
+                                    )
+                                    RillListItem(
+                                        headline = stringResource(R.string.sound_and_vibration),
+                                        supporting = stringResource(R.string.sound_and_vibration_subtitle),
+                                        leadingIcon = Icons.AutoMirrored.Rounded.VolumeUp,
+                                        iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
+                                        iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
+                                        trailingIcon = Icons.Default.ChevronRight,
+                                        onClick = {
+                                            navigator.navigate(
+                                                SoundVibrationScreenDestination
+                                            )
+                                        }
+                                    )
+                                    RillListItem(
+                                        headline = stringResource(R.string.manage_blocked),
+                                        supporting = stringResource(R.string.manage_blocked_subtitle),
+                                        leadingIcon = Icons.Outlined.DoDisturb,
+                                        iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
+                                        iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
+                                        trailingIcon = Icons.Default.ChevronRight,
+                                        onClick = {
+                                            navigator.navigate(
+                                                BlockedNumbersScreenDestination
+                                            )
+                                        }
+                                    )
+                                    val biometricsType =
+                                        remember(prefs.settingsChanged.collectAsStateWithLifecycle().value) {
+                                            prefs.getString(
+                                                PreferenceManager.KEY_BIOMETRICS_TYPE,
+                                                ""
+                                            )
+                                                ?: ""
+                                        }
+                                    val biometricsLabel = when (biometricsType) {
+                                        "system" -> stringResource(R.string.system_biometrics)
+                                        "pin" -> stringResource(R.string.custom_pin)
+                                        "password" -> stringResource(R.string.custom_password)
+                                        else -> stringResource(R.string.not_configured)
+                                    }
+                                    RillListItem(
+                                        headline = stringResource(R.string.authentication),
+                                        supporting = biometricsLabel,
+                                        leadingIcon = Icons.Rounded.Fingerprint,
+                                        iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
+                                        iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
+                                        trailingIcon = Icons.Default.ChevronRight,
+                                        onClick = { navigator.navigate(BiometricScreenDestination) }
+                                    )
+                                    RillListItem(
+                                        modifier = Modifier.shake(enabledShake) { enabledShake = false },
+                                        headline = stringResource(R.string.settings_call_analytics_title),
+                                        supporting = stringResource(R.string.settings_call_analytics_supporting),
+                                        leadingIcon = Icons.Rounded.BubbleChart,
+                                        iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
+                                        iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
+                                        trailingIcon = if (isPro) Icons.Default.ChevronRight else Icons.Rounded.Lock,
+                                        onClick = {
+                                            val isBlurSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+                                            if (isPro || isBlurSupported) {
+                                                navigator.navigate(CallAnalyticsScreenDestination)
+                                            } else {
+                                                enabledShake = true
+                                                showSnackbar = true
+                                                scope.launch {
+                                                    delay(3000.milliseconds)
+                                                    showSnackbar = false
+                                                }
+                                            }
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    // ── Contacts ────────────────────────────────────────────────────────
+                    item {
+                        RillAnimatedSection(delayMs = 300L) {
+                            Column {
+                                SettingsSectionLabel(stringResource(R.string.contacts))
+                                RillExpressiveCard {
+                                    RillListItem(
+                                        headline = stringResource(R.string.manage_contacts),
+                                        supporting = stringResource(R.string.manage_contacts_subtitle),
+                                        leadingIcon = Icons.Rounded.PeopleAlt,
+                                        iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkBlue,
+                                        iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorBlue,
+                                        trailingIcon = Icons.Default.ChevronRight,
+                                        onClick = {
+                                            navigator.navigate(
+                                                ContactManagementScreenDestination
+                                            )
+                                        })
+                                }
+                            }
+                        }
+                    }
+
+                    // ── Backup & Restore ─────────────────────────────────────────────
+                    item {
+                        RillAnimatedSection(delayMs = 260L) {
+                            Column {
+                                SettingsSectionLabel(stringResource(R.string.backup_and_restore))
+                                RillExpressiveCard {
+                                    RillListItem(
+                                        headline = stringResource(R.string.create_backup),
+                                        supporting = stringResource(R.string.create_backup_subtitle),
+                                        leadingIcon = Icons.Rounded.Backup,
+                                        iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPink,
+                                        iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPink,
+                                        trailingIcon = Icons.Default.ChevronRight,
+                                        onClick = { createBackup() }
+                                    )
+                                    RillListItem(
+                                        headline = stringResource(R.string.restore_backup),
+                                        supporting = stringResource(R.string.restore_backup_subtitle),
+                                        leadingIcon = Icons.Rounded.Restore,
+                                        iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPink,
+                                        iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPink,
+                                        trailingIcon = Icons.Default.ChevronRight,
+                                        onClick = { restoreBackup() })
+                                }
+                            }
+                        }
+                    }
+
+                    // ── Other ────────────────────────────────────────────────────────
+                    item {
+                        RillAnimatedSection(delayMs = 300L) {
+                            Column {
+                                SettingsSectionLabel(stringResource(R.string.other))
+                                RillExpressiveCard {
+                                    if (isPro) {
+                                        RillListItem(
+                                            headline = stringResource(R.string.support_development),
+                                            supporting = stringResource(R.string.support_development_description3),
+                                            leadingIcon = Icons.Rounded.VolunteerActivism,
+                                            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
+                                            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
+                                            trailingIcon = Icons.Default.ChevronRight,
+                                            onClick = { navigator.navigate(DonateScreenDestination) })
+                                    }
+                                    val isFoss = BuildConfig.FLAVOR == "foss"
+                                    if (isFoss) RillListItem(
+                                        headline = stringResource(R.string.updates),
+                                        supporting = stringResource(R.string.check_for_updates_subtitle),
+                                        leadingIcon = Icons.Rounded.SystemUpdate,
                                         iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOliva,
                                         iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOliva,
                                         trailingIcon = Icons.Default.ChevronRight,
-                                        onClick = { navigator.navigate(DonateScreenDestination) })
-                                }
-                                val isFoss = BuildConfig.FLAVOR == "foss"
-                                if (isFoss) RillListItem(
-                                    headline = stringResource(R.string.check_for_updates),
-                                    supporting = stringResource(R.string.check_for_updates_subtitle),
-                                    leadingIcon = Icons.Rounded.SystemUpdate,
-                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOliva,
-                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOliva,
-                                    trailingIcon = Icons.Default.ChevronRight,
-                                    onClick = {
-                                        scope.launch {
-                                            performUpdateCheck(appVersion) { updateDialogState = it }
+                                        onClick = {
+                                            navigator.navigate(UpdatesScreenDestination)
                                         }
-                                    }
-                                )
-                                RillListItem(
-                                    headline = stringResource(R.string.about),
-                                    supporting = "Version $appVersion ($storeName)",
-                                    leadingIcon = Icons.Outlined.Info,
-                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOliva,
-                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOliva,
-                                    trailingIcon = Icons.Default.ChevronRight,
-                                    onClick = { navigator.navigate(AboutAppScreenDestination) })
+                                    )
+                                    RillListItem(
+                                        headline = stringResource(R.string.about),
+                                        supporting = "Version $appVersion ($storeName)",
+                                        leadingIcon = Icons.Outlined.Info,
+                                        iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOliva,
+                                        iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOliva,
+                                        trailingIcon = Icons.Default.ChevronRight,
+                                        onClick = { navigator.navigate(AboutAppScreenDestination) })
+                                }
                             }
                         }
                     }
+
+                    item { SettingsBottomPadding(120.dp) }
                 }
+            }
 
-                // ── Updates ──────────────────────────────────────────────────────
-//                item {
-//                    RillAnimatedSection(delayMs = 340L) {
-//                        Column {
-//                            SettingsSectionLabel(stringResource(R.string.updates))
-//                            RillExpressiveCard {
-//                                var autoUpdateCheck by remember {
-//                                    mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_AUTO_UPDATE_CHECK, true))
-//                                }
-//                                RillSwitchListItem(
-//                                    headline = stringResource(R.string.auto_check_for_updates),
-//                                    supporting = stringResource(R.string.auto_check_for_updates_subtitle),
-//                                    leadingIcon = Icons.Rounded.Autorenew,
-//                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkBlue,
-//                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorBlue,
-//                                    checked = autoUpdateCheck,
-//                                    onCheckedChange = { checked ->
-//                                        autoUpdateCheck = checked
-//                                        prefs.setBoolean(PreferenceManager.KEY_AUTO_UPDATE_CHECK, checked)
-//                                    }
-//                                )
-//                            }
-//                        }
-//                    }
-//                }
-
-                item { SettingsBottomPadding(120.dp) }
+            AnimatedVisibility(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter),
+                visible = showSnackbar,
+                enter = slideInVertically { it } + fadeIn(),
+                exit = slideOutVertically { it } + fadeOut()
+            ) {
+                Snackbar(
+                    modifier = Modifier.navigationBarsPadding().padding(24.dp).padding(bottom = if (showBottomBar) bottomBarHeight else 0.dp),
+                    shape = MaterialTheme.shapes.large,
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    action = {
+                        TextButton(
+                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 6.dp),
+                            onClick = {
+                                showSnackbar = false
+                                navigator.navigate(DonateScreenDestination)
+                            }
+                        ) {
+                            Text(
+                                stringResource(R.string.continue_support),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    },
+                ) {
+                    Text(
+                        stringResource(R.string.support_project_to_unlock),
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
             }
         }
     }

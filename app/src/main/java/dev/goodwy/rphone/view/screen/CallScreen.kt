@@ -19,10 +19,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.StickyNote2
+import androidx.compose.material.icons.automirrored.rounded.CallSplit
 import androidx.compose.material.icons.automirrored.rounded.VolumeDown
 import androidx.compose.material.icons.automirrored.rounded.VolumeUp
 import androidx.compose.material.icons.filled.Check
@@ -61,13 +64,15 @@ import dev.goodwy.rphone.controller.sensor.PocketModeManager
 import dev.goodwy.rphone.controller.util.NoteManager
 import dev.goodwy.rphone.modal.data.getDisplayName
 import dev.goodwy.rphone.view.components.RillExpressiveCard
-import dev.goodwy.rphone.view.components.RillSelectionDialog
 import dev.goodwy.rphone.view.theme.MyColors.bottomBarColor
 import dev.goodwy.rphone.view.theme.MyColors.cardColor
 import dev.goodwy.rphone.view.theme.MyColors.dialpadKeyColor
 import dev.goodwy.rphone.view.theme.color_call_end
 import dev.goodwy.rphone.controller.util.formatDuration
 import dev.goodwy.rphone.controller.util.PreferenceManager
+import dev.goodwy.rphone.controller.util.forceLtr
+import dev.goodwy.rphone.controller.util.hasCapability
+import dev.goodwy.rphone.controller.util.isHD
 import dev.goodwy.rphone.liquidglass.LocalLiquidGlassBackdrop
 import dev.goodwy.rphone.liquidglass.backdrops.LayerBackdrop
 import dev.goodwy.rphone.liquidglass.drawBackdrop
@@ -77,6 +82,7 @@ import dev.goodwy.rphone.liquidglass.effects.colorControls
 import dev.goodwy.rphone.liquidglass.effects.lens
 import dev.goodwy.rphone.liquidglass.highlight.Highlight
 import dev.goodwy.rphone.liquidglass.shadow.Shadow
+import dev.goodwy.rphone.view.components.RillAvatar
 import dev.goodwy.rphone.view.screen.settings.PasswordSetupDialog
 import dev.goodwy.rphone.view.screen.settings.PinSetupDialog
 import kotlinx.coroutines.delay
@@ -94,6 +100,7 @@ fun ExpressiveCallScreen(
     initialConnectTime: Long = 0L,
     backgroundUri: String? = null,
     skipIncomingScreen: Boolean = false,
+    isConference: Boolean,
     liquidGlassBackdrop: LayerBackdrop
 ) {
     val view = LocalView.current
@@ -118,6 +125,7 @@ fun ExpressiveCallScreen(
     var typedDigits by remember { mutableStateOf("") }
     var showMore by remember { mutableStateOf(false) }
     var isEnding by remember { mutableStateOf(false) }
+    var showManageSheet by remember { mutableStateOf(false) }
 
     fun callDisconnect(isIncoming: Boolean = false) {
         if (isIncoming) isEnding = true
@@ -262,7 +270,7 @@ fun ExpressiveCallScreen(
         ) {
             // Other Call Card
             AnimatedVisibility(
-                visible = otherCall != null,
+                visible = otherCall != null && !isConference,
                 enter = fadeIn() + expandVertically(),
                 exit = fadeOut() + shrinkVertically()
             ) {
@@ -274,7 +282,7 @@ fun ExpressiveCallScreen(
                     val displayOrder = preferenceManager.getInt(PreferenceManager.KEY_CONTACT_DISPLAY_ORDER, 0)
                     LaunchedEffect(oc, cnam) {
                         val number = oc.details?.handle?.schemeSpecificPart ?: ""
-                        if (number.isNotEmpty()) {
+                        if (number.isNotEmpty() && number.isNotBlank()) {
                             val contact = try { contactsRepo.getContactByNumber(number) } catch (_: Exception) { null }
                             if (contact != null) ocName = getDisplayName(contact, displayOrder)
                             else if (!cnam.isNullOrEmpty()) ocName = cnam
@@ -394,14 +402,46 @@ fun ExpressiveCallScreen(
                         }
 
                         val currentSimLabel = simLabel
-                        if (currentSimLabel != null) {
+                        val isHD = call.isHD()
+                        if (currentSimLabel != null || isHD) {
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                if (currentSimLabel != null) Surface(
+                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                    shape = RoundedCornerShape(8.dp),
+                                    modifier = Modifier.padding(top = 8.dp)
+                                ) {
+                                    Text(
+                                        text = currentSimLabel,
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                                if (isHD) Surface(
+                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                    shape = RoundedCornerShape(8.dp),
+                                    modifier = Modifier.padding(top = 8.dp)
+                                ) {
+                                    Text(
+                                        text = "HD",
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
+                        } else {
                             Surface(
-                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0f),
                                 shape = RoundedCornerShape(8.dp),
                                 modifier = Modifier.padding(top = 8.dp)
                             ) {
                                 Text(
-                                    text = currentSimLabel,
+                                    text = "",
                                     style = MaterialTheme.typography.labelMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
@@ -414,8 +454,9 @@ fun ExpressiveCallScreen(
                 }
 
                 if (!showKeypad && !showNoteWindow && !showMore && !showAudioPicker) {
+                    val showAvatar = shouldShowAvatar && (photoUri != null || isConference)
                     AnimatedVisibility(
-                        visible = shouldShowAvatar && photoUri != null,
+                        visible = showAvatar,
                         enter = fadeIn() + expandVertically(),
                         exit = fadeOut() + shrinkVertically()
                     ) {
@@ -428,6 +469,7 @@ fun ExpressiveCallScreen(
                             }
                         }
                     }
+                    if (!showAvatar) Spacer(modifier = Modifier.size(if (callState == Call.STATE_RINGING) 200.dp else 160.dp))
                 }
                 Spacer(modifier = Modifier.weight(0.6f))
             }
@@ -562,10 +604,21 @@ fun ExpressiveCallScreen(
                                                         context.startActivity(intent)
                                                     }
                                                 )
-                                                MoreItem(
+
+                                                val canMerge = otherCall != null || (try { call.details.can(Call.Details.CAPABILITY_MERGE_CONFERENCE) } catch (_: Exception) { false })
+                                                if (!isConference && canMerge) MoreItem(
+                                                    headline = stringResource(R.string.merge),
+                                                    leadingIcon = Icons.Rounded.Merge,
+                                                    enabled = canMerge,
+                                                    onClick = {
+                                                        view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                                                        callViewModel.mergeCalls()
+                                                    }
+                                                )
+                                                if (!isConference) MoreItem(
                                                     headline = stringResource(R.string.add_call),
                                                     leadingIcon = Icons.Rounded.AddIcCall,
-                                                    enabled = otherCall == null && callState != Call.STATE_DIALING,
+                                                    enabled = (otherCall == null && callState != Call.STATE_DIALING),
                                                     onClick = {
                                                         view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                                                         if (callState != Call.STATE_HOLDING) {
@@ -577,12 +630,21 @@ fun ExpressiveCallScreen(
                                                         val intent = Intent(Intent.ACTION_DIAL)
                                                         context.startActivity(intent)
                                                     }
+                                                ) else MoreItem(
+                                                    headline = stringResource(R.string.manage),
+                                                    leadingIcon = Icons.Rounded.PeopleAlt,
+                                                    enabled = isConference,
+                                                    onClick = {
+                                                        view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                                                        showManageSheet = true
+                                                    }
                                                 )
+
                                                 MoreItem(
-                                                    headline = if (otherCall != null) stringResource(R.string.swap)
+                                                    headline = if (otherCall != null && !isConference) stringResource(R.string.swap)
                                                     else if (callState == Call.STATE_HOLDING) stringResource(R.string.resume)
                                                     else stringResource(R.string.hold),
-                                                    leadingIcon = if (otherCall != null) Icons.Rounded.SwapCalls
+                                                    leadingIcon = if (otherCall != null && !isConference) Icons.Rounded.SwapCalls
                                                     else if (callState == Call.STATE_HOLDING) Icons.Rounded.PlayArrow
                                                     else Icons.Default.Pause,
                                                     enabled = callState != Call.STATE_DIALING,
@@ -1157,6 +1219,125 @@ fun ExpressiveCallScreen(
                     },
                     onDismiss = { onBiometricFail() }
                 )
+            }
+        }
+    }
+
+    if (showManageSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showManageSheet = false },
+            containerColor = MaterialTheme.colorScheme.surface,
+            dragHandle = null,
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .padding(bottom = 16.dp)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                // Drag handle
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp, bottom = 4.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Surface(
+                        shape = RoundedCornerShape(3.dp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                        modifier = Modifier.size(width = 36.dp, height = 4.dp)
+                    ) {}
+                }
+
+                Spacer(Modifier.height(16.dp))
+//                Text(
+//                    text = stringResource(R.string.manage),
+//                    style = MaterialTheme.typography.headlineSmall,
+//                    modifier = Modifier.padding(start = 24.dp, bottom = 16.dp)
+//                )
+
+                val children = remember(allCalls, call) {
+                    allCalls.filter { it.parent != null && it.parent == call }
+                }
+
+                if (children.isEmpty()) {
+                    Text(
+                        text = "No participants",
+                        modifier = Modifier.padding(24.dp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                } else {
+                    children.forEach { childCall ->
+                        val childDetails = childCall.details
+                        val childNumber = childDetails?.handle?.schemeSpecificPart ?: ""
+                        var childName by remember(childCall) { mutableStateOf(childNumber) }
+                        var childPhotoUri by remember(childCall) { mutableStateOf("") }
+
+                        LaunchedEffect(childCall) {
+                            val cnam = if (childDetails?.callerDisplayNamePresentation == TelecomManager.PRESENTATION_ALLOWED) {
+                                childDetails.callerDisplayName
+                            } else null
+                            val contact = if (childNumber.isNotEmpty()) try { contactsRepo.getContactByNumber(childNumber) } catch (_: Exception) { null } else null
+                            childName = contact?.let { getDisplayName(it, 0) } ?: cnam ?: childNumber.forceLtr()
+                            childPhotoUri = contact?.photoUri ?: ""
+                        }
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 24.dp, vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RillAvatar(
+                                name = childName,
+                                photoUri = childPhotoUri,
+                                modifier = Modifier.size(40.dp),
+                                shape = CircleShape
+                            )
+                            Spacer(Modifier.width(16.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = childName,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                if (childName != childNumber && childNumber.isNotEmpty()) {
+                                    Text(
+                                        text = childNumber,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+
+                            val canSeparate = childCall.hasCapability(Call.Details.CAPABILITY_SEPARATE_FROM_CONFERENCE)
+                            if (canSeparate) IconButton(onClick = {
+                                view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                                try { childCall.splitFromConference() } catch (_: Exception) {}
+                            }) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Rounded.CallSplit,
+                                    contentDescription = "Split",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+
+                            val canDisconnect = childCall.hasCapability(Call.Details.CAPABILITY_DISCONNECT_FROM_CONFERENCE)
+                            if (canDisconnect) IconButton(onClick = {
+                                view.performHapticFeedback(HapticFeedbackConstants.REJECT)
+                                try { childCall.disconnect() } catch (_: Exception) {}
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Rounded.CallEnd,
+                                    contentDescription = stringResource(R.string.end_call),
+                                    tint = color_call_end
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
     }

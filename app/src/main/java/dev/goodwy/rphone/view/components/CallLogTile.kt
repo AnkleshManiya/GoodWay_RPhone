@@ -333,7 +333,7 @@ fun BatchCallLogActionBar(
                     if (onClearAll != null) {
                         DropdownMenuItem(
                             contentPadding = PaddingValues(start = 16.dp, end = 20.dp),
-                            text = { Text(stringResource(R.string.clear_all_filtered_logs), color = MaterialTheme.colorScheme.error, lineHeight = 14.sp) },
+                            text = { Text(stringResource(R.string.clear_all_filtered_logs), color = MaterialTheme.colorScheme.error, lineHeight = MaterialTheme.typography.bodyMedium.fontSize) },
                             leadingIcon = { Icon(ImageVector.vectorResource(id = R.drawable.ic_delete_sweep), stringResource(R.string.clear_all_filtered_logs), tint = MaterialTheme.colorScheme.error) },
                             onClick = {
                                 showSelectionMenuOuter = false
@@ -344,7 +344,7 @@ fun BatchCallLogActionBar(
                     if (onShare != null) {
                         DropdownMenuItem(
                             contentPadding = PaddingValues(start = 16.dp, end = 20.dp),
-                            text = { Text(stringResource(R.string.share), lineHeight = 14.sp) },
+                            text = { Text(stringResource(R.string.share), lineHeight = MaterialTheme.typography.bodyMedium.fontSize) },
                             leadingIcon = { Icon(Icons.Default.Share, stringResource(R.string.share)) },
                             onClick = {
                                 showSelectionMenuOuter = false
@@ -355,7 +355,7 @@ fun BatchCallLogActionBar(
                     if (onCallLogs != null) {
                         DropdownMenuItem(
                             contentPadding = PaddingValues(start = 16.dp, end = 20.dp),
-                            text = { Text(stringResource(R.string.show_full_history), lineHeight = 14.sp) },
+                            text = { Text(stringResource(R.string.show_full_history), lineHeight = MaterialTheme.typography.bodyMedium.fontSize) },
                             leadingIcon = { Icon(Icons.Rounded.AccessTime, stringResource(R.string.show_full_history)) },
                             onClick = {
                                 showSelectionMenuOuter = false

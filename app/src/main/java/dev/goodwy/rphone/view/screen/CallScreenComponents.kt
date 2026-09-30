@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
@@ -38,6 +39,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -47,6 +49,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -70,10 +73,12 @@ import dev.goodwy.rphone.view.theme.MyColors.dialpadKeyColor
 import dev.goodwy.rphone.view.theme.color_call_button
 import dev.goodwy.rphone.view.theme.color_call_end
 import dev.goodwy.rphone.view.theme.customColors
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import kotlin.math.abs
 import kotlin.math.roundToInt
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun KeypadButton(
@@ -453,26 +458,26 @@ fun HeroAvatar(photoUri: String?, avatarSize: Dp = 160.dp, wavy: Boolean = false
     val avatarFrame = prefs.getBoolean(PreferenceManager.KEY_AVATAR_FRAME, false)
     val borderColor =  MaterialTheme.colorScheme.onSurface
 
-    Box(
-        modifier = Modifier
-            .then(
-                if (avatarFrame) Modifier
-                    .drawBehind {
-                        val borderWidth = size.width * 0.08f // 8% of the width
-                        drawOutline(
-                            outline = avatarShape.createOutline(size, layoutDirection, this),
-                            color = borderColor,
-                            style = Stroke(width = borderWidth)
-                        )
-                    }
-                else Modifier
-            )
-            .size(avatarSize)
-            .clip(avatarShape)
-            .background(MaterialTheme.colorScheme.secondaryContainer),
-        contentAlignment = Alignment.Center
-    ) {
-        if (!photoUri.isNullOrEmpty()) {
+    if (!photoUri.isNullOrEmpty()) {
+        Box(
+            modifier = Modifier
+                .then(
+                    if (avatarFrame) Modifier
+                        .drawBehind {
+                            val borderWidth = size.width * 0.08f // 8% of the width
+                            drawOutline(
+                                outline = avatarShape.createOutline(size, layoutDirection, this),
+                                color = borderColor,
+                                style = Stroke(width = borderWidth)
+                            )
+                        }
+                    else Modifier
+                )
+                .size(avatarSize)
+                .clip(avatarShape)
+                .background(bottomBarColor),
+            contentAlignment = Alignment.Center
+        ) {
             AsyncImage(
                 model = photoUri,
                 contentDescription = null,
@@ -480,6 +485,20 @@ fun HeroAvatar(photoUri: String?, avatarSize: Dp = 160.dp, wavy: Boolean = false
                     .fillMaxSize()
                     .clip(avatarShape),
                 contentScale = ContentScale.Crop
+            )
+        }
+    } else {
+        Box(
+            modifier = Modifier
+                .size(avatarSize)
+                .clip(avatarShape)
+                .background(bottomBarColor),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                Icons.Rounded.PeopleAlt,
+                contentDescription = null,
+                modifier = Modifier.size((avatarSize.value * 0.6).dp),
             )
         }
     }
@@ -544,6 +563,8 @@ fun HorizontalSwipeToAnswer(
     val localDensity = LocalDensity.current
     val view = LocalView.current
     val globalBackdrop = LocalLiquidGlassBackdrop.current
+    val layoutDirection = LocalLayoutDirection.current
+    val isRtl = layoutDirection == LayoutDirection.Rtl
 
     val trackHeight = 96.dp
     val handleWidth = 110.dp
@@ -711,7 +732,8 @@ fun HorizontalSwipeToAnswer(
                             onHorizontalDrag = { change, dragAmount ->
                                 change.consume()
                                 coroutineScope.launch {
-                                    val newOffset = (offsetX.value + dragAmount).coerceIn(
+                                    val adjustedDragAmount = if (isRtl) -dragAmount else dragAmount
+                                    val newOffset = (offsetX.value + adjustedDragAmount).coerceIn(
                                         -maxDrag * 1.1f,
                                         maxDrag * 1.1f
                                     )
@@ -735,7 +757,10 @@ fun HorizontalSwipeToAnswer(
                         tint = iconTint,
                         modifier = Modifier
                             .size(32.dp)
-                            .graphicsLayer { rotationZ = iconRotation }
+                            .graphicsLayer {
+                                val adjustedIconRotation = if (isRtl) -iconRotation else iconRotation
+                                rotationZ = adjustedIconRotation
+                            }
                     )
                 }
             }
@@ -987,6 +1012,8 @@ fun IPhoneSwipeToAnswer(
     val view = LocalView.current
     val isDark = isSystemInDarkTheme()
     val globalBackdrop = LocalLiquidGlassBackdrop.current
+    val layoutDirection = LocalLayoutDirection.current
+    val isRtl = layoutDirection == LayoutDirection.Rtl
 
     val trackWidth = 320.dp
     val trackHeight = 94.dp
@@ -1215,8 +1242,9 @@ fun IPhoneSwipeToAnswer(
                             onHorizontalDrag = { change, dragAmount ->
                                 change.consume()
                                 coroutineScope.launch {
+                                    val adjustedDragAmount = if (isRtl) -dragAmount else dragAmount
                                     offsetX.snapTo(
-                                        (offsetX.value + dragAmount).coerceIn(
+                                        (offsetX.value + adjustedDragAmount).coerceIn(
                                             0f,
                                             maxDrag
                                         )
@@ -1233,7 +1261,10 @@ fun IPhoneSwipeToAnswer(
                     tint = color_call_button,
                     modifier = Modifier
                         .size(36.dp)
-                        .graphicsLayer { rotationZ = iconRotation }
+                        .graphicsLayer {
+                            val adjustedIconRotation = if (isRtl) -iconRotation else iconRotation
+                            rotationZ = adjustedIconRotation
+                        }
                 )
             }
         }
@@ -1486,6 +1517,8 @@ fun DefaultSwipeToAnswer(
     val view = LocalView.current
     val isDark = isSystemInDarkTheme()
     val globalBackdrop = LocalLiquidGlassBackdrop.current
+    val layoutDirection = LocalLayoutDirection.current
+    val isRtl = layoutDirection == LayoutDirection.Rtl
 
     val trackWidth = 320.dp
     val trackHeight = 80.dp
@@ -1517,9 +1550,17 @@ fun DefaultSwipeToAnswer(
     )
 
     val dragProgress = remember { derivedStateOf { if (maxDrag > 0f) offsetX.value / maxDrag else 0f } }
-    val iconRotation by remember { derivedStateOf {
-        dragProgress.value * 135f
-    } }
+    val iconRotation by remember { derivedStateOf { dragProgress.value * 135f } }
+
+    val appearanceStretch = remember { Animatable(0f) }
+    LaunchedEffect(Unit) {
+        delay(500.milliseconds)
+        while (true) {
+            appearanceStretch.animateTo(12f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow))
+            appearanceStretch.animateTo(0f, spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMedium))
+            delay(4000.milliseconds)
+        }
+    }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -1636,10 +1677,10 @@ fun DefaultSwipeToAnswer(
                 tonalElevation  = 0.dp,
                 modifier = Modifier
                     .height(trackHeight)
-                    .align(Alignment.CenterEnd)
+                    .align(Alignment.CenterStart)
                     .width(
                         with(localDensity) {
-                            val width = trackWidthPx - offsetX.value
+                            val width = trackWidthPx// - offsetX.value
                             width.coerceAtLeast(0f).toDp()
                         }
                     )
@@ -1666,10 +1707,10 @@ fun DefaultSwipeToAnswer(
                     )
             ) {}
 
-            val shimmerColor = buttonIconColor.copy(alpha = 0.4f)
+            val shimmerColor = handleBgColor.copy(alpha = 0.4f)
 
             val brush = Brush.linearGradient(
-                colors = listOf(shimmerColor, buttonIconColor, shimmerColor),
+                colors = listOf(shimmerColor, handleBgColor, shimmerColor),
                 start = Offset(trackWidthPx * shimmerOffset - 150f, 0f),
                 end = Offset(trackWidthPx * shimmerOffset + 150f, 0f)
             )
@@ -1704,8 +1745,11 @@ fun DefaultSwipeToAnswer(
             Box(
                 modifier = Modifier
                     .padding(start = handlePadding)
-                    .offset { IntOffset(offsetX.value.roundToInt(), 0) }
-                    .size(handleWidth, handleHeight)
+                    .width(with(localDensity) {
+                        val currentStretch = if (offsetX.value > 0f) 0f else appearanceStretch.value
+                        (handleWidthPx + offsetX.value + currentStretch).toDp()
+                    })
+                    .height(handleHeight)
                     .clip(CircleShape)
                     .background(handleBgColor)
                     .pointerInput(Unit) {
@@ -1727,8 +1771,9 @@ fun DefaultSwipeToAnswer(
                             onHorizontalDrag = { change, dragAmount ->
                                 change.consume()
                                 coroutineScope.launch {
+                                    val adjustedDragAmount = if (isRtl) -dragAmount else dragAmount
                                     offsetX.snapTo(
-                                        (offsetX.value + dragAmount).coerceIn(
+                                        (offsetX.value + adjustedDragAmount).coerceIn(
                                             0f,
                                             maxDrag
                                         )
@@ -1737,15 +1782,17 @@ fun DefaultSwipeToAnswer(
                             }
                         )
                     },
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.CenterEnd
             ) {
                 Icon(
-                    Icons.Rounded.Call,
+                    Icons.Rounded.DensityMedium,
                     contentDescription = null,
-                    tint = Color.Black.copy(alpha = 0.9f),
+                    tint = Color.Black.copy(alpha = 0.6f),
                     modifier = Modifier
-                        .size(36.dp)
-                        .graphicsLayer { rotationZ = iconRotation }
+                        .padding(end = 35.dp)
+                        .rotate(90f)
+                        .size(26.dp)
+//                        .graphicsLayer { rotationZ = iconRotation }
                 )
             }
         }

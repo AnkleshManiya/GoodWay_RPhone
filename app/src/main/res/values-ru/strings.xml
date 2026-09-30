@@ -40,12 +40,15 @@
     <string name="sim_picker_title">Выбрать SIM-карту</string>
     <string name="label_unknown_number">Неизвестный номер</string>
     <string name="reset">Сбросить</string>
+    <string name="add">Добавить</string>
+    <string name="use_number">Использовать номер: %s</string>
 
     <!-- Search -->
     <string name="search">Поиск</string>
     <string name="search_contacts">Поиск в контактах</string>
     <string name="no_results">Результатов нет</string>
     <string name="no_contacts_found">Контакты не найдены</string>
+    <string name="no_calls_found">Звонки не найдены</string>
     <string name="call_query">Позвонить %s</string>
     <string name="voice_input">Голосовой ввод</string>
     <string name="filter_results">Фильтр результата</string>
@@ -103,14 +106,18 @@
     <string name="updates">Обновления</string>
     <string name="check_for_updates">Проверить обновления</string>
     <string name="check_for_updates_subtitle">Проверить, доступна ли новая версия</string>
-    <string name="auto_check_for_updates">Автоматическая проверка наличия обновлений</string>
-    <string name="auto_check_for_updates_subtitle">Автоматическая проверка наличия обновлений</string>
+    <string name="auto_check_for_updates">Автоматическая проверка обновлений</string>
+    <string name="auto_check_for_updates_subtitle">Автоматически проверять наличие новых версий при запуске приложения</string>
     <string name="checking_for_updates">Проверка наличия обновлений…</string>
-    <string name="up_to_date">Актуальная информация</string>
-    <string name="up_to_date_subtitle">В приложении установлена последняя версия (v%s).</string>
+    <string name="up_to_date">Последняя версия</string>
+    <string name="up_to_date_subtitle">В приложении установлена последняя версия %1$s.</string>
     <string name="update_available">Доступно обновление</string>
-    <string name="update_available_subtitle">Доступна версия v%s.</string>
-    <string name="update_available_description">Хотите скачать APK файл в папку Загрузки?</string>
+    <string name="update_available_subtitle">Доступна версия %s.</string>
+    <string name="update_available_subtitle_dialog">Новая сборка Rill Phone готова к загрузке и ознакомлению.</string>
+    <string name="download_update">Скачать обновление?</string>
+    <string name="download_update_subtitle">Доступна версия Rill Phone %1$s (у вас установлена версия %2$s). APK-файл будет загружен в папку «Загрузки».</string>
+    <string name="install_update">Установить обновление?</string>
+    <string name="install_update_subtitle">Обновление v%1$s уже загружено. Хотите установить его сейчас?</string>
     <string name="download">Скачать</string>
     <string name="not_now">Не сейчас</string>
     <string name="downloading_update">Загрузка обновления</string>
@@ -120,7 +127,14 @@
     <string name="download_complete">Загрузка завершена</string>
     <string name="download_complete_subtitle">Обновление до версии %1$s успешно загружено.</string>
     <string name="open_downloads_folder_manually">Откройте папку Загрузки вручную</string>
-    <string name="file_saved_to_downloads_folder">Файл сохранен в папку Загрузки.</string>
+    <string name="try_again">Попробуй ещё раз</string>
+    <string name="couldnt_check_for_updates">Не удалось проверить наличие обновлений</string>
+    <string name="couldnt_check_for_updates_subtitle">Не удалось подключиться к репозиторию релизов GitHub. Проверьте подключение.</string>
+    <string name="no_release_notes">Для этой версии не было предоставлено никаких примечаний к выпуску.</string>
+    <string name="installed">Установлено</string>
+    <string name="latest">Последний выпуск</string>
+    <string name="later">Позже</string>
+    <string name="view_update">Просмотреть обновление</string>
 
     <!-- Contributors -->
     <string name="contributors">Участники</string>
@@ -422,6 +436,9 @@
     <string name="add_call">Добавить вызов</string>
     <string name="resume">Возобновить</string>
     <string name="swap">Переключить</string>
+    <string name="merge">Объединить</string>
+    <string name="manage">Управлять</string>
+    <string name="conference">Конференц-вызов</string>
     <string name="more">Ещё</string>
     <string name="hold">Удерживать</string>
     <string name="call_status_on_hold">Звонок на удержании</string>
@@ -658,4 +675,23 @@
     <string name="pocket_mode_active">Карманный режим включен</string>
     <string name="pocket_mode_active_description">Функция сенсорного управления заблокирована, чтобы предотвратить случайные нажатия в кармане.</string>
     <string name="pocket_mode_dismiss">Отключить защиту</string>
+
+    <!-- Call Analytics -->
+    <string name="settings_call_analytics_title">Аналитика звонков</string>
+    <string name="settings_call_analytics_supporting">Отслеживайте показатели звонков, статистику продолжительности разговоров, часы пиковой нагрузки и аналитические данные о контактах</string>
+    <string name="call_analytics_disabled_title">Аналитика звонков отключена</string>
+    <string name="call_analytics_disabled_desc">Аналитика звонков и отслеживание продолжительности разговоров в настоящее время отключены. Включите эту опцию, чтобы рассчитывать продолжительность разговоров, часы пиковой нагрузки и статистику по контактам.</string>
+    <string name="call_analytics_enable_action">Включить аналитику</string>
+    <string name="this_week">За неделю</string>
+    <string name="this_month">За месяц</string>
+    <string name="all_time">Все время</string>
+    <string name="total_talk_time">Время разговоров</string>
+    <string name="total_calls">Всего звонков</string>
+    <string name="avg_duration">Среднее время</string>
+    <string name="call_volume">Количество звонков</string>
+    <string name="call_breakdown">Виды звонков</string>
+    <string name="sim_usage_breakdown">Использование SIM-карт</string>
+    <string name="most_talked_persons">С кем общались больше всего</string>
+    <string name="no_call_records_this_period">"За этот период нет записей о звонках"</string>
+    <string name="total_calls_in_number">%1$s зв. (вх: %2$s, исх: %3$s, проп: %4$s)</string>
 </resources>

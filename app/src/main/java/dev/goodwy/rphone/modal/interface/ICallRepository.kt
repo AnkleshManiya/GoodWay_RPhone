@@ -32,4 +32,5 @@ interface ICallRepository {
     fun toggleMute()
     fun setAudioRoute(route: Int)
     fun cycleAudioRoute()
+    fun mergeCalls()
 }

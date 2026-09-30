@@ -40,6 +40,8 @@
     <string name="sim_picker_title">Επιλογή κάρτας SIM</string>
     <string name="label_unknown_number">Άγνωστος αριθμός</string>
     <string name="reset">Επαναφορά</string>
+    <string name="add">Προσθήκη</string>
+    <string name="use_number">Χρήση αριθμού: %s</string>
 
     <!-- Search -->
     <string name="search">Αναζήτηση</string>
@@ -104,13 +106,17 @@
     <string name="check_for_updates">Έλεγχος για ενημερώσεις</string>
     <string name="check_for_updates_subtitle">Έλεγχος αν είναι διαθέσιμη νέα έκδοση</string>
     <string name="auto_check_for_updates">Αυτόματος έλεγχος για ενημερώσεις</string>
-    <string name="auto_check_for_updates_subtitle">Αυτόματος έλεγχος για ενημερώσεις</string>
+    <string name="auto_check_for_updates_subtitle">Αυτόματος έλεγχος για νέες εκδόσεις κατά την εκκίνηση της εφαρμογής</string>
     <string name="checking_for_updates">Έλεγχος για ενημερώσεις…</string>
     <string name="up_to_date">Ενημερωμένο</string>
-    <string name="up_to_date_subtitle">Η εφαρμογή εκτελεί την τελευταία έκδοση (v%1$s).</string>
+    <string name="up_to_date_subtitle">Η εφαρμογή εκτελεί την τελευταία έκδοση %1$s.</string>
     <string name="update_available">Διαθέσιμη ενημέρωση</string>
-    <string name="update_available_subtitle">Η έκδοση v%1$s είναι διαθέσιμη.</string>
-    <string name="update_available_description">Θέλετε να κατεβάσετε το αρχείο APK στον φάκελο Λήψεις;</string>
+    <string name="update_available_subtitle">Η έκδοση %1$s είναι διαθέσιμη.</string>
+    <string name="update_available_subtitle_dialog">Μια νεότερη έκδοση του Rill Phone είναι έτοιμη για λήψη και εξερεύνηση.</string>
+    <string name="download_update">Λήψη ενημέρωσης;</string>
+    <string name="download_update_subtitle">Το Rill Phone v%1$s είναι διαθέσιμο (έχετε v%2$s). Το αρχείο APK θα ληφθεί στον φάκελο Λήψεις.</string>
+    <string name="install_update">Εγκατάσταση ενημέρωσης;</string>
+    <string name="install_update_subtitle">Η ενημέρωση v%1$s έχει ήδη ληφθεί. Θέλετε να την εγκαταστήσετε τώρα;</string>
     <string name="download">Λήψη</string>
     <string name="not_now">Όχι τώρα</string>
     <string name="downloading_update">Λήψη ενημέρωσης</string>
@@ -120,7 +126,15 @@
     <string name="download_complete">Η λήψη ολοκληρώθηκε</string>
     <string name="download_complete_subtitle">Η ενημέρωση στην έκδοση %1$s κατέβηκε με επιτυχία.</string>
     <string name="open_downloads_folder_manually">Ανοίξτε τον φάκελο Λήψεις χειροκίνητα</string>
-    <string name="file_saved_to_downloads_folder">Το αρχείο αποθηκεύτηκε στον φάκελο Λήψεις.</string>
+    <string name="try_again">Δοκιμάστε ξανά</string>
+    <string name="couldnt_check_for_updates">Δεν ήταν δυνατός ο έλεγχος για ενημερώσεις</string>
+    <string name="couldnt_check_for_updates_subtitle">Δεν είναι δυνατή η πρόσβαση στο αποθετήριο εκδόσεων του GitHub. Ελέγξτε τη σύνδεσή σας.</string>
+    <string name="no_release_notes">Δεν παρασχέθηκαν σημειώσεις έκδοσης για αυτήν την έκδοση.</string>
+    <string name="installed">Εγκατεστημένο</string>
+    <string name="latest">Τελευταία</string>
+    <string name="later">Αργότερα</string>
+    <string name="view_update">Προβολή ενημέρωσης</string>
+
 
     <!-- Contributors -->
     <string name="contributors">Συντελεστές</string>
@@ -421,6 +435,9 @@
     <string name="add_call">Προσθήκη κλήσης</string>
     <string name="resume">Συνέχιση</string>
     <string name="swap">Εναλλαγή</string>
+    <string name="merge">Συγχώνευση</string>
+    <string name="manage">Διαχείριση</string>
+    <string name="conference">Διάσκεψη</string>
     <string name="more">Περισσότερα</string>
     <string name="hold">Αναμονή</string>
     <string name="call_status_on_hold">Σε αναμονή</string>
@@ -649,4 +666,23 @@
     <string name="pocket_mode_active">Λειτουργία τσέπης ενεργή</string>
     <string name="pocket_mode_active_description">Οι αφές της οθόνης είναι κλειδωμένες για την αποφυγή τυχαίων αφών στην τσέπη σας.</string>
     <string name="pocket_mode_dismiss">Απενεργοποίηση προστασίας αφής</string>
+
+    <!-- Call Analytics -->
+    <string name="settings_call_analytics_title">Ανάλυση κλήσεων</string>
+    <string name="settings_call_analytics_supporting">Παρακολούθηση μετρικών κλήσεων, στατιστικών χρόνου ομιλίας, ωρών αιχμής και πληροφοριών συχνών επαφών</string>
+    <string name="call_analytics_disabled_title">Η ανάλυση κλήσεων είναι απενεργοποιημένη</string>
+    <string name="call_analytics_disabled_desc">Η ανάλυση κλήσεων και η παρακολούθηση χρόνου ομιλίας είναι προς το παρόν απενεργοποιημένες. Ενεργοποιήστε αυτήν την επιλογή για να υπολογίσετε τον χρόνο ομιλίας, τις ώρες αιχμής και τις πληροφορίες επαφών.</string>
+    <string name="call_analytics_enable_action">Ενεργοποίηση ανάλυσης</string>
+    <string name="this_week">Αυτή την εβδομάδα</string>
+    <string name="this_month">Αυτόν τον μήνα</string>
+    <string name="all_time">Συνολικά</string>
+    <string name="total_talk_time">Συνολικός χρόνος ομιλίας</string>
+    <string name="total_calls">Σύνολο κλήσεων</string>
+    <string name="avg_duration">Μέση διάρκεια</string>
+    <string name="call_volume">Όγκος κλήσεων</string>
+    <string name="call_breakdown">Ανάλυση κλήσεων</string>
+    <string name="sim_usage_breakdown">Χρήση SIM</string>
+    <string name="most_talked_persons">Πιο συχνές επαφές</string>
+    <string name="no_call_records_this_period">Δεν βρέθηκαν αρχεία κλήσεων για αυτήν την περίοδο</string>
+    <string name="total_calls_in_number">%1$s κλήσεις (εισ: %2$s, εξ: %3$s, αναπ: %4$s)</string>
 </resources>

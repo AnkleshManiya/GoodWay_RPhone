@@ -1,4 +1,4 @@
-package dev.goodwy.rphone.domain.model
+package dev.goodwy.rphone.modal.data
 
 data class CallerMetadata(
     val number: String,

@@ -1,7 +1,7 @@
-package dev.goodwy.rphone.domain.usecase
+package dev.goodwy.rphone.controller
 
-import dev.goodwy.rphone.domain.model.CallerMetadata
-import dev.goodwy.rphone.domain.repository.ICallerRepository
+import dev.goodwy.rphone.modal.data.CallerMetadata
+import dev.goodwy.rphone.modal.`interface`.ICallerRepository
 
 class GetCallerNameUseCase(private val repository: ICallerRepository) {
     suspend operator fun invoke(incomingNumber: String, cnamName: String?): CallerMetadata {

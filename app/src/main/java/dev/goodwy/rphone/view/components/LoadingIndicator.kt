@@ -92,7 +92,7 @@ fun RillPullToRefreshIndicator(
                 shape = CircleShape,
                 color = MaterialTheme.colorScheme.surfaceContainerHigh,
                 shadowElevation = 6.dp,
-                modifier = Modifier.size(48.dp)
+                modifier = Modifier.padding(8.dp).size(48.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     if (isRefreshing) {

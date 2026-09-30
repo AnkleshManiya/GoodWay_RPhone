@@ -87,6 +87,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.ramcosta.composedestinations.generated.destinations.ContactScreenDestination
 import dev.goodwy.rphone.R
+import dev.goodwy.rphone.controller.util.ContactUtils.getPhoneNumber
 import dev.goodwy.rphone.view.components.PlaceholderView
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
@@ -421,7 +422,7 @@ fun FavoritesScreen(navController: NavController, navigator: DestinationsNavigat
                                 },
                                 onClick = {
 //                                    val directCall = prefs.getBoolean(PreferenceManager.KEY_DIRECT_CALL_ON_TAP, false)
-                                    val phoneNumber = contact.phoneNumbers.firstOrNull()
+                                    val phoneNumber = getPhoneNumber(contact)
                                     if (/*directCall &&*/ phoneNumber != null) {
                                         if (ContextCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
                                             placeCallWithSimPreference(context, phoneNumber, simPref) {
@@ -685,7 +686,7 @@ fun FavoriteContactCard(
                     onClick()
                 }
             )
-            val phoneNumber = contact.phoneNumbers.firstOrNull()
+            val phoneNumber = getPhoneNumber(contact)
             if (!phoneNumber.isNullOrEmpty()) {
                 DropdownMenuItem(
                     contentPadding = PaddingValues(start = 20.dp, end = 26.dp),

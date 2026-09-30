@@ -40,6 +40,8 @@
     <string name="sim_picker_title">SIM कार्ड चुनें</string>
     <string name="label_unknown_number">अज्ञात नंबर</string>
     <string name="reset">रीसेट करें</string>
+    <string name="add">जोड़ें</string>
+    <string name="use_number">नंबर का उपयोग करें: %s</string>
 
     <!-- Search -->
     <string name="search">खोजें</string>
@@ -104,13 +106,17 @@
     <string name="check_for_updates">अपडेट की जाँच करें</string>
     <string name="check_for_updates_subtitle">जाँचें कि क्या नया संस्करण उपलब्ध है</string>
     <string name="auto_check_for_updates">स्वचालित अपडेट जाँच</string>
-    <string name="auto_check_for_updates_subtitle">स्वचालित रूप से अपडेट की जाँच करें</string>
+    <string name="auto_check_for_updates_subtitle">ऐप लॉन्च होने पर नए संस्करणों की स्वचालित रूप से जाँच करें</string>
     <string name="checking_for_updates">अपडेट की जाँच हो रही है…</string>
     <string name="up_to_date">अद्यतित</string>
-    <string name="up_to_date_subtitle">ऐप नवीनतम संस्करण (v%1$s) चला रहा है।</string>
+    <string name="up_to_date_subtitle">ऐप नवीनतम संस्करण %1$s चला रहा है।</string>
     <string name="update_available">अपडेट उपलब्ध</string>
-    <string name="update_available_subtitle">संस्करण v%1$s उपलब्ध है।</string>
-    <string name="update_available_description">क्या आप APK फ़ाइल को Downloads फ़ोल्डर में डाउनलोड करना चाहते हैं?</string>
+    <string name="update_available_subtitle">संस्करण %1$s उपलब्ध है।</string>
+    <string name="update_available_subtitle_dialog">Rill Phone का नया बिल्ड डाउनलोड और एक्सप्लोर करने के लिए तैयार है।</string>
+    <string name="download_update">अपडेट डाउनलोड करें?</string>
+    <string name="download_update_subtitle">Rill Phone v%1$s उपलब्ध है (आपके पास v%2$s है)। APK फ़ाइल आपके Downloads फ़ोल्डर में डाउनलोड की जाएगी।</string>
+    <string name="install_update">अपडेट इंस्टॉल करें?</string>
+    <string name="install_update_subtitle">अपडेट v%1$s पहले ही डाउनलोड हो चुका है। क्या आप इसे अभी इंस्टॉल करना चाहते हैं?</string>
     <string name="download">डाउनलोड करें</string>
     <string name="not_now">अभी नहीं</string>
     <string name="downloading_update">अपडेट डाउनलोड हो रहा है</string>
@@ -120,7 +126,15 @@
     <string name="download_complete">डाउनलोड पूर्ण</string>
     <string name="download_complete_subtitle">संस्करण %1$s में अपडेट सफलतापूर्वक डाउनलोड हो गया है।</string>
     <string name="open_downloads_folder_manually">Downloads फ़ोल्डर मैन्युअल रूप से खोलें</string>
-    <string name="file_saved_to_downloads_folder">फ़ाइल Downloads फ़ोल्डर में सहेजी गई है।</string>
+    <string name="try_again">पुनः प्रयास करें</string>
+    <string name="couldnt_check_for_updates">अपडेट की जाँच नहीं हो सकी</string>
+    <string name="couldnt_check_for_updates_subtitle">GitHub रिलीज़ रिपॉजिटरी तक नहीं पहुँच सका। कृपया अपना कनेक्शन जाँचें।</string>
+    <string name="no_release_notes">इस संस्करण के लिए कोई रिलीज़ नोट्स प्रदान नहीं किए गए।</string>
+    <string name="installed">इंस्टॉल किया गया</string>
+    <string name="latest">नवीनतम</string>
+    <string name="later">बाद में</string>
+    <string name="view_update">अपडेट देखें</string>
+
 
     <!-- Contributors -->
     <string name="contributors">योगदानकर्ता</string>
@@ -421,6 +435,9 @@
     <string name="add_call">कॉल जोड़ें</string>
     <string name="resume">फिर से शुरू करें</string>
     <string name="swap">बदलें</string>
+    <string name="merge">मर्ज करें</string>
+    <string name="manage">प्रबंधित करें</string>
+    <string name="conference">कॉन्फ़्रेंस</string>
     <string name="more">अधिक</string>
     <string name="hold">होल्ड करें</string>
     <string name="call_status_on_hold">होल्ड पर</string>
@@ -649,4 +666,23 @@
     <string name="pocket_mode_active">पॉकेट मोड सक्रिय</string>
     <string name="pocket_mode_active_description">जेब में गलती से टच होने से बचाने के लिए स्क्रीन टच लॉक कर दिए गए हैं।</string>
     <string name="pocket_mode_dismiss">टच गार्ड बंद करें</string>
+
+    <!-- Call Analytics -->
+    <string name="settings_call_analytics_title">कॉल विश्लेषण</string>
+    <string name="settings_call_analytics_supporting">कॉल मेट्रिक्स, बातचीत समय आँकड़े, व्यस्त घंटे और अक्सर संपर्क किए जाने वाले लोगों की जानकारी ट्रैक करें</string>
+    <string name="call_analytics_disabled_title">कॉल विश्लेषण अक्षम</string>
+    <string name="call_analytics_disabled_desc">कॉल विश्लेषण और बातचीत समय ट्रैकिंग वर्तमान में बंद हैं। बातचीत समय, व्यस्त घंटे और संपर्क जानकारी की गणना करने के लिए इस विकल्प को सक्षम करें।</string>
+    <string name="call_analytics_enable_action">विश्लेषण सक्षम करें</string>
+    <string name="this_week">इस सप्ताह</string>
+    <string name="this_month">इस महीने</string>
+    <string name="all_time">कुल समय</string>
+    <string name="total_talk_time">कुल बातचीत का समय</string>
+    <string name="total_calls">कुल कॉल</string>
+    <string name="avg_duration">औसत अवधि</string>
+    <string name="call_volume">कॉल की मात्रा</string>
+    <string name="call_breakdown">कॉल विवरण</string>
+    <string name="sim_usage_breakdown">SIM उपयोग</string>
+    <string name="most_talked_persons">सबसे अधिक बात करने वाले लोग</string>
+    <string name="no_call_records_this_period">इस अवधि के लिए कोई कॉल रिकॉर्ड नहीं मिला</string>
+    <string name="total_calls_in_number">%1$s कॉल (इन: %2$s, आउट: %3$s, मिस: %4$s)</string>
 </resources>

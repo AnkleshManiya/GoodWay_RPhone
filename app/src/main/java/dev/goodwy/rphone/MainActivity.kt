@@ -105,12 +105,16 @@ import com.ramcosta.composedestinations.generated.destinations.RecentScreenDesti
 import com.ramcosta.composedestinations.generated.destinations.SettingsScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.SoundVibrationScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.SpamScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.UpdatesScreenDestination
 import dev.goodwy.rphone.controller.CallViewModel
 import dev.goodwy.rphone.controller.MainViewModel
 import dev.goodwy.rphone.controller.NavigationTarget
 import dev.goodwy.rphone.controller.PurchaseHelper
 import dev.goodwy.rphone.controller.lock.AppLockManager
+import dev.goodwy.rphone.controller.util.fetchLatestRelease
+import dev.goodwy.rphone.controller.util.isNewerVersion
 import dev.goodwy.rphone.view.components.TabSpec
+import dev.goodwy.rphone.view.components.UpdateAvailableDialog
 import dev.goodwy.rphone.view.components.parseTabOrder
 import dev.goodwy.rphone.view.components.performAppHaptic
 import dev.goodwy.rphone.view.theme.color_call_button
@@ -231,6 +235,38 @@ class MainActivity : FragmentActivity() {
                         }
                     }
 
+                    var autoUpdateVersion by remember { mutableStateOf<String?>(null) }
+                    var autoUpdateApkUrl by remember { mutableStateOf<String?>(null) }
+                    var showAutoUpdateDialog by remember { mutableStateOf(false) }
+
+                    LaunchedEffect(Unit) {
+                        val isFoss = BuildConfig.FLAVOR == "foss"
+                        if (isFoss) {
+                            val autoCheck = prefs.getBoolean(PreferenceManager.KEY_AUTO_UPDATE_CHECK, true)
+                            if (autoCheck) {
+                                val release = fetchLatestRelease(GITHUB_API_RELEASES)
+                                if (release != null && isNewerVersion(release.tagName, APP_VERSION)) {
+                                    autoUpdateVersion = release.tagName
+                                    autoUpdateApkUrl = release.apkUrl
+                                    showAutoUpdateDialog = true
+                                }
+                            }
+                        }
+                    }
+
+                    if (showAutoUpdateDialog) {
+                        UpdateAvailableDialog(
+                            currentVersion = APP_VERSION,
+                            latestVersion = autoUpdateVersion ?: "",
+                            readyToInstall = false,
+                            onAction = {
+                                showAutoUpdateDialog = false
+                                navController.navigate(UpdatesScreenDestination.route)
+                            },
+                            onDismiss = { showAutoUpdateDialog = false }
+                        )
+                    }
+
                     // ── Biometric blur + lock ─────────────────────────────────
                     val isBlurSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
                     val blurRadius by animateDpAsState(
@@ -258,10 +294,7 @@ class MainActivity : FragmentActivity() {
                                 .fillMaxSize()
                                 .then(
                                     if (isBlurSupported && blurRadius > 0.dp)
-                                        Modifier.blur(
-                                            blurRadius,
-                                            edgeTreatment = BlurredEdgeTreatment.Unbounded
-                                        )
+                                        Modifier.blur(blurRadius, edgeTreatment = BlurredEdgeTreatment.Unbounded)
                                     else
                                         Modifier
                                 )

@@ -289,7 +289,7 @@ fun RillExpressiveCard(
                             color = containerColor,
                             shape = RoundedCornerShape(cardCornerExtraSmall)
                         )
-                        .padding(horizontal = 24.dp).padding(top = 16.dp, bottom = 14.dp)
+                        .padding(horizontal = if (icon != null) 20.dp else 24.dp).padding(top = 16.dp, bottom = 14.dp)
                 ) {
                     if (icon != null) {
                         Icon(
@@ -297,7 +297,7 @@ fun RillExpressiveCard(
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(18.dp)
                         )
-                        Spacer(Modifier.width(8.dp))
+                        Spacer(Modifier.width(12.dp))
                     }
                     if (title != null) {
                         Text(
@@ -905,7 +905,7 @@ fun RillListItem(
                     Text(
                         text = supporting,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.8f),
                         lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
 //                        maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -1010,7 +1010,7 @@ fun RillSwitchListItem(
                         text = supporting,
                         style = MaterialTheme.typography.bodyMedium,
                         lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.8f)
                     )
                 }
             }
@@ -1106,7 +1106,7 @@ fun RillSelectListItem(
                         text = displaySupporting,
                         style = MaterialTheme.typography.bodyMedium,
                         lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.8f)
                     )
                 }
             }

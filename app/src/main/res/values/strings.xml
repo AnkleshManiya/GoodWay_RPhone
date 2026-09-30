@@ -52,6 +52,7 @@
     <string name="search_contacts">Search contacts</string>
     <string name="no_results">No results</string>
     <string name="no_contacts_found">No contacts found</string>
+    <string name="no_calls_found">No calls found</string>
     <string name="call_query">Call %s</string>
     <string name="voice_input">Voice Input</string>
     <string name="filter_results">Filter results</string>
@@ -110,13 +111,17 @@
     <string name="check_for_updates">Check for updates</string>
     <string name="check_for_updates_subtitle">Check if a new version is available</string>
     <string name="auto_check_for_updates">Auto check for updates</string>
-    <string name="auto_check_for_updates_subtitle">Check for updates automatically</string>
+    <string name="auto_check_for_updates_subtitle">Automatically check for new releases when app launches</string>
     <string name="checking_for_updates">Checking for updates…</string>
     <string name="up_to_date">Up to date</string>
-    <string name="up_to_date_subtitle">The app is running the latest version (v%1$s).</string>
+    <string name="up_to_date_subtitle">The app is running the latest version %1$s.</string>
     <string name="update_available">Update available</string>
-    <string name="update_available_subtitle">Version v%1$s is available.</string>
-    <string name="update_available_description">Would you like to download the APK file to the Downloads folder?</string>
+    <string name="update_available_subtitle">Version %1$s is available.</string>
+    <string name="update_available_subtitle_dialog">A newer build of Rill Phone is ready to download &amp; explore.</string>
+    <string name="download_update">Download update?</string>
+    <string name="download_update_subtitle">Rill Phone v%1$s is available (you have v%2$s). The APK will be downloaded to your Downloads folder.</string>
+    <string name="install_update">Install update?</string>
+    <string name="install_update_subtitle">Update v%1$s has already been downloaded. Would you like to install it now?</string>
     <string name="download">Download</string>
     <string name="not_now">Not now</string>
     <string name="downloading_update">Downloading update</string>
@@ -126,7 +131,14 @@
     <string name="download_complete">Download complete</string>
     <string name="download_complete_subtitle">The update to version %1$s has been successfully downloaded.</string>
     <string name="open_downloads_folder_manually">Open the Downloads folder manually</string>
-    <string name="file_saved_to_downloads_folder">The file has been saved to the Downloads folder.</string>
+    <string name="try_again">Try Again</string>
+    <string name="couldnt_check_for_updates">Couldn\'t check for updates</string>
+    <string name="couldnt_check_for_updates_subtitle">Unable to reach the GitHub releases repository. Please verify your connection.</string>
+    <string name="no_release_notes">No release notes were provided for this version.</string>
+    <string name="installed">Installed</string>
+    <string name="latest">Latest</string>
+    <string name="later">Later</string>
+    <string name="view_update">View update</string>
 
     <!-- Contributors -->
     <string name="contributors">Contributors</string>
@@ -427,6 +439,9 @@
     <string name="add_call">Add call</string>
     <string name="resume">Resume</string>
     <string name="swap">Swap</string>
+    <string name="merge">Merge</string>
+    <string name="manage">Manage</string>
+    <string name="conference">Conference</string>
     <string name="more">More</string>
     <string name="hold">Hold</string>
     <string name="call_status_on_hold">On hold</string>
@@ -663,4 +678,23 @@
     <string name="pocket_mode_active">Pocket Mode Active</string>
     <string name="pocket_mode_active_description">Screen touches are locked to prevent accidental touches in your pocket.</string>
     <string name="pocket_mode_dismiss">Dismiss Touch Guard</string>
+
+    <!-- Call Analytics -->
+    <string name="settings_call_analytics_title">Call analytics</string>
+    <string name="settings_call_analytics_supporting">Track call metrics, talk time statistics, peak hours, and frequent contact insights</string>
+    <string name="call_analytics_disabled_title">Call analytics disabled</string>
+    <string name="call_analytics_disabled_desc">Call analytics and talk time tracking are currently turned off. Enable this option to compute talk time, peak hours, and contact insights.</string>
+    <string name="call_analytics_enable_action">Enable analytics</string>
+    <string name="this_week">This week</string>
+    <string name="this_month">This month</string>
+    <string name="all_time">All time</string>
+    <string name="total_talk_time">Total talk time</string>
+    <string name="total_calls">Total calls</string>
+    <string name="avg_duration">Avg duration</string>
+    <string name="call_volume">Call volume</string>
+    <string name="call_breakdown">Call breakdown</string>
+    <string name="sim_usage_breakdown">SIM usage breakdown</string>
+    <string name="most_talked_persons">Most talked persons</string>
+    <string name="no_call_records_this_period">No call records found for this period</string>
+    <string name="total_calls_in_number">%1$s calls (in: %2$s, out: %3$s, miss: %4$s)</string>
 </resources>

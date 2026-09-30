@@ -1,7 +1,6 @@
-package dev.goodwy.rphone.data.manager
+package dev.goodwy.rphone.controller
 
-import dev.goodwy.rphone.domain.model.CallerMetadata
-import dev.goodwy.rphone.domain.usecase.GetCallerNameUseCase
+import dev.goodwy.rphone.modal.data.CallerMetadata
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

@@ -1,4 +1,4 @@
-package dev.goodwy.rphone.domain.repository
+package dev.goodwy.rphone.modal.`interface`
 
 import dev.goodwy.rphone.modal.data.Contact
 

@@ -41,6 +41,8 @@
     <string name="sim_picker_title">קלויב SIM קאַרטע</string>
     <string name="label_unknown_number">אומבאַקאַנט נומער</string>
     <string name="reset">צוריקשטעלן</string>
+    <string name="add">צולייגן</string>
+    <string name="use_number">נוץ נומער: %s</string>
 
     <!-- Search -->
     <string name="search">זוכן</string>
@@ -105,13 +107,17 @@
     <string name="check_for_updates">קוק פֿאַר דערהויכענונגען</string>
     <string name="check_for_updates_subtitle">קוק צי אַ נייע ווערסיע איז פֿאַראַן</string>
     <string name="auto_check_for_updates">אויטאָמאַטיש קוקן פֿאַר דערהויכענונגען</string>
-    <string name="auto_check_for_updates_subtitle">קוק אויטאָמאַטיש פֿאַר דערהויכענונגען</string>
+    <string name="auto_check_for_updates_subtitle">קוק אויטאָמאַטיש פֿאַר נייע ווערסיעס ווען די אַפּ הייבט אָן</string>
     <string name="checking_for_updates">קוקט פֿאַר דערהויכענונגען…</string>
     <string name="up_to_date">אויף דעם לעצטן שטאַנד</string>
-    <string name="up_to_date_subtitle">די אַפּ לויפֿט אויף דער לעצטער ווערסיע (v%1$s).</string>
+    <string name="up_to_date_subtitle">די אַפּ לויפֿט אויף דער לעצטער ווערסיע %1$s.</string>
     <string name="update_available">דערהויכענונג פֿאַראַן</string>
-    <string name="update_available_subtitle">ווערסיע v%1$s איז פֿאַראַן.</string>
-    <string name="update_available_description">ווילסטו אַראָפּלאָדן די APK טעקע אין דער אַראָפּלאָדן טעקע?</string>
+    <string name="update_available_subtitle">ווערסיע %1$s איז פֿאַראַן.</string>
+    <string name="update_available_subtitle_dialog">אַ נייערע בוי פֿון Rill Phone איז גרייט אַראָפּצולאָדן און אויסצופֿאָרשן.</string>
+    <string name="download_update">אַראָפּלאָדן דערהויכענונג?</string>
+    <string name="download_update_subtitle">Rill Phone v%1$s איז פֿאַראַן (דו האָסט v%2$s). די APK טעקע וועט אַראָפּגעלאָדן ווערן אין דער אַראָפּלאָדן טעקע.</string>
+    <string name="install_update">אינסטאַלירן דערהויכענונג?</string>
+    <string name="install_update_subtitle">די דערהויכענונג v%1$s איז שוין אַראָפּגעלאָדן געוואָרן. ווילסטו זי איצט אינסטאַלירן?</string>
     <string name="download">אַראָפּלאָדן</string>
     <string name="not_now">נישט איצט</string>
     <string name="downloading_update">לאָדט אַראָפּ דערהויכענונג</string>
@@ -121,7 +127,14 @@
     <string name="download_complete">אַראָפּלאָדן פֿאַרענדיקט</string>
     <string name="download_complete_subtitle">די דערהויכענונג צו ווערסיע %1$s איז מיט דערפֿאָלג אַראָפּגעלאָדן געוואָרן.</string>
     <string name="open_downloads_folder_manually">עפֿענען די אַראָפּלאָדן טעקע מיט דער האַנט</string>
-    <string name="file_saved_to_downloads_folder">די טעקע איז געהיט געוואָרן אין דער אַראָפּלאָדן טעקע.</string>
+    <string name="try_again">פּרוביר נאָכאַמאָל</string>
+    <string name="couldnt_check_for_updates">האָט נישט געקענט קוקן פֿאַר דערהויכענונגען</string>
+    <string name="couldnt_check_for_updates_subtitle">האָט נישט געקענט דערגרייכן דעם GitHub ארויסגעבונג רעפּאָזיטאָריע. ביטע באַשטעטיק דײַן פֿאַרבינדונג.</string>
+    <string name="no_release_notes">קיין ארויסגעבונג נאָטיצן זענען נישט צוגעשטעלט געוואָרן פֿאַר דער ווערסיע.</string>
+    <string name="installed">אינסטאַלירט</string>
+    <string name="latest">לעצטע</string>
+    <string name="later">שפּעטער</string>
+    <string name="view_update">זע דערהויכענונג</string>
 
     <!-- Contributors -->
     <string name="contributors">בײַשטײַערער</string>
@@ -422,6 +435,9 @@
     <string name="add_call">צולייגן רוף</string>
     <string name="resume">אָנהײבן ווידער</string>
     <string name="swap">איבערבויען</string>
+    <string name="merge">פֿאַראייניקן</string>
+    <string name="manage">פֿאַרוואַלטן</string>
+    <string name="conference">קאָנפֿערענץ</string>
     <string name="more">נאָך</string>
     <string name="hold">האַלטן</string>
     <string name="call_status_on_hold">אויף האַלטן</string>
@@ -656,4 +672,23 @@
     <string name="pocket_mode_active">קעשענע מאָדע אַקטיוו</string>
     <string name="pocket_mode_active_description">פאַרשטעל באַרירונגען זענען פֿאַרשליסן צו פֿאַרהיטן צופאַליקע באַרירונגען אין דער קעשענע.</string>
     <string name="pocket_mode_dismiss">אויסשטעלן באַריר שוץ</string>
+
+    <!-- Call Analytics -->
+    <string name="settings_call_analytics_title">רוף אַנאַליטיק</string>
+    <string name="settings_call_analytics_supporting">נאָכפֿאָלגן רוף מעטריקן, רעדן צײַט סטאַטיסטיק, שפּיץ שעה\'ן און אינפֿאָרמאַציע וועגן אָפֿטיקע קאָנטאַקטן</string>
+    <string name="call_analytics_disabled_title">רוף אַנאַליטיק אָפּגעשטעלט</string>
+    <string name="call_analytics_disabled_desc">רוף אַנאַליטיק און רעדן צײַט נאָכפֿאָלגונג זענען איצט אָפּגעשטעלט. אַקטיוויזיר די אָפּציע צו רעכענען רעדן צײַט, שפּיץ שעה\'ן און קאָנטאַקט אינפֿאָרמאַציע.</string>
+    <string name="call_analytics_enable_action">אַקטיוויזיר אַנאַליטיק</string>
+    <string name="this_week">די וואָך</string>
+    <string name="this_month">דעם חודש</string>
+    <string name="all_time">אַלע צײַט</string>
+    <string name="total_talk_time">גאַנצע רעדן צײַט</string>
+    <string name="total_calls">גאַנצע רופן</string>
+    <string name="avg_duration">דורכשניטלעכע דויער</string>
+    <string name="call_volume">רוף פֿאַרנעם</string>
+    <string name="call_breakdown">רוף צעטיילונג</string>
+    <string name="sim_usage_breakdown">SIM נוץ</string>
+    <string name="most_talked_persons">מערסטע גערעדט מיט</string>
+    <string name="no_call_records_this_period">קיין רוף רעקאָרדס נישט געפֿונען פֿאַר דעם פּעריאָד</string>
+    <string name="total_calls_in_number">%1$s רופן (אַרײַן: %2$s, אַרויס: %3$s, פֿאַרפֿעלט: %4$s)</string>
 </resources>

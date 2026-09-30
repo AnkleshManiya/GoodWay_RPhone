@@ -12,7 +12,7 @@ class MissedCallReceiver : BroadcastReceiver() {
             TelecomManager.ACTION_SHOW_MISSED_CALLS_NOTIFICATION -> {
                 // Simply disable the system notification
                 // Our notification has already been displayed via CallService
-                abortBroadcast()
+//                abortBroadcast()
             }
         }
     }

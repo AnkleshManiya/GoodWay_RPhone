@@ -40,6 +40,8 @@
     <string name="sim_picker_title">SIM kart seç</string>
     <string name="label_unknown_number">Bilinmeyen numara</string>
     <string name="reset">Sıfırla</string>
+    <string name="add">Ekle</string>
+    <string name="use_number">Numarayı kullan: %s</string>
 
     <!-- Search -->
     <string name="search">Ara</string>
@@ -104,13 +106,17 @@
     <string name="check_for_updates">Güncellemeleri kontrol et</string>
     <string name="check_for_updates_subtitle">Yeni bir sürümün olup olmadığını kontrol et</string>
     <string name="auto_check_for_updates">Otomatik güncelleme kontrolü</string>
-    <string name="auto_check_for_updates_subtitle">Güncellemeleri otomatik olarak kontrol et</string>
+    <string name="auto_check_for_updates_subtitle">Uygulama başlatıldığında yeni sürümleri otomatik olarak kontrol et</string>
     <string name="checking_for_updates">Güncellemeler kontrol ediliyor…</string>
     <string name="up_to_date">Güncel</string>
-    <string name="up_to_date_subtitle">Uygulama en son sürümü çalıştırıyor (v%1$s).</string>
+    <string name="up_to_date_subtitle">Uygulama en son sürümü çalıştırıyor %1$s.</string>
     <string name="update_available">Güncelleme mevcut</string>
-    <string name="update_available_subtitle">Sürüm v%1$s mevcut.</string>
-    <string name="update_available_description">APK dosyasını İndirilenler klasörüne indirmek ister misiniz?</string>
+    <string name="update_available_subtitle">Sürüm %1$s mevcut.</string>
+    <string name="update_available_subtitle_dialog">Rill Phone\'un daha yeni bir sürümü indirilmeye ve keşfedilmeye hazır.</string>
+    <string name="download_update">Güncelleme indirilsin mi?</string>
+    <string name="download_update_subtitle">Rill Phone v%1$s mevcut (sizde v%2$s var). APK dosyası İndirilenler klasörüne indirilecek.</string>
+    <string name="install_update">Güncelleme yüklensin mi?</string>
+    <string name="install_update_subtitle">Güncelleme v%1$s zaten indirildi. Şimdi yüklemek ister misiniz?</string>
     <string name="download">İndir</string>
     <string name="not_now">Şimdi değil</string>
     <string name="downloading_update">Güncelleme indiriliyor</string>
@@ -120,7 +126,15 @@
     <string name="download_complete">İndirme tamamlandı</string>
     <string name="download_complete_subtitle">%1$s sürümüne güncelleme başarıyla indirildi.</string>
     <string name="open_downloads_folder_manually">İndirilenler klasörünü manuel olarak aç</string>
-    <string name="file_saved_to_downloads_folder">Dosya İndirilenler klasörüne kaydedildi.</string>
+    <string name="try_again">Tekrar dene</string>
+    <string name="couldnt_check_for_updates">Güncellemeler kontrol edilemedi</string>
+    <string name="couldnt_check_for_updates_subtitle">GitHub sürüm deposuna ulaşılamıyor. Lütfen bağlantınızı kontrol edin.</string>
+    <string name="no_release_notes">Bu sürüm için sürüm notu sağlanmadı.</string>
+    <string name="installed">Yüklendi</string>
+    <string name="latest">En son</string>
+    <string name="later">Daha sonra</string>
+    <string name="view_update">Güncellemeyi görüntüle</string>
+
 
     <!-- Contributors -->
     <string name="contributors">Katkıda Bulunanlar</string>
@@ -421,6 +435,9 @@
     <string name="add_call">Arama Ekle</string>
     <string name="resume">Devam Et</string>
     <string name="swap">Değiştir</string>
+    <string name="merge">Birleştir</string>
+    <string name="manage">Yönet</string>
+    <string name="conference">Konferans</string>
     <string name="more">Daha Fazla</string>
     <string name="hold">Beklet</string>
     <string name="call_status_on_hold">Beklemede</string>
@@ -649,4 +666,23 @@
     <string name="pocket_mode_active">Cep modu etkin</string>
     <string name="pocket_mode_active_description">Cebinizde yanlışlıkla dokunmayı önlemek için ekran dokunuşları kilitlendi.</string>
     <string name="pocket_mode_dismiss">Dokunma korumasını kapat</string>
+
+    <!-- Call Analytics -->
+    <string name="settings_call_analytics_title">Arama analizi</string>
+    <string name="settings_call_analytics_supporting">Arama metriklerini, konuşma süresi istatistiklerini, yoğun saatleri ve sık iletişim kurulan kişilerle ilgili bilgileri takip edin</string>
+    <string name="call_analytics_disabled_title">Arama analizi devre dışı</string>
+    <string name="call_analytics_disabled_desc">Arama analizi ve konuşma süresi takibi şu anda kapalı. Konuşma süresini, yoğun saatleri ve kişi bilgilerini hesaplamak için bu seçeneği etkinleştirin.</string>
+    <string name="call_analytics_enable_action">Analizi etkinleştir</string>
+    <string name="this_week">Bu hafta</string>
+    <string name="this_month">Bu ay</string>
+    <string name="all_time">Tüm zamanlar</string>
+    <string name="total_talk_time">Toplam konuşma süresi</string>
+    <string name="total_calls">Toplam arama</string>
+    <string name="avg_duration">Ortalama süre</string>
+    <string name="call_volume">Arama hacmi</string>
+    <string name="call_breakdown">Arama dağılımı</string>
+    <string name="sim_usage_breakdown">SIM kullanımı</string>
+    <string name="most_talked_persons">En çok konuşulan kişiler</string>
+    <string name="no_call_records_this_period">Bu dönem için arama kaydı bulunamadı</string>
+    <string name="total_calls_in_number">%1$s arama (gelen: %2$s, giden: %3$s, cevapsız: %4$s)</string>
 </resources>

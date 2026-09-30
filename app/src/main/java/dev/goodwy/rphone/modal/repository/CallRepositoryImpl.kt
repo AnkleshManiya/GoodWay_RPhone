@@ -5,6 +5,7 @@ import android.telecom.Call
 import android.telecom.CallAudioState
 import android.telecom.InCallService
 import android.telecom.VideoProfile
+import android.util.Log
 import dev.goodwy.rphone.modal.`interface`.CallSession
 import dev.goodwy.rphone.modal.`interface`.ICallRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -121,5 +122,32 @@ class CallRepositoryImpl : ICallRepository {
         }
 
         if (nextRoute != current) setAudioRoute(nextRoute)
+    }
+
+    override fun mergeCalls() {
+        val inst = inCallService ?: return
+        val calls = inst.calls ?: return
+        if (calls.isEmpty()) return
+        val activeCall = calls.find { it.state == Call.STATE_ACTIVE }
+        val heldCall = calls.find { it.state == Call.STATE_HOLDING }
+
+        try {
+            if (activeCall != null && activeCall.details.can(Call.Details.CAPABILITY_MERGE_CONFERENCE)) {
+                activeCall.mergeConference()
+                return
+            }
+        } catch (e: Exception) {
+            Log.w("CallService", "mergeConference failed: ${e.message}")
+        }
+
+        try {
+            if (activeCall != null && heldCall != null) {
+                activeCall.conference(heldCall)
+            } else if (calls.size >= 2) {
+                calls[0].conference(calls[1])
+            }
+        } catch (e: Exception) {
+            Log.e("CallService", "Error conferencing calls: ${e.message}")
+        }
     }
 }

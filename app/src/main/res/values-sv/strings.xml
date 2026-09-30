@@ -40,6 +40,8 @@
     <string name="sim_picker_title">Välj SIM-kort</string>
     <string name="label_unknown_number">Okänt nummer</string>
     <string name="reset">Återställ</string>
+    <string name="add">Lägg till</string>
+    <string name="use_number">Använd nummer: %s</string>
 
     <!-- Search -->
     <string name="search">Sök</string>
@@ -104,13 +106,17 @@
     <string name="check_for_updates">Sök efter uppdateringar</string>
     <string name="check_for_updates_subtitle">Kontrollera om en ny version är tillgänglig</string>
     <string name="auto_check_for_updates">Sök automatiskt efter uppdateringar</string>
-    <string name="auto_check_for_updates_subtitle">Sök automatiskt efter uppdateringar</string>
+    <string name="auto_check_for_updates_subtitle">Sök automatiskt efter nya versioner när appen startar</string>
     <string name="checking_for_updates">Söker efter uppdateringar…</string>
     <string name="up_to_date">Uppdaterad</string>
-    <string name="up_to_date_subtitle">Appen kör den senaste versionen (v%1$s).</string>
+    <string name="up_to_date_subtitle">Appen kör den senaste versionen %1$s.</string>
     <string name="update_available">Uppdatering tillgänglig</string>
-    <string name="update_available_subtitle">Version v%1$s är tillgänglig.</string>
-    <string name="update_available_description">Vill du ladda ner APK-filen till mappen Nedladdningar?</string>
+    <string name="update_available_subtitle">Version %1$s är tillgänglig.</string>
+    <string name="update_available_subtitle_dialog">En nyare version av Rill Phone är redo att laddas ner och utforskas.</string>
+    <string name="download_update">Ladda ner uppdatering?</string>
+    <string name="download_update_subtitle">Rill Phone v%1$s är tillgänglig (du har v%2$s). APK-filen laddas ner till mappen Nedladdningar.</string>
+    <string name="install_update">Installera uppdatering?</string>
+    <string name="install_update_subtitle">Uppdatering v%1$s har redan laddats ner. Vill du installera den nu?</string>
     <string name="download">Ladda ner</string>
     <string name="not_now">Inte nu</string>
     <string name="downloading_update">Laddar ner uppdatering</string>
@@ -120,7 +126,15 @@
     <string name="download_complete">Nedladdning klar</string>
     <string name="download_complete_subtitle">Uppdateringen till version %1$s har laddats ner.</string>
     <string name="open_downloads_folder_manually">Öppna mappen Nedladdningar manuellt</string>
-    <string name="file_saved_to_downloads_folder">Filen har sparats i mappen Nedladdningar.</string>
+    <string name="try_again">Försök igen</string>
+    <string name="couldnt_check_for_updates">Kunde inte söka efter uppdateringar</string>
+    <string name="couldnt_check_for_updates_subtitle">Kunde inte nå GitHubs versionsarkiv. Kontrollera din anslutning.</string>
+    <string name="no_release_notes">Inga versionsanteckningar tillhandahölls för denna version.</string>
+    <string name="installed">Installerad</string>
+    <string name="latest">Senaste</string>
+    <string name="later">Senare</string>
+    <string name="view_update">Visa uppdatering</string>
+
 
     <!-- Contributors -->
     <string name="contributors">Bidragsgivare</string>
@@ -421,6 +435,9 @@
     <string name="add_call">Lägg till samtal</string>
     <string name="resume">Återuppta</string>
     <string name="swap">Växla</string>
+    <string name="merge">Sammanfoga</string>
+    <string name="manage">Hantera</string>
+    <string name="conference">Konferens</string>
     <string name="more">Mer</string>
     <string name="hold">Vänta</string>
     <string name="call_status_on_hold">I vänteläge</string>
@@ -649,4 +666,23 @@
     <string name="pocket_mode_active">Fickläge aktivt</string>
     <string name="pocket_mode_active_description">Skärmberöringar är låsta för att förhindra oavsiktliga beröringar i fickan.</string>
     <string name="pocket_mode_dismiss">Inaktivera beröringsskydd</string>
+
+    <!-- Call Analytics -->
+    <string name="settings_call_analytics_title">Samtalsanalys</string>
+    <string name="settings_call_analytics_supporting">Spåra samtalsstatistik, taltidsstatistik, topptimmar och insikter om frekventa kontakter</string>
+    <string name="call_analytics_disabled_title">Samtalsanalys inaktiverad</string>
+    <string name="call_analytics_disabled_desc">Samtalsanalys och taltidsspårning är för närvarande avstängda. Aktivera detta alternativ för att beräkna taltid, topptimmar och kontaktinsikter.</string>
+    <string name="call_analytics_enable_action">Aktivera analys</string>
+    <string name="this_week">Denna vecka</string>
+    <string name="this_month">Denna månad</string>
+    <string name="all_time">All tid</string>
+    <string name="total_talk_time">Total taltid</string>
+    <string name="total_calls">Totala samtal</string>
+    <string name="avg_duration">Genomsnittlig längd</string>
+    <string name="call_volume">Samtalsvolym</string>
+    <string name="call_breakdown">Samtalsuppdelning</string>
+    <string name="sim_usage_breakdown">SIM-användning</string>
+    <string name="most_talked_persons">Mest kontaktade personer</string>
+    <string name="no_call_records_this_period">Inga samtalsposter hittades för denna period</string>
+    <string name="total_calls_in_number">%1$s samtal (in: %2$s, ut: %3$s, miss: %4$s)</string>
 </resources>

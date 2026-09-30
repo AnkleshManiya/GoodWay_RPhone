@@ -72,6 +72,7 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import java.util.Calendar
 import kotlin.random.Random
+import kotlin.time.Duration.Companion.milliseconds
 
 private const val EASTER_EGG_TIME_LIMIT = 8000L
 private const val EASTER_EGG_REQUIRED_CLICKS = 7
@@ -116,7 +117,7 @@ fun AboutAppScreen(navigator: DestinationsNavigator) {
         if (firstVersionClickTS == 0L) {
             firstVersionClickTS = currentTime
             scope.launch {
-                delay(EASTER_EGG_TIME_LIMIT)
+                delay(EASTER_EGG_TIME_LIMIT.milliseconds)
                 firstVersionClickTS = 0L
                 clicksSinceFirstClick = 0
             }
@@ -130,6 +131,7 @@ fun AboutAppScreen(navigator: DestinationsNavigator) {
             firstVersionClickTS = 0L
             clicksSinceFirstClick = 0
             showHorseGame = true
+//            showDialog = true
         }
     }
     if (showDialog) {
