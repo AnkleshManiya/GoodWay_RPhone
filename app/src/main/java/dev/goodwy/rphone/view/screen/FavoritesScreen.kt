@@ -173,7 +173,7 @@ fun FavoritesScreen(navController: NavController, navigator: DestinationsNavigat
         SimPickerDialog(
             onDismissRequest = { showSimPicker = false },
             onSimSelected = { handle ->
-                makeCall(context, pendingCallNumber!!, handle)
+                pendingCallNumber?.let { number -> makeCall(context, number, handle) }
                 showSimPicker = false
             }
         )

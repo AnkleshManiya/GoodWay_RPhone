@@ -651,7 +651,7 @@ fun CallLogFullContent(
             SimPickerDialog(
                 onDismissRequest = { showSimPicker = false },
                 onSimSelected = { handle ->
-                    makeCall(context, pendingNumber!!, handle)
+                    pendingNumber?.let { number -> makeCall(context, number, handle) }
                     showSimPicker = false
                 }
             )

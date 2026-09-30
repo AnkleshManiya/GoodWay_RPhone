@@ -48,7 +48,7 @@ class FloatingNotesService : Service() {
 
     private lateinit var windowManager: WindowManager
     private var overlayView: ComposeView? = null
-    private val lifecycleOwner = ServiceLifecycleOwner()
+    private var lifecycleOwner: ServiceLifecycleOwner? = null
 
     companion object {
         const val EXTRA_CONTACT_NAME = "contact_name"
@@ -69,7 +69,6 @@ class FloatingNotesService : Service() {
     override fun onCreate() {
         super.onCreate()
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
-        lifecycleOwner.onCreate()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -93,10 +92,15 @@ class FloatingNotesService : Service() {
             softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
         }
 
+        val owner = ServiceLifecycleOwner().also {
+            it.onCreate()
+            lifecycleOwner = it
+        }
+
         val cv = ComposeView(this).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
-            setViewTreeLifecycleOwner(lifecycleOwner)
-            setViewTreeSavedStateRegistryOwner(lifecycleOwner)
+            setViewTreeLifecycleOwner(owner)
+            setViewTreeSavedStateRegistryOwner(owner)
             setContent {
                 Rill4Theme {
                     FloatingNoteOverlay(
@@ -118,11 +122,12 @@ class FloatingNotesService : Service() {
             }
         } catch (_: Exception) {}
         overlayView = null
+        lifecycleOwner?.onDestroy()
+        lifecycleOwner = null
     }
 
     override fun onDestroy() {
         removeOverlay()
-        lifecycleOwner.onDestroy()
         super.onDestroy()
     }
 }
