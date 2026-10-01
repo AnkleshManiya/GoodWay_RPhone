@@ -108,6 +108,7 @@ import dev.goodwy.rphone.view.components.RillDialog
 import dev.goodwy.rphone.view.components.Title
 import dev.goodwy.rphone.view.theme.RillShapeDefaults
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinActivityViewModel
 
 private val blankPhoneDetail = ContactPhoneDetail(Phone.TYPE_MOBILE, null, "")
@@ -128,8 +129,8 @@ fun ContactEditScreen(
     navigator: DestinationsNavigator
 ) {
     val context = LocalContext.current
+    val prefs = koinInject<PreferenceManager>()
     val contactsVM: ContactsViewModel = koinActivityViewModel()
-    val allContacts by contactsVM.allContacts.collectAsStateWithLifecycle()
     val availableAccounts by contactsVM.availableAccounts.collectAsStateWithLifecycle()
     val availableAccountsForMoving by contactsVM.availableAccountsForMoving.collectAsStateWithLifecycle()
 
@@ -144,22 +145,21 @@ fun ContactEditScreen(
         }
     }
 
-    val contactIdData = remember(contactId, allContacts) {
-        if (contactId != null && contactId != "0" && contactId != "null") {
-            allContacts.find { it.id == contactId }
-        } else null
-    }
+    var fullContact by remember { mutableStateOf<Contact?>(null) }
+    var isLoadingContact by remember { mutableStateOf(false) }
 
-//    val existingContact = remember(contactId, allContacts) {
-//        if (contactId != null && contactId != "0" && contactId != "null") {
-//            allContacts.find { it.id == contactId }
-//        } else null
-//    }
+    LaunchedEffect(contactId) {
+        if (contactId != null && contactId != "0" && contactId != "null" && !isEditingSource) {
+            isLoadingContact = true
+            fullContact = contactsVM.getFullContactById(contactId)
+            isLoadingContact = false
+        }
+    }
 
     val existingContact = if (isEditingSource && rawContactData != null) {
         rawContactData
     } else {
-        contactIdData
+        fullContact
     }
 
     var namePrefix by remember(existingContact) { mutableStateOf(existingContact?.namePrefix ?: "") }
@@ -767,9 +767,10 @@ fun ContactEditScreen(
 //                        val headline = getDisplayName(currentContactForPreview)
                         // Delete confirmation dialog
                         if (showDeleteConfirm) {
+                            var trashEnabled by remember { mutableStateOf(prefs.isContactsTrashEnabled()) }
                             RillDialog(
                                 onDismissRequest = { showDeleteConfirm = false },
-                                title = stringResource(R.string.delete_contact),
+                                title = if (trashEnabled) stringResource(R.string.trash_contact) else stringResource(R.string.delete_contact),
                                 icon = ImageVector.vectorResource(id = R.drawable.ic_delete),
                                 iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
                                 iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
@@ -789,7 +790,7 @@ fun ContactEditScreen(
                                 }
                             ) {
                                 Text(
-                                    stringResource(R.string.delete_contact_subtitle),
+                                    if (trashEnabled) stringResource(R.string.trash_contact_subtitle) else stringResource(R.string.delete_contact_subtitle),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     textAlign = TextAlign.Center,
@@ -849,1469 +850,1478 @@ fun ContactEditScreen(
             )
         }
     ) { innerPadding ->
-        val configuration = LocalConfiguration.current
-        val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-        if (isLandscape) {
-            Row(
-                modifier = Modifier.fillMaxSize(),
-                verticalAlignment = Alignment.Top
-            ) {
-                // Left column - avatar
-                Box(
-                    modifier = Modifier.weight(1f)
-                        .then(
-                            if (isRotation90) Modifier.navigationBarsPadding()
-                            else Modifier
-                        )
-                        .padding(
-                            top = innerPadding.calculateTopPadding(),
-                            start = 0.dp,
-                            end = 0.dp,
-                            bottom = 24.dp
-                        )
-                        .fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            if (isLoadingContact && existingContact == null) {
+                CircularProgressIndicator()
+            } else {
+                val configuration = LocalConfiguration.current
+                val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+                if (isLandscape) {
                     Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(start = 24.dp, top = 16.dp)
-                            .background(
-                                color = MaterialTheme.colorScheme.surfaceContainerLowest,
-                                shape = RoundedCornerShape(24.dp)
-                            )
-                            .padding(vertical = 24.dp),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
+                        modifier = Modifier.fillMaxSize(),
+                        verticalAlignment = Alignment.Top
                     ) {
-                        Box(contentAlignment = Alignment.BottomEnd) {
-                            val displayPhotoUri = tempPhotoUri ?: photoUri
-                            RillAvatar(
-                                name = getDisplayName(currentContactForPreview),
-                                photoUri = displayPhotoUri,
-                                modifier = Modifier.size(120.dp),
-                                shape = CircleShape
-                            )
-
-                            if (displayPhotoUri != null) {
-                                SmallFloatingActionButton(
-                                    onClick = {
-                                        photoUri = null
-                                        tempPhotoUri = null
-                                    },
-                                    containerColor = MaterialTheme.colorScheme.customColors.colorRed,
-                                    contentColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
-                                    shape = CircleShape,
-                                    elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
-                                    modifier = Modifier
-                                        .size(40.dp)
-                                        .align(Alignment.BottomStart)
-                                        .offset(x = (-8).dp, y = 0.dp)
-                                        .border(
-                                            border = BorderStroke(3.dp, MaterialTheme.colorScheme.surfaceContainerLowest),
-                                            shape = CircleShape
-                                        )
-                                ) {
-                                    Icon(
-                                        ImageVector.vectorResource(id = R.drawable.ic_delete),
-                                        stringResource(R.string.delete),
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                }
-                            }
-
-                            SmallFloatingActionButton(
-                                onClick = {
-                                    photoPickerLauncher.launch(
-                                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                                    )
-                                },
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                                shape = CircleShape,
-                                elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .align(Alignment.BottomEnd)
-                                    .offset(x = 8.dp, y = 0.dp)
-                                    .border(
-                                        border = BorderStroke(3.dp, MaterialTheme.colorScheme.surfaceContainerLowest),
-                                        shape = CircleShape
-                                    )
-                            ) {
-                                Icon(
-                                    if (photoUri != null) Icons.Outlined.Edit else Icons.Rounded.Add,
-                                    if (photoUri != null) stringResource(R.string.edit) else stringResource(R.string.add_photo),
-                                    modifier = Modifier.size(20.dp)
+                        // Left column - avatar
+                        Box(
+                            modifier = Modifier.weight(1f)
+                                .then(
+                                    if (isRotation90) Modifier.navigationBarsPadding()
+                                    else Modifier
                                 )
-                            }
-                        }
-                        Spacer(Modifier.width(32.dp))
-                        Box(contentAlignment = Alignment.BottomEnd) {
-                            val displayBackground = tempCallBackground ?: callBackground
-                            if (displayBackground != null) {
-                                AsyncImage(
-                                    model = displayBackground,
-                                    contentDescription = stringResource(R.string.contact_call_background_preview),
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier
-                                        .size(width = 82.dp, height = 160.dp)
-                                        .clip(RoundedCornerShape(RillShapeDefaults.BaseMedium))
+                                .padding(
+                                    top = innerPadding.calculateTopPadding(),
+                                    start = 0.dp,
+                                    end = 0.dp,
+                                    bottom = 24.dp
                                 )
-                            } else {
-                                Box(
-                                    modifier = Modifier
-                                        .size(width = 82.dp, height = 160.dp)
-                                        .clip(RoundedCornerShape(RillShapeDefaults.BaseMedium))
-                                        .background(MaterialTheme.colorScheme.surfaceContainerHighest),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Rounded.Wallpaper,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        modifier = Modifier.size(40.dp)
-                                    )
-                                }
-                            }
-
-                            if (displayBackground != null) {
-                                SmallFloatingActionButton(
-                                    onClick = {
-                                        // If this is a temporary background (not yet saved)
-                                        if (tempCallBackground != null) {
-                                            tempCallBackground = null
-                                            selectedBackgroundUri = null
-                                            tempBackgroundDeleted = true
-                                        } else if (callBackground != null) {
-                                            // If this is a saved background, mark it for deletion when saving
-                                            tempBackgroundDeleted = true
-                                            callBackground = null
-                                        }
-                                    },
-                                    containerColor = MaterialTheme.colorScheme.customColors.colorRed,
-                                    contentColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
-                                    shape = CircleShape,
-                                    elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
-                                    modifier = Modifier
-                                        .size(40.dp)
-                                        .align(Alignment.BottomStart)
-                                        .offset(x = (-16).dp, y = 12.dp)
-                                        .border(
-                                            border = BorderStroke(3.dp, MaterialTheme.colorScheme.surfaceContainerLowest),
-                                            shape = CircleShape
-                                        )
-                                ) {
-                                    Icon(
-                                        ImageVector.vectorResource(id = R.drawable.ic_delete),
-                                        stringResource(R.string.contact_call_background_remove),
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                }
-                            }
-
-                            SmallFloatingActionButton(
-                                onClick = onBackgroundClick,
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                                shape = CircleShape,
-                                elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .align(Alignment.BottomEnd)
-                                    .offset(x = 16.dp, y = 12.dp)
-                                    .border(
-                                        border = BorderStroke(3.dp, MaterialTheme.colorScheme.surfaceContainerLowest),
-                                        shape = CircleShape
-                                    )
-                            ) {
-                                Icon(
-                                    if (displayBackground != null) Icons.Outlined.Edit else Icons.Rounded.Add,
-                                    if (displayBackground != null) stringResource(R.string.contact_call_background_change)
-                                    else stringResource(R.string.contact_call_background_set),
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
-                        }
-                    }
-                }
-
-                // Right column contains all other content
-                LazyColumn(
-                    state = listState,
-                    modifier = Modifier
-                        .weight(1.7f)
-                        .padding(
-                            top = innerPadding.calculateTopPadding(),
-                            start = 0.dp,
-                            end = 0.dp,
-                            bottom = 0.dp
-                        )
-                        .fillMaxSize(),
-                    contentPadding = PaddingValues(vertical = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(32.dp)
-                ) {
-                    item {
-                        var appeared by remember { mutableStateOf(false) }
-                        LaunchedEffect(Unit) { appeared = true }
-                        val rowScale by animateFloatAsState(
-                            targetValue = if (appeared) 1f else 0.5f,
-                            animationSpec = spring(stiffness = Spring.StiffnessMedium),
-                            label = "rowScale"
-                        )
-                        val rowAlpha by animateFloatAsState(
-                            targetValue = if (appeared) 1f else 0f,
-                            animationSpec = tween(150),
-                            label = "rowAlpha"
-                        )
-                        Column(
-                            modifier = Modifier
-                                .animateContentSize(
-                                    animationSpec = spring(
-                                        stiffness = Spring.StiffnessMediumLow,
-                                        dampingRatio = Spring.DampingRatioMediumBouncy
-                                    )
-                                )
-                                .scale(rowScale)
-                                .alpha(rowAlpha),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            AnimatedVisibility(
-                                visible = showNamePrefix,
-                                enter = expandVertically() + fadeIn(),
-                                exit = shrinkVertically() + fadeOut()
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    OutlinedTextField(
-                                        value = namePrefix,
-                                        onValueChange = { namePrefix = it },
-                                        label = { Text(stringResource(R.string.prefix)) },
-                                        modifier = Modifier.weight(1f)
-                                            .fillMaxWidth()
-                                            .padding(start = paddingHorizontal),
-                                        shape = RoundedCornerShape(12.dp),
-                                        colors = OutlinedTextFieldDefaults.colors(
-                                            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                            focusedBorderColor = MaterialTheme.colorScheme.primary
-                                        )
-                                    )
-                                    IconButton(
-                                        modifier = Modifier.padding(top = 8.dp),
-                                        onClick = {
-                                            namePrefix = ""
-                                            showNamePrefix = false
-                                        }
-                                    ) {
-                                        Icon(
-                                            Icons.Rounded.RemoveCircleOutline,
-                                            null,
-                                            tint = MaterialTheme.colorScheme.error
-                                        )
-                                    }
-                                }
-                            }
-                            OutlinedTextField(
-                                value = givenName,
-                                onValueChange = { givenName = it },
-                                label = { Text(stringResource(R.string.first_name)) },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = paddingHorizontal),
-                                shape = RoundedCornerShape(12.dp),
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                    focusedBorderColor = MaterialTheme.colorScheme.primary
-                                )
-                            )
-                            AnimatedVisibility(
-                                visible = showMiddleName,
-                                enter = expandVertically() + fadeIn(),
-                                exit = shrinkVertically() + fadeOut()
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    OutlinedTextField(
-                                        value = middleName,
-                                        onValueChange = { middleName = it },
-                                        label = { Text(stringResource(R.string.middle_name)) },
-                                        modifier = Modifier.weight(1f)
-                                            .fillMaxWidth()
-                                            .padding(start = paddingHorizontal),
-                                        shape = RoundedCornerShape(12.dp),
-                                        colors = OutlinedTextFieldDefaults.colors(
-                                            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                            focusedBorderColor = MaterialTheme.colorScheme.primary
-                                        )
-                                    )
-                                    IconButton(
-                                        modifier = Modifier.padding(top = 8.dp),
-                                        onClick = {
-                                            middleName = ""
-                                            showMiddleName = false
-                                        }
-                                    ) {
-                                        Icon(
-                                            Icons.Rounded.RemoveCircleOutline,
-                                            null,
-                                            tint = MaterialTheme.colorScheme.error
-                                        )
-                                    }
-                                }
-                            }
-                            OutlinedTextField(
-                                value = familyName,
-                                onValueChange = { familyName = it },
-                                label = { Text(stringResource(R.string.last_name)) },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = paddingHorizontal),
-                                shape = RoundedCornerShape(12.dp),
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                    focusedBorderColor = MaterialTheme.colorScheme.primary
-                                )
-                            )
-                            AnimatedVisibility(
-                                visible = showNameSuffix,
-                                enter = expandVertically() + fadeIn(),
-                                exit = shrinkVertically() + fadeOut()
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    OutlinedTextField(
-                                        value = nameSuffix,
-                                        onValueChange = { nameSuffix = it },
-                                        label = { Text(stringResource(R.string.suffix)) },
-                                        modifier = Modifier.weight(1f)
-                                            .fillMaxWidth()
-                                            .padding(start = paddingHorizontal),
-                                        shape = RoundedCornerShape(12.dp),
-                                        colors = OutlinedTextFieldDefaults.colors(
-                                            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                            focusedBorderColor = MaterialTheme.colorScheme.primary
-                                        )
-                                    )
-                                    IconButton(
-                                        modifier = Modifier.padding(top = 8.dp),
-                                        onClick = {
-                                            nameSuffix = ""
-                                            showNameSuffix = false
-                                        }
-                                    ) {
-                                        Icon(
-                                            Icons.Rounded.RemoveCircleOutline,
-                                            null,
-                                            tint = MaterialTheme.colorScheme.error
-                                        )
-                                    }
-                                }
-                            }
-                            AnimatedVisibility(
-                                visible = showNickname,
-                                enter = expandVertically() + fadeIn(),
-                                exit = shrinkVertically() + fadeOut()
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    OutlinedTextField(
-                                        value = nickname,
-                                        onValueChange = { nickname = it },
-                                        label = { Text(stringResource(R.string.nickname)) },
-                                        modifier = Modifier.weight(1f)
-                                            .fillMaxWidth()
-                                            .padding(start = paddingHorizontal),
-                                        shape = RoundedCornerShape(12.dp),
-                                        colors = OutlinedTextFieldDefaults.colors(
-                                            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                            focusedBorderColor = MaterialTheme.colorScheme.primary
-                                        )
-                                    )
-                                    IconButton(
-                                        modifier = Modifier.padding(top = 8.dp),
-                                        onClick = {
-                                            nickname = ""
-                                            showNickname = false
-                                        }
-                                    ) {
-                                        Icon(
-                                            Icons.Rounded.RemoveCircleOutline,
-                                            null,
-                                            tint = MaterialTheme.colorScheme.error
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    // Organization
-                    item {
-                        var appeared by remember { mutableStateOf(false) }
-                        LaunchedEffect(Unit) { appeared = true }
-                        val rowScale by animateFloatAsState(
-                            targetValue = if (appeared) 1f else 0.5f,
-                            animationSpec = spring(stiffness = Spring.StiffnessMedium),
-                            label = "rowScale"
-                        )
-                        val rowAlpha by animateFloatAsState(
-                            targetValue = if (appeared) 1f else 0f,
-                            animationSpec = tween(150),
-                            label = "rowAlpha"
-                        )
-                        Column(
-                            modifier = Modifier
-                                .animateContentSize(
-                                    animationSpec = spring(
-                                        stiffness = Spring.StiffnessMediumLow,
-                                        dampingRatio = Spring.DampingRatioMediumBouncy
-                                    )
-                                )
-                                .scale(rowScale)
-                                .alpha(rowAlpha),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            OutlinedTextField(
-                                value = company,
-                                onValueChange = { company = it },
-                                label = { Text(stringResource(R.string.company)) },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = paddingHorizontal),
-                                shape = RoundedCornerShape(12.dp),
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                    focusedBorderColor = MaterialTheme.colorScheme.primary
-                                )
-                            )
-                            AnimatedVisibility(
-                                visible = showJobTitle,
-                                enter = expandVertically() + fadeIn(),
-                                exit = shrinkVertically() + fadeOut()
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    OutlinedTextField(
-                                        value = jobTitle,
-                                        onValueChange = { jobTitle = it },
-                                        label = { Text(stringResource(R.string.job_title)) },
-                                        modifier = Modifier.weight(1f)
-                                            .fillMaxWidth()
-                                            .padding(start = paddingHorizontal),
-                                        shape = RoundedCornerShape(12.dp),
-                                        colors = OutlinedTextFieldDefaults.colors(
-                                            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                            focusedBorderColor = MaterialTheme.colorScheme.primary
-                                        )
-                                    )
-                                    IconButton(
-                                        modifier = Modifier.padding(top = 8.dp),
-                                        onClick = {
-                                            jobTitle = ""
-                                            showJobTitle = false
-                                        }
-                                    ) {
-                                        Icon(
-                                            Icons.Rounded.RemoveCircleOutline,
-                                            null,
-                                            tint = MaterialTheme.colorScheme.error
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    item {
-                        Column(
-                            modifier = Modifier.animateContentSize(
-                                animationSpec = spring(
-                                    stiffness = Spring.StiffnessMediumLow,
-                                    dampingRatio = Spring.DampingRatioMediumBouncy
-                                )
-                            ),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            phoneDetails.forEachIndexed { index, phoneDetail ->
-                                EditPhoneField(
-                                    value = phoneDetail.number,
-                                    onValueChange = {
-                                        if (index < phoneDetails.size && index < phoneNumbers.size) {
-                                            phoneDetails[index] = ContactPhoneDetail(phoneDetail.type, phoneDetail.label, it)
-                                            phoneNumbers[index] = it
-                                        }
-                                    },
-                                    label = getPhoneTypeText(context, phoneDetail.type, phoneDetail.label),
-                                    onDelete = if (phoneDetails.size > 1) {
-                                        {
-                                            if (index < phoneDetails.size && index < phoneNumbers.size) {
-                                                phoneDetails.removeAt(index)
-                                                phoneNumbers.removeAt(index)
-                                            }
-                                        }
-                                    } else null,
-                                    onLabelChange = { newLabel, newType ->
-                                        val newTypeValue = newType ?: Phone.TYPE_CUSTOM
-                                        phoneDetails[index] = ContactPhoneDetail(
-                                            type = newTypeValue,
-                                            label = if (newType == null) newLabel else null,
-                                            number = phoneDetail.number
-                                        )
-                                        phoneNumbers[index] = phoneDetail.number
-                                    }
-                                )
-                            }
-                            AddButton(
-                                text = stringResource(R.string.add_phone),
-                                onClick = {
-                                    phoneDetails.add(blankPhoneDetail)
-                                    phoneNumbers.add("")
-                                }
-                            )
-                        }
-                    }
-
-
-                    item {
-                        Column(
-                            modifier = Modifier.animateContentSize(
-                                animationSpec = spring(
-                                    stiffness = Spring.StiffnessMediumLow,
-                                    dampingRatio = Spring.DampingRatioMediumBouncy
-                                )
-                            ),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            emails.forEachIndexed { index, email ->
-                                EditEmailField(
-                                    value = email.value,
-                                    onValueChange = { emails[index] = ContactEmail(email.type, email.label, it) },
-                                    label = getEmailTypeText(context, email.type, email.label),
-                                    onDelete = if (emails.size > 1) { { if (index < emails.size) { emails.removeAt(index) } } } else null,
-                                    onLabelChange = { newLabel, newType ->
-                                        val newTypeValue = newType ?: Email.TYPE_CUSTOM
-                                        emails[index] = ContactEmail(
-                                            type = newTypeValue,
-                                            label = if (newType == null) newLabel else null,
-                                            value = email.value
-                                        )
-                                    }
-                                )
-                            }
-                            AddButton(
-                                text = stringResource(R.string.add_email),
-                                onClick = { emails.add(blankEmail) }
-                            )
-                        }
-                    }
-
-
-                    item {
-                        Column(
-                            modifier = Modifier.animateContentSize(
-                                animationSpec = spring(
-                                    stiffness = Spring.StiffnessMediumLow,
-                                    dampingRatio = Spring.DampingRatioMediumBouncy
-                                )
-                            ),verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            events.forEachIndexed { index, event ->
-                                EditEventField(
-                                    value = event.date,
-                                    onValueChange = { events[index] = ContactEvent(event.type, event.label, it) },
-                                    label = getEventTypeText(context, event.type, event.label),
-                                    onDelete = if (events.size > 1) { { if (index < events.size) { events.removeAt(index) } } } else null,
-                                    onLabelChange = { newLabel, newType ->
-                                        val newTypeValue = newType ?: Event.TYPE_CUSTOM
-                                        events[index] = ContactEvent(
-                                            type = newTypeValue,
-                                            label = if (newType == null) newLabel else null,
-                                            date = event.date
-                                        )
-                                    }
-                                )
-                            }
-                            AddButton(
-                                text = stringResource(R.string.add_event),
-                                onClick = { events.add(blankEvent) }
-                            )
-                        }
-                    }
-
-
-                    item {
-                        Column(
-                            modifier = Modifier.animateContentSize(
-                                animationSpec = spring(
-                                    stiffness = Spring.StiffnessMediumLow,
-                                    dampingRatio = Spring.DampingRatioMediumBouncy
-                                )
-                            ),verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            addresses.forEachIndexed { index, address ->
-                                EditAddressField(
-                                    value = address.formattedAddress,
-                                    onValueChange = { addresses[index] = ContactAddress(address.type, address.label, it) },
-                                    label = getAddressTypeText(context, address.type, address.label),
-                                    onDelete = if (addresses.size > 1) { { if (index < addresses.size) { addresses.removeAt(index) } } } else null,
-                                    onLabelChange = { newLabel, newType ->
-                                        val newTypeValue = newType ?: StructuredPostal.TYPE_CUSTOM
-                                        addresses[index] = ContactAddress(
-                                            type = newTypeValue,
-                                            label = if (newType == null) newLabel else null,
-                                            formattedAddress = address.formattedAddress
-                                        )
-                                    }
-                                )
-                            }
-                            AddButton(
-                                text = stringResource(R.string.add_address),
-                                onClick = { addresses.add(blankAddress) }
-                            )
-                        }
-                    }
-
-                    // Notes
-                    item {
-                        var appeared by remember { mutableStateOf(false) }
-                        LaunchedEffect(Unit) { appeared = true }
-                        val rowScale by animateFloatAsState(
-                            targetValue = if (appeared) 1f else 0.5f,
-                            animationSpec = spring(stiffness = Spring.StiffnessMedium),
-                            label = "rowScale"
-                        )
-                        val rowAlpha by animateFloatAsState(
-                            targetValue = if (appeared) 1f else 0f,
-                            animationSpec = tween(150),
-                            label = "rowAlpha"
-                        )
-                        OutlinedTextField(
-                            value = notes ?: "",
-                            onValueChange = { notes = it },
-                            label = { Text(stringResource(R.string.notes_contact)) },
-                            modifier = Modifier
-                                .animateContentSize(
-                                    animationSpec = spring(
-                                        stiffness = Spring.StiffnessMediumLow,
-                                        dampingRatio = Spring.DampingRatioMediumBouncy
-                                    )
-                                )
-                                .scale(rowScale)
-                                .alpha(rowAlpha)
-                                .fillMaxWidth()
-                                .padding(horizontal = paddingHorizontal),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                focusedBorderColor = MaterialTheme.colorScheme.primary
-                            )
-                        )
-                    }
-
-                    item {
-                        val interactionSource = remember { MutableInteractionSource() }
-                        val isPressed by interactionSource.collectIsPressedAsState()
-
-                        val cornerRadius by animateDpAsState(
-                            targetValue = if (isPressed) 12.dp else 50.dp,
-                            animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
-                            label = "ButtonShape"
-                        )
-                        Button(
-                            onClick = { showFieldsDialog = true },
-                            interactionSource = interactionSource,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = paddingHorizontal),
-                            shape = RoundedCornerShape(cornerRadius),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                            ),
-                            contentPadding = PaddingValues(16.dp)
-                        ) {
-                            Icon(Icons.Rounded.PostAdd, null)
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(stringResource(R.string.add_field))
-                        }
-                    }
-
-                    item {
-                        Surface(
-                            modifier = Modifier.padding(horizontal = paddingHorizontal),
-                            onClick = { showPicker = true },
-                            shape = RoundedCornerShape(16.dp),
-                            color = MaterialTheme.colorScheme.surfaceContainerHigh
+                                .fillMaxSize(),
+                            contentAlignment = Alignment.Center
                         ) {
                             Row(
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
+                                    .fillMaxSize()
+                                    .padding(start = 24.dp, top = 16.dp)
+                                    .background(
+                                        color = MaterialTheme.colorScheme.surfaceContainerLowest,
+                                        shape = RoundedCornerShape(24.dp)
+                                    )
+                                    .padding(vertical = 24.dp),
+                                horizontalArrangement = Arrangement.Center,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Icon(
-                                    imageVector = ContactUtils.getAccountIcon(selectedAccount, isPrivate),
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                                Spacer(Modifier.width(16.dp))
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = stringResource(R.string.save_to_account),
-                                        style = MaterialTheme.typography.labelMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                Box(contentAlignment = Alignment.BottomEnd) {
+                                    val displayPhotoUri = tempPhotoUri ?: photoUri
+                                    RillAvatar(
+                                        name = getDisplayName(currentContactForPreview),
+                                        photoUri = displayPhotoUri,
+                                        modifier = Modifier.size(120.dp),
+                                        shape = CircleShape
                                     )
-                                    Text(
-                                        text = if (selectedAccount != null) ContactUtils.getAccountName(selectedAccount!!)
+
+                                    if (displayPhotoUri != null) {
+                                        SmallFloatingActionButton(
+                                            onClick = {
+                                                photoUri = null
+                                                tempPhotoUri = null
+                                            },
+                                            containerColor = MaterialTheme.colorScheme.customColors.colorRed,
+                                            contentColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
+                                            shape = CircleShape,
+                                            elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
+                                            modifier = Modifier
+                                                .size(40.dp)
+                                                .align(Alignment.BottomStart)
+                                                .offset(x = (-8).dp, y = 0.dp)
+                                                .border(
+                                                    border = BorderStroke(3.dp, MaterialTheme.colorScheme.surfaceContainerLowest),
+                                                    shape = CircleShape
+                                                )
+                                        ) {
+                                            Icon(
+                                                ImageVector.vectorResource(id = R.drawable.ic_delete),
+                                                stringResource(R.string.delete),
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                        }
+                                    }
+
+                                    SmallFloatingActionButton(
+                                        onClick = {
+                                            photoPickerLauncher.launch(
+                                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                            )
+                                        },
+                                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                        shape = CircleShape,
+                                        elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
+                                        modifier = Modifier
+                                            .size(40.dp)
+                                            .align(Alignment.BottomEnd)
+                                            .offset(x = 8.dp, y = 0.dp)
+                                            .border(
+                                                border = BorderStroke(3.dp, MaterialTheme.colorScheme.surfaceContainerLowest),
+                                                shape = CircleShape
+                                            )
+                                    ) {
+                                        Icon(
+                                            if (photoUri != null) Icons.Outlined.Edit else Icons.Rounded.Add,
+                                            if (photoUri != null) stringResource(R.string.edit) else stringResource(R.string.add_photo),
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
+                                }
+                                Spacer(Modifier.width(32.dp))
+                                Box(contentAlignment = Alignment.BottomEnd) {
+                                    val displayBackground = tempCallBackground ?: callBackground
+                                    if (displayBackground != null) {
+                                        AsyncImage(
+                                            model = displayBackground,
+                                            contentDescription = stringResource(R.string.contact_call_background_preview),
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier
+                                                .size(width = 82.dp, height = 160.dp)
+                                                .clip(RoundedCornerShape(RillShapeDefaults.BaseMedium))
+                                        )
+                                    } else {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(width = 82.dp, height = 160.dp)
+                                                .clip(RoundedCornerShape(RillShapeDefaults.BaseMedium))
+                                                .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Rounded.Wallpaper,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                modifier = Modifier.size(40.dp)
+                                            )
+                                        }
+                                    }
+
+                                    if (displayBackground != null) {
+                                        SmallFloatingActionButton(
+                                            onClick = {
+                                                // If this is a temporary background (not yet saved)
+                                                if (tempCallBackground != null) {
+                                                    tempCallBackground = null
+                                                    selectedBackgroundUri = null
+                                                    tempBackgroundDeleted = true
+                                                } else if (callBackground != null) {
+                                                    // If this is a saved background, mark it for deletion when saving
+                                                    tempBackgroundDeleted = true
+                                                    callBackground = null
+                                                }
+                                            },
+                                            containerColor = MaterialTheme.colorScheme.customColors.colorRed,
+                                            contentColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
+                                            shape = CircleShape,
+                                            elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
+                                            modifier = Modifier
+                                                .size(40.dp)
+                                                .align(Alignment.BottomStart)
+                                                .offset(x = (-16).dp, y = 12.dp)
+                                                .border(
+                                                    border = BorderStroke(3.dp, MaterialTheme.colorScheme.surfaceContainerLowest),
+                                                    shape = CircleShape
+                                                )
+                                        ) {
+                                            Icon(
+                                                ImageVector.vectorResource(id = R.drawable.ic_delete),
+                                                stringResource(R.string.contact_call_background_remove),
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                        }
+                                    }
+
+                                    SmallFloatingActionButton(
+                                        onClick = onBackgroundClick,
+                                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                        shape = CircleShape,
+                                        elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
+                                        modifier = Modifier
+                                            .size(40.dp)
+                                            .align(Alignment.BottomEnd)
+                                            .offset(x = 16.dp, y = 12.dp)
+                                            .border(
+                                                border = BorderStroke(3.dp, MaterialTheme.colorScheme.surfaceContainerLowest),
+                                                shape = CircleShape
+                                            )
+                                    ) {
+                                        Icon(
+                                            if (displayBackground != null) Icons.Outlined.Edit else Icons.Rounded.Add,
+                                            if (displayBackground != null) stringResource(R.string.contact_call_background_change)
+                                            else stringResource(R.string.contact_call_background_set),
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        // Right column contains all other content
+                        LazyColumn(
+                            state = listState,
+                            modifier = Modifier
+                                .weight(1.7f)
+                                .padding(
+                                    top = innerPadding.calculateTopPadding(),
+                                    start = 0.dp,
+                                    end = 0.dp,
+                                    bottom = 0.dp
+                                )
+                                .fillMaxSize(),
+                            contentPadding = PaddingValues(vertical = 16.dp),
+                            verticalArrangement = Arrangement.spacedBy(32.dp)
+                        ) {
+                            item {
+                                var appeared by remember { mutableStateOf(false) }
+                                LaunchedEffect(Unit) { appeared = true }
+                                val rowScale by animateFloatAsState(
+                                    targetValue = if (appeared) 1f else 0.5f,
+                                    animationSpec = spring(stiffness = Spring.StiffnessMedium),
+                                    label = "rowScale"
+                                )
+                                val rowAlpha by animateFloatAsState(
+                                    targetValue = if (appeared) 1f else 0f,
+                                    animationSpec = tween(150),
+                                    label = "rowAlpha"
+                                )
+                                Column(
+                                    modifier = Modifier
+                                        .animateContentSize(
+                                            animationSpec = spring(
+                                                stiffness = Spring.StiffnessMediumLow,
+                                                dampingRatio = Spring.DampingRatioMediumBouncy
+                                            )
+                                        )
+                                        .scale(rowScale)
+                                        .alpha(rowAlpha),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    AnimatedVisibility(
+                                        visible = showNamePrefix,
+                                        enter = expandVertically() + fadeIn(),
+                                        exit = shrinkVertically() + fadeOut()
+                                    ) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            OutlinedTextField(
+                                                value = namePrefix,
+                                                onValueChange = { namePrefix = it },
+                                                label = { Text(stringResource(R.string.prefix)) },
+                                                modifier = Modifier.weight(1f)
+                                                    .fillMaxWidth()
+                                                    .padding(start = paddingHorizontal),
+                                                shape = RoundedCornerShape(12.dp),
+                                                colors = OutlinedTextFieldDefaults.colors(
+                                                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                                                    focusedBorderColor = MaterialTheme.colorScheme.primary
+                                                )
+                                            )
+                                            IconButton(
+                                                modifier = Modifier.padding(top = 8.dp),
+                                                onClick = {
+                                                    namePrefix = ""
+                                                    showNamePrefix = false
+                                                }
+                                            ) {
+                                                Icon(
+                                                    Icons.Rounded.RemoveCircleOutline,
+                                                    null,
+                                                    tint = MaterialTheme.colorScheme.error
+                                                )
+                                            }
+                                        }
+                                    }
+                                    OutlinedTextField(
+                                        value = givenName,
+                                        onValueChange = { givenName = it },
+                                        label = { Text(stringResource(R.string.first_name)) },
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = paddingHorizontal),
+                                        shape = RoundedCornerShape(12.dp),
+                                        colors = OutlinedTextFieldDefaults.colors(
+                                            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                                            focusedBorderColor = MaterialTheme.colorScheme.primary
+                                        )
+                                    )
+                                    AnimatedVisibility(
+                                        visible = showMiddleName,
+                                        enter = expandVertically() + fadeIn(),
+                                        exit = shrinkVertically() + fadeOut()
+                                    ) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            OutlinedTextField(
+                                                value = middleName,
+                                                onValueChange = { middleName = it },
+                                                label = { Text(stringResource(R.string.middle_name)) },
+                                                modifier = Modifier.weight(1f)
+                                                    .fillMaxWidth()
+                                                    .padding(start = paddingHorizontal),
+                                                shape = RoundedCornerShape(12.dp),
+                                                colors = OutlinedTextFieldDefaults.colors(
+                                                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                                                    focusedBorderColor = MaterialTheme.colorScheme.primary
+                                                )
+                                            )
+                                            IconButton(
+                                                modifier = Modifier.padding(top = 8.dp),
+                                                onClick = {
+                                                    middleName = ""
+                                                    showMiddleName = false
+                                                }
+                                            ) {
+                                                Icon(
+                                                    Icons.Rounded.RemoveCircleOutline,
+                                                    null,
+                                                    tint = MaterialTheme.colorScheme.error
+                                                )
+                                            }
+                                        }
+                                    }
+                                    OutlinedTextField(
+                                        value = familyName,
+                                        onValueChange = { familyName = it },
+                                        label = { Text(stringResource(R.string.last_name)) },
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = paddingHorizontal),
+                                        shape = RoundedCornerShape(12.dp),
+                                        colors = OutlinedTextFieldDefaults.colors(
+                                            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                                            focusedBorderColor = MaterialTheme.colorScheme.primary
+                                        )
+                                    )
+                                    AnimatedVisibility(
+                                        visible = showNameSuffix,
+                                        enter = expandVertically() + fadeIn(),
+                                        exit = shrinkVertically() + fadeOut()
+                                    ) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            OutlinedTextField(
+                                                value = nameSuffix,
+                                                onValueChange = { nameSuffix = it },
+                                                label = { Text(stringResource(R.string.suffix)) },
+                                                modifier = Modifier.weight(1f)
+                                                    .fillMaxWidth()
+                                                    .padding(start = paddingHorizontal),
+                                                shape = RoundedCornerShape(12.dp),
+                                                colors = OutlinedTextFieldDefaults.colors(
+                                                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                                                    focusedBorderColor = MaterialTheme.colorScheme.primary
+                                                )
+                                            )
+                                            IconButton(
+                                                modifier = Modifier.padding(top = 8.dp),
+                                                onClick = {
+                                                    nameSuffix = ""
+                                                    showNameSuffix = false
+                                                }
+                                            ) {
+                                                Icon(
+                                                    Icons.Rounded.RemoveCircleOutline,
+                                                    null,
+                                                    tint = MaterialTheme.colorScheme.error
+                                                )
+                                            }
+                                        }
+                                    }
+                                    AnimatedVisibility(
+                                        visible = showNickname,
+                                        enter = expandVertically() + fadeIn(),
+                                        exit = shrinkVertically() + fadeOut()
+                                    ) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            OutlinedTextField(
+                                                value = nickname,
+                                                onValueChange = { nickname = it },
+                                                label = { Text(stringResource(R.string.nickname)) },
+                                                modifier = Modifier.weight(1f)
+                                                    .fillMaxWidth()
+                                                    .padding(start = paddingHorizontal),
+                                                shape = RoundedCornerShape(12.dp),
+                                                colors = OutlinedTextFieldDefaults.colors(
+                                                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                                                    focusedBorderColor = MaterialTheme.colorScheme.primary
+                                                )
+                                            )
+                                            IconButton(
+                                                modifier = Modifier.padding(top = 8.dp),
+                                                onClick = {
+                                                    nickname = ""
+                                                    showNickname = false
+                                                }
+                                            ) {
+                                                Icon(
+                                                    Icons.Rounded.RemoveCircleOutline,
+                                                    null,
+                                                    tint = MaterialTheme.colorScheme.error
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Organization
+                            item {
+                                var appeared by remember { mutableStateOf(false) }
+                                LaunchedEffect(Unit) { appeared = true }
+                                val rowScale by animateFloatAsState(
+                                    targetValue = if (appeared) 1f else 0.5f,
+                                    animationSpec = spring(stiffness = Spring.StiffnessMedium),
+                                    label = "rowScale"
+                                )
+                                val rowAlpha by animateFloatAsState(
+                                    targetValue = if (appeared) 1f else 0f,
+                                    animationSpec = tween(150),
+                                    label = "rowAlpha"
+                                )
+                                Column(
+                                    modifier = Modifier
+                                        .animateContentSize(
+                                            animationSpec = spring(
+                                                stiffness = Spring.StiffnessMediumLow,
+                                                dampingRatio = Spring.DampingRatioMediumBouncy
+                                            )
+                                        )
+                                        .scale(rowScale)
+                                        .alpha(rowAlpha),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    OutlinedTextField(
+                                        value = company,
+                                        onValueChange = { company = it },
+                                        label = { Text(stringResource(R.string.company)) },
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = paddingHorizontal),
+                                        shape = RoundedCornerShape(12.dp),
+                                        colors = OutlinedTextFieldDefaults.colors(
+                                            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                                            focusedBorderColor = MaterialTheme.colorScheme.primary
+                                        )
+                                    )
+                                    AnimatedVisibility(
+                                        visible = showJobTitle,
+                                        enter = expandVertically() + fadeIn(),
+                                        exit = shrinkVertically() + fadeOut()
+                                    ) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            OutlinedTextField(
+                                                value = jobTitle,
+                                                onValueChange = { jobTitle = it },
+                                                label = { Text(stringResource(R.string.job_title)) },
+                                                modifier = Modifier.weight(1f)
+                                                    .fillMaxWidth()
+                                                    .padding(start = paddingHorizontal),
+                                                shape = RoundedCornerShape(12.dp),
+                                                colors = OutlinedTextFieldDefaults.colors(
+                                                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                                                    focusedBorderColor = MaterialTheme.colorScheme.primary
+                                                )
+                                            )
+                                            IconButton(
+                                                modifier = Modifier.padding(top = 8.dp),
+                                                onClick = {
+                                                    jobTitle = ""
+                                                    showJobTitle = false
+                                                }
+                                            ) {
+                                                Icon(
+                                                    Icons.Rounded.RemoveCircleOutline,
+                                                    null,
+                                                    tint = MaterialTheme.colorScheme.error
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            item {
+                                Column(
+                                    modifier = Modifier.animateContentSize(
+                                        animationSpec = spring(
+                                            stiffness = Spring.StiffnessMediumLow,
+                                            dampingRatio = Spring.DampingRatioMediumBouncy
+                                        )
+                                    ),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    phoneDetails.forEachIndexed { index, phoneDetail ->
+                                        EditPhoneField(
+                                            value = phoneDetail.number,
+                                            onValueChange = {
+                                                if (index < phoneDetails.size && index < phoneNumbers.size) {
+                                                    phoneDetails[index] = ContactPhoneDetail(phoneDetail.type, phoneDetail.label, it)
+                                                    phoneNumbers[index] = it
+                                                }
+                                            },
+                                            label = getPhoneTypeText(context, phoneDetail.type, phoneDetail.label),
+                                            onDelete = if (phoneDetails.size > 1) {
+                                                {
+                                                    if (index < phoneDetails.size && index < phoneNumbers.size) {
+                                                        phoneDetails.removeAt(index)
+                                                        phoneNumbers.removeAt(index)
+                                                    }
+                                                }
+                                            } else null,
+                                            onLabelChange = { newLabel, newType ->
+                                                val newTypeValue = newType ?: Phone.TYPE_CUSTOM
+                                                phoneDetails[index] = ContactPhoneDetail(
+                                                    type = newTypeValue,
+                                                    label = if (newType == null) newLabel else null,
+                                                    number = phoneDetail.number
+                                                )
+                                                phoneNumbers[index] = phoneDetail.number
+                                            }
+                                        )
+                                    }
+                                    AddButton(
+                                        text = stringResource(R.string.add_phone),
+                                        onClick = {
+                                            phoneDetails.add(blankPhoneDetail)
+                                            phoneNumbers.add("")
+                                        }
+                                    )
+                                }
+                            }
+
+
+                            item {
+                                Column(
+                                    modifier = Modifier.animateContentSize(
+                                        animationSpec = spring(
+                                            stiffness = Spring.StiffnessMediumLow,
+                                            dampingRatio = Spring.DampingRatioMediumBouncy
+                                        )
+                                    ),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    emails.forEachIndexed { index, email ->
+                                        EditEmailField(
+                                            value = email.value,
+                                            onValueChange = { emails[index] = ContactEmail(email.type, email.label, it) },
+                                            label = getEmailTypeText(context, email.type, email.label),
+                                            onDelete = if (emails.size > 1) { { if (index < emails.size) { emails.removeAt(index) } } } else null,
+                                            onLabelChange = { newLabel, newType ->
+                                                val newTypeValue = newType ?: Email.TYPE_CUSTOM
+                                                emails[index] = ContactEmail(
+                                                    type = newTypeValue,
+                                                    label = if (newType == null) newLabel else null,
+                                                    value = email.value
+                                                )
+                                            }
+                                        )
+                                    }
+                                    AddButton(
+                                        text = stringResource(R.string.add_email),
+                                        onClick = { emails.add(blankEmail) }
+                                    )
+                                }
+                            }
+
+
+                            item {
+                                Column(
+                                    modifier = Modifier.animateContentSize(
+                                        animationSpec = spring(
+                                            stiffness = Spring.StiffnessMediumLow,
+                                            dampingRatio = Spring.DampingRatioMediumBouncy
+                                        )
+                                    ),verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    events.forEachIndexed { index, event ->
+                                        EditEventField(
+                                            value = event.date,
+                                            onValueChange = { events[index] = ContactEvent(event.type, event.label, it) },
+                                            label = getEventTypeText(context, event.type, event.label),
+                                            onDelete = if (events.size > 1) { { if (index < events.size) { events.removeAt(index) } } } else null,
+                                            onLabelChange = { newLabel, newType ->
+                                                val newTypeValue = newType ?: Event.TYPE_CUSTOM
+                                                events[index] = ContactEvent(
+                                                    type = newTypeValue,
+                                                    label = if (newType == null) newLabel else null,
+                                                    date = event.date
+                                                )
+                                            }
+                                        )
+                                    }
+                                    AddButton(
+                                        text = stringResource(R.string.add_event),
+                                        onClick = { events.add(blankEvent) }
+                                    )
+                                }
+                            }
+
+
+                            item {
+                                Column(
+                                    modifier = Modifier.animateContentSize(
+                                        animationSpec = spring(
+                                            stiffness = Spring.StiffnessMediumLow,
+                                            dampingRatio = Spring.DampingRatioMediumBouncy
+                                        )
+                                    ),verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    addresses.forEachIndexed { index, address ->
+                                        EditAddressField(
+                                            value = address.formattedAddress,
+                                            onValueChange = { addresses[index] = ContactAddress(address.type, address.label, it) },
+                                            label = getAddressTypeText(context, address.type, address.label),
+                                            onDelete = if (addresses.size > 1) { { if (index < addresses.size) { addresses.removeAt(index) } } } else null,
+                                            onLabelChange = { newLabel, newType ->
+                                                val newTypeValue = newType ?: StructuredPostal.TYPE_CUSTOM
+                                                addresses[index] = ContactAddress(
+                                                    type = newTypeValue,
+                                                    label = if (newType == null) newLabel else null,
+                                                    formattedAddress = address.formattedAddress
+                                                )
+                                            }
+                                        )
+                                    }
+                                    AddButton(
+                                        text = stringResource(R.string.add_address),
+                                        onClick = { addresses.add(blankAddress) }
+                                    )
+                                }
+                            }
+
+                            // Notes
+                            item {
+                                var appeared by remember { mutableStateOf(false) }
+                                LaunchedEffect(Unit) { appeared = true }
+                                val rowScale by animateFloatAsState(
+                                    targetValue = if (appeared) 1f else 0.5f,
+                                    animationSpec = spring(stiffness = Spring.StiffnessMedium),
+                                    label = "rowScale"
+                                )
+                                val rowAlpha by animateFloatAsState(
+                                    targetValue = if (appeared) 1f else 0f,
+                                    animationSpec = tween(150),
+                                    label = "rowAlpha"
+                                )
+                                OutlinedTextField(
+                                    value = notes ?: "",
+                                    onValueChange = { notes = it },
+                                    label = { Text(stringResource(R.string.notes_contact)) },
+                                    modifier = Modifier
+                                        .animateContentSize(
+                                            animationSpec = spring(
+                                                stiffness = Spring.StiffnessMediumLow,
+                                                dampingRatio = Spring.DampingRatioMediumBouncy
+                                            )
+                                        )
+                                        .scale(rowScale)
+                                        .alpha(rowAlpha)
+                                        .fillMaxWidth()
+                                        .padding(horizontal = paddingHorizontal),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                                        focusedBorderColor = MaterialTheme.colorScheme.primary
+                                    )
+                                )
+                            }
+
+                            item {
+                                val interactionSource = remember { MutableInteractionSource() }
+                                val isPressed by interactionSource.collectIsPressedAsState()
+
+                                val cornerRadius by animateDpAsState(
+                                    targetValue = if (isPressed) 12.dp else 50.dp,
+                                    animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                                    label = "ButtonShape"
+                                )
+                                Button(
+                                    onClick = { showFieldsDialog = true },
+                                    interactionSource = interactionSource,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = paddingHorizontal),
+                                    shape = RoundedCornerShape(cornerRadius),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                    ),
+                                    contentPadding = PaddingValues(16.dp)
+                                ) {
+                                    Icon(Icons.Rounded.PostAdd, null)
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(stringResource(R.string.add_field))
+                                }
+                            }
+
+                            item {
+                                Surface(
+                                    modifier = Modifier.padding(horizontal = paddingHorizontal),
+                                    onClick = { showPicker = true },
+                                    shape = RoundedCornerShape(16.dp),
+                                    color = MaterialTheme.colorScheme.surfaceContainerHigh
+                                ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(16.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            imageVector = ContactUtils.getAccountIcon(selectedAccount, isPrivate),
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+                                        Spacer(Modifier.width(16.dp))
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(
+                                                text = stringResource(R.string.save_to_account),
+                                                style = MaterialTheme.typography.labelMedium,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                            Text(
+                                                text = if (selectedAccount != null) ContactUtils.getAccountName(selectedAccount!!)
                                                 else ContactUtils.getFriendlyAccountName(null, isPrivate),
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        fontWeight = FontWeight.Bold
-                                    )
+                                                style = MaterialTheme.typography.bodyLarge,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+                                        Icon(Icons.Default.ArrowDropDown, null)
+                                    }
                                 }
-                                Icon(Icons.Default.ArrowDropDown, null)
                             }
+
+                            item { Spacer(modifier = Modifier.height(100.dp)) }
                         }
                     }
-
-                    item { Spacer(modifier = Modifier.height(100.dp)) }
-                }
-            }
-        } else {
-            // Portrait
-            LazyColumn(
-                state = listState,
-                modifier = Modifier
+                } else {
+                    // Portrait
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier
 //                .padding(innerPadding)
-                    .padding(
-                        top = innerPadding.calculateTopPadding(),
-                        start = 0.dp,
-                        end = 0.dp,
-                        bottom = 0.dp
-                    )
-                    .fillMaxSize(),
-                contentPadding = PaddingValues(vertical = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(32.dp)
-            ) {
-                item {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = paddingHorizontal)
-                            .background(
-                                color = MaterialTheme.colorScheme.surfaceContainerLowest,
-                                shape = RoundedCornerShape(24.dp)
+                            .padding(
+                                top = innerPadding.calculateTopPadding(),
+                                start = 0.dp,
+                                end = 0.dp,
+                                bottom = 0.dp
                             )
-                            .padding(vertical = 24.dp),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
+                            .fillMaxSize(),
+                        contentPadding = PaddingValues(vertical = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(32.dp)
                     ) {
-                        Box(contentAlignment = Alignment.BottomEnd) {
-                            val displayPhotoUri = tempPhotoUri ?: photoUri
-                            RillAvatar(
-                                name = getDisplayName(currentContactForPreview),
-                                photoUri = displayPhotoUri,
-                                modifier = Modifier.size(120.dp),
-                                shape = CircleShape
-                            )
-
-                            if (displayPhotoUri != null) {
-                                SmallFloatingActionButton(
-                                    onClick = {
-                                        photoUri = null
-                                        tempPhotoUri = null
-                                    },
-                                    containerColor = MaterialTheme.colorScheme.customColors.colorRed,
-                                    contentColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
-                                    shape = CircleShape,
-                                    elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
-                                    modifier = Modifier
-                                        .size(40.dp)
-                                        .align(Alignment.BottomStart)
-                                        .offset(x = (-8).dp, y = 0.dp)
-                                        .border(
-                                            border = BorderStroke(3.dp, MaterialTheme.colorScheme.surfaceContainerLowest),
-                                            shape = CircleShape
-                                        )
-                                ) {
-                                    Icon(
-                                        ImageVector.vectorResource(id = R.drawable.ic_delete),
-                                        stringResource(R.string.delete),
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                }
-                            }
-
-                            SmallFloatingActionButton(
-                                onClick = {
-                                    photoPickerLauncher.launch(
-                                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                                    )
-                                },
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                                shape = CircleShape,
-                                elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
+                        item {
+                            Row(
                                 modifier = Modifier
-                                    .size(40.dp)
-                                    .align(Alignment.BottomEnd)
-                                    .offset(x = 8.dp, y = 0.dp)
-                                    .border(
-                                        border = BorderStroke(3.dp, MaterialTheme.colorScheme.surfaceContainerLowest),
+                                    .fillMaxWidth()
+                                    .padding(horizontal = paddingHorizontal)
+                                    .background(
+                                        color = MaterialTheme.colorScheme.surfaceContainerLowest,
+                                        shape = RoundedCornerShape(24.dp)
+                                    )
+                                    .padding(vertical = 24.dp),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(contentAlignment = Alignment.BottomEnd) {
+                                    val displayPhotoUri = tempPhotoUri ?: photoUri
+                                    RillAvatar(
+                                        name = getDisplayName(currentContactForPreview),
+                                        photoUri = displayPhotoUri,
+                                        modifier = Modifier.size(120.dp),
                                         shape = CircleShape
                                     )
+
+                                    if (displayPhotoUri != null) {
+                                        SmallFloatingActionButton(
+                                            onClick = {
+                                                photoUri = null
+                                                tempPhotoUri = null
+                                            },
+                                            containerColor = MaterialTheme.colorScheme.customColors.colorRed,
+                                            contentColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
+                                            shape = CircleShape,
+                                            elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
+                                            modifier = Modifier
+                                                .size(40.dp)
+                                                .align(Alignment.BottomStart)
+                                                .offset(x = (-8).dp, y = 0.dp)
+                                                .border(
+                                                    border = BorderStroke(3.dp, MaterialTheme.colorScheme.surfaceContainerLowest),
+                                                    shape = CircleShape
+                                                )
+                                        ) {
+                                            Icon(
+                                                ImageVector.vectorResource(id = R.drawable.ic_delete),
+                                                stringResource(R.string.delete),
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                        }
+                                    }
+
+                                    SmallFloatingActionButton(
+                                        onClick = {
+                                            photoPickerLauncher.launch(
+                                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                            )
+                                        },
+                                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                        shape = CircleShape,
+                                        elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
+                                        modifier = Modifier
+                                            .size(40.dp)
+                                            .align(Alignment.BottomEnd)
+                                            .offset(x = 8.dp, y = 0.dp)
+                                            .border(
+                                                border = BorderStroke(3.dp, MaterialTheme.colorScheme.surfaceContainerLowest),
+                                                shape = CircleShape
+                                            )
+                                    ) {
+                                        Icon(
+                                            if (photoUri != null) Icons.Outlined.Edit else Icons.Rounded.Add,
+                                            if (photoUri != null) stringResource(R.string.edit) else stringResource(R.string.add_photo),
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
+                                }
+                                Spacer(Modifier.width(32.dp))
+                                Box(contentAlignment = Alignment.BottomEnd) {
+                                    val displayBackground = tempCallBackground ?: callBackground
+                                    if (displayBackground != null) {
+                                        AsyncImage(
+                                            model = displayBackground,
+                                            contentDescription = stringResource(R.string.contact_call_background_preview),
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier
+                                                .size(width = 82.dp, height = 160.dp)
+                                                .clip(RoundedCornerShape(RillShapeDefaults.BaseMedium))
+                                        )
+                                    } else {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(width = 82.dp, height = 160.dp)
+                                                .clip(RoundedCornerShape(RillShapeDefaults.BaseMedium))
+                                                .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Rounded.Wallpaper,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                modifier = Modifier.size(40.dp)
+                                            )
+                                        }
+                                    }
+
+                                    if (displayBackground != null) {
+                                        SmallFloatingActionButton(
+                                            onClick = {
+                                                // If this is a temporary background (not yet saved)
+                                                if (tempCallBackground != null) {
+                                                    tempCallBackground = null
+                                                    selectedBackgroundUri = null
+                                                    tempBackgroundDeleted = true
+                                                } else if (callBackground != null) {
+                                                    // If this is a saved background, mark it for deletion when saving
+                                                    tempBackgroundDeleted = true
+                                                    callBackground = null
+                                                }
+                                            },
+                                            containerColor = MaterialTheme.colorScheme.customColors.colorRed,
+                                            contentColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
+                                            shape = CircleShape,
+                                            elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
+                                            modifier = Modifier
+                                                .size(40.dp)
+                                                .align(Alignment.BottomStart)
+                                                .offset(x = (-16).dp, y = 12.dp)
+                                                .border(
+                                                    border = BorderStroke(3.dp, MaterialTheme.colorScheme.surfaceContainerLowest),
+                                                    shape = CircleShape
+                                                )
+                                        ) {
+                                            Icon(
+                                                ImageVector.vectorResource(id = R.drawable.ic_delete),
+                                                stringResource(R.string.contact_call_background_remove),
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                        }
+                                    }
+
+                                    SmallFloatingActionButton(
+                                        onClick = onBackgroundClick,
+                                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                        shape = CircleShape,
+                                        elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
+                                        modifier = Modifier
+                                            .size(40.dp)
+                                            .align(Alignment.BottomEnd)
+                                            .offset(x = 16.dp, y = 12.dp)
+                                            .border(
+                                                border = BorderStroke(3.dp, MaterialTheme.colorScheme.surfaceContainerLowest),
+                                                shape = CircleShape
+                                            )
+                                    ) {
+                                        Icon(
+                                            if (displayBackground != null) Icons.Outlined.Edit else Icons.Rounded.Add,
+                                            if (displayBackground != null) stringResource(R.string.contact_call_background_change)
+                                            else stringResource(R.string.contact_call_background_set),
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        item {
+                            var appeared by remember { mutableStateOf(false) }
+                            LaunchedEffect(Unit) { appeared = true }
+                            val rowScale by animateFloatAsState(
+                                targetValue = if (appeared) 1f else 0.5f,
+                                animationSpec = spring(stiffness = Spring.StiffnessMedium),
+                                label = "rowScale"
+                            )
+                            val rowAlpha by animateFloatAsState(
+                                targetValue = if (appeared) 1f else 0f,
+                                animationSpec = tween(150),
+                                label = "rowAlpha"
+                            )
+                            Column(
+                                modifier = Modifier
+                                    .animateContentSize(
+                                        animationSpec = spring(
+                                            stiffness = Spring.StiffnessMediumLow,
+                                            dampingRatio = Spring.DampingRatioMediumBouncy
+                                        )
+                                    )
+                                    .scale(rowScale)
+                                    .alpha(rowAlpha),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                Icon(
-                                    if (photoUri != null) Icons.Outlined.Edit else Icons.Rounded.Add,
-                                    if (photoUri != null) stringResource(R.string.edit) else stringResource(R.string.add_photo),
-                                    modifier = Modifier.size(20.dp)
+                                AnimatedVisibility(
+                                    visible = showNamePrefix,
+                                    enter = expandVertically() + fadeIn(),
+                                    exit = shrinkVertically() + fadeOut()
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        OutlinedTextField(
+                                            value = namePrefix,
+                                            onValueChange = { namePrefix = it },
+                                            label = { Text(stringResource(R.string.prefix)) },
+                                            modifier = Modifier.weight(1f)
+                                                .fillMaxWidth()
+                                                .padding(start = paddingHorizontal),
+                                            shape = RoundedCornerShape(12.dp),
+                                            colors = OutlinedTextFieldDefaults.colors(
+                                                unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                                                focusedBorderColor = MaterialTheme.colorScheme.primary
+                                            )
+                                        )
+                                        IconButton(
+                                            modifier = Modifier.padding(top = 8.dp),
+                                            onClick = {
+                                                namePrefix = ""
+                                                showNamePrefix = false
+                                            }
+                                        ) {
+                                            Icon(
+                                                Icons.Rounded.RemoveCircleOutline,
+                                                null,
+                                                tint = MaterialTheme.colorScheme.error
+                                            )
+                                        }
+                                    }
+                                }
+                                OutlinedTextField(
+                                    value = givenName,
+                                    onValueChange = { givenName = it },
+                                    label = { Text(stringResource(R.string.first_name)) },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = paddingHorizontal),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                                        focusedBorderColor = MaterialTheme.colorScheme.primary
+                                    )
+                                )
+                                AnimatedVisibility(
+                                    visible = showMiddleName,
+                                    enter = expandVertically() + fadeIn(),
+                                    exit = shrinkVertically() + fadeOut()
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        OutlinedTextField(
+                                            value = middleName,
+                                            onValueChange = { middleName = it },
+                                            label = { Text(stringResource(R.string.middle_name)) },
+                                            modifier = Modifier.weight(1f)
+                                                .fillMaxWidth()
+                                                .padding(start = paddingHorizontal),
+                                            shape = RoundedCornerShape(12.dp),
+                                            colors = OutlinedTextFieldDefaults.colors(
+                                                unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                                                focusedBorderColor = MaterialTheme.colorScheme.primary
+                                            )
+                                        )
+                                        IconButton(
+                                            modifier = Modifier.padding(top = 8.dp),
+                                            onClick = {
+                                                middleName = ""
+                                                showMiddleName = false
+                                            }
+                                        ) {
+                                            Icon(
+                                                Icons.Rounded.RemoveCircleOutline,
+                                                null,
+                                                tint = MaterialTheme.colorScheme.error
+                                            )
+                                        }
+                                    }
+                                }
+                                OutlinedTextField(
+                                    value = familyName,
+                                    onValueChange = { familyName = it },
+                                    label = { Text(stringResource(R.string.last_name)) },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = paddingHorizontal),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                                        focusedBorderColor = MaterialTheme.colorScheme.primary
+                                    )
+                                )
+                                AnimatedVisibility(
+                                    visible = showNameSuffix,
+                                    enter = expandVertically() + fadeIn(),
+                                    exit = shrinkVertically() + fadeOut()
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        OutlinedTextField(
+                                            value = nameSuffix,
+                                            onValueChange = { nameSuffix = it },
+                                            label = { Text(stringResource(R.string.suffix)) },
+                                            modifier = Modifier.weight(1f)
+                                                .fillMaxWidth()
+                                                .padding(start = paddingHorizontal),
+                                            shape = RoundedCornerShape(12.dp),
+                                            colors = OutlinedTextFieldDefaults.colors(
+                                                unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                                                focusedBorderColor = MaterialTheme.colorScheme.primary
+                                            )
+                                        )
+                                        IconButton(
+                                            modifier = Modifier.padding(top = 8.dp),
+                                            onClick = {
+                                                nameSuffix = ""
+                                                showNameSuffix = false
+                                            }
+                                        ) {
+                                            Icon(
+                                                Icons.Rounded.RemoveCircleOutline,
+                                                null,
+                                                tint = MaterialTheme.colorScheme.error
+                                            )
+                                        }
+                                    }
+                                }
+                                AnimatedVisibility(
+                                    visible = showNickname,
+                                    enter = expandVertically() + fadeIn(),
+                                    exit = shrinkVertically() + fadeOut()
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        OutlinedTextField(
+                                            value = nickname,
+                                            onValueChange = { nickname = it },
+                                            label = { Text(stringResource(R.string.nickname)) },
+                                            modifier = Modifier.weight(1f)
+                                                .fillMaxWidth()
+                                                .padding(start = paddingHorizontal),
+                                            shape = RoundedCornerShape(12.dp),
+                                            colors = OutlinedTextFieldDefaults.colors(
+                                                unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                                                focusedBorderColor = MaterialTheme.colorScheme.primary
+                                            )
+                                        )
+                                        IconButton(
+                                            modifier = Modifier.padding(top = 8.dp),
+                                            onClick = {
+                                                nickname = ""
+                                                showNickname = false
+                                            }
+                                        ) {
+                                            Icon(
+                                                Icons.Rounded.RemoveCircleOutline,
+                                                null,
+                                                tint = MaterialTheme.colorScheme.error
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // Organization
+                        item {
+                            var appeared by remember { mutableStateOf(false) }
+                            LaunchedEffect(Unit) { appeared = true }
+                            val rowScale by animateFloatAsState(
+                                targetValue = if (appeared) 1f else 0.5f,
+                                animationSpec = spring(stiffness = Spring.StiffnessMedium),
+                                label = "rowScale"
+                            )
+                            val rowAlpha by animateFloatAsState(
+                                targetValue = if (appeared) 1f else 0f,
+                                animationSpec = tween(150),
+                                label = "rowAlpha"
+                            )
+                            Column(
+                                modifier = Modifier
+                                    .animateContentSize(
+                                        animationSpec = spring(
+                                            stiffness = Spring.StiffnessMediumLow,
+                                            dampingRatio = Spring.DampingRatioMediumBouncy
+                                        )
+                                    )
+                                    .scale(rowScale)
+                                    .alpha(rowAlpha),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                OutlinedTextField(
+                                    value = company,
+                                    onValueChange = { company = it },
+                                    label = { Text(stringResource(R.string.company)) },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = paddingHorizontal),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                                        focusedBorderColor = MaterialTheme.colorScheme.primary
+                                    )
+                                )
+                                AnimatedVisibility(
+                                    visible = showJobTitle,
+                                    enter = expandVertically() + fadeIn(),
+                                    exit = shrinkVertically() + fadeOut()
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        OutlinedTextField(
+                                            value = jobTitle,
+                                            onValueChange = { jobTitle = it },
+                                            label = { Text(stringResource(R.string.job_title)) },
+                                            modifier = Modifier.weight(1f)
+                                                .fillMaxWidth()
+                                                .padding(start = paddingHorizontal),
+                                            shape = RoundedCornerShape(12.dp),
+                                            colors = OutlinedTextFieldDefaults.colors(
+                                                unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                                                focusedBorderColor = MaterialTheme.colorScheme.primary
+                                            )
+                                        )
+                                        IconButton(
+                                            modifier = Modifier.padding(top = 8.dp),
+                                            onClick = {
+                                                jobTitle = ""
+                                                showJobTitle = false
+                                            }
+                                        ) {
+                                            Icon(
+                                                Icons.Rounded.RemoveCircleOutline,
+                                                null,
+                                                tint = MaterialTheme.colorScheme.error
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+
+                        item {
+                            Column(
+                                modifier = Modifier.animateContentSize(
+                                    animationSpec = spring(
+                                        stiffness = Spring.StiffnessMediumLow,
+                                        dampingRatio = Spring.DampingRatioMediumBouncy
+                                    )
+                                ),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                phoneDetails.forEachIndexed { index, phoneDetail ->
+                                    EditPhoneField(
+                                        value = phoneDetail.number,
+                                        onValueChange = {
+                                            if (index < phoneDetails.size && index < phoneNumbers.size) {
+                                                phoneDetails[index] = ContactPhoneDetail(phoneDetail.type, phoneDetail.label, it)
+                                                phoneNumbers[index] = it
+                                            }
+                                        },
+                                        label = getPhoneTypeText(context, phoneDetail.type, phoneDetail.label),
+                                        onDelete = if (phoneDetails.size > 1) {
+                                            {
+                                                if (index < phoneDetails.size && index < phoneNumbers.size) {
+                                                    phoneDetails.removeAt(index)
+                                                    phoneNumbers.removeAt(index)
+                                                }
+                                            }
+                                        } else null,
+                                        onLabelChange = { newLabel, newType ->
+                                            val newTypeValue = newType ?: Phone.TYPE_CUSTOM
+                                            phoneDetails[index] = ContactPhoneDetail(
+                                                type = newTypeValue,
+                                                label = if (newType == null) newLabel else null,
+                                                number = phoneDetail.number
+                                            )
+                                            phoneNumbers[index] = phoneDetail.number
+                                        }
+                                    )
+                                }
+                                AddButton(
+                                    text = stringResource(R.string.add_phone),
+                                    onClick = {
+                                        phoneDetails.add(blankPhoneDetail)
+                                        phoneNumbers.add("")
+                                    }
                                 )
                             }
                         }
-                        Spacer(Modifier.width(32.dp))
-                        Box(contentAlignment = Alignment.BottomEnd) {
-                            val displayBackground = tempCallBackground ?: callBackground
-                            if (displayBackground != null) {
-                                AsyncImage(
-                                    model = displayBackground,
-                                    contentDescription = stringResource(R.string.contact_call_background_preview),
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier
-                                        .size(width = 82.dp, height = 160.dp)
-                                        .clip(RoundedCornerShape(RillShapeDefaults.BaseMedium))
+
+
+                        item {
+                            Column(
+                                modifier = Modifier.animateContentSize(
+                                    animationSpec = spring(
+                                        stiffness = Spring.StiffnessMediumLow,
+                                        dampingRatio = Spring.DampingRatioMediumBouncy
+                                    )
+                                ),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                emails.forEachIndexed { index, email ->
+                                    EditEmailField(
+                                        value = email.value,
+                                        onValueChange = { emails[index] = ContactEmail(email.type, email.label, it) },
+                                        label = getEmailTypeText(context, email.type, email.label),
+                                        onDelete = if (emails.size > 1) { { if (index < emails.size) { emails.removeAt(index) } } } else null,
+                                        onLabelChange = { newLabel, newType ->
+                                            val newTypeValue = newType ?: Email.TYPE_CUSTOM
+                                            emails[index] = ContactEmail(
+                                                type = newTypeValue,
+                                                label = if (newType == null) newLabel else null,
+                                                value = email.value
+                                            )
+                                        }
+                                    )
+                                }
+                                AddButton(
+                                    text = stringResource(R.string.add_email),
+                                    onClick = { emails.add(blankEmail) }
                                 )
-                            } else {
-                                Box(
+                            }
+                        }
+
+
+                        item {
+                            Column(
+                                modifier = Modifier.animateContentSize(
+                                    animationSpec = spring(
+                                        stiffness = Spring.StiffnessMediumLow,
+                                        dampingRatio = Spring.DampingRatioMediumBouncy
+                                    )
+                                ),verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                events.forEachIndexed { index, event ->
+                                    EditEventField(
+                                        value = event.date,
+                                        onValueChange = { events[index] = ContactEvent(event.type, event.label, it) },
+                                        label = getEventTypeText(context, event.type, event.label),
+                                        onDelete = if (events.size > 1) { { if (index < events.size) { events.removeAt(index) } } } else null,
+                                        onLabelChange = { newLabel, newType ->
+                                            val newTypeValue = newType ?: Event.TYPE_CUSTOM
+                                            events[index] = ContactEvent(
+                                                type = newTypeValue,
+                                                label = if (newType == null) newLabel else null,
+                                                date = event.date
+                                            )
+                                        }
+                                    )
+                                }
+                                AddButton(
+                                    text = stringResource(R.string.add_event),
+                                    onClick = { events.add(blankEvent) }
+                                )
+                            }
+                        }
+
+
+                        item {
+                            Column(
+                                modifier = Modifier.animateContentSize(
+                                    animationSpec = spring(
+                                        stiffness = Spring.StiffnessMediumLow,
+                                        dampingRatio = Spring.DampingRatioMediumBouncy
+                                    )
+                                ),verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                addresses.forEachIndexed { index, address ->
+                                    EditAddressField(
+                                        value = address.formattedAddress,
+                                        onValueChange = { addresses[index] = ContactAddress(address.type, address.label, it) },
+                                        label = getAddressTypeText(context, address.type, address.label),
+                                        onDelete = if (addresses.size > 1) { { if (index < addresses.size) { addresses.removeAt(index) } } } else null,
+                                        onLabelChange = { newLabel, newType ->
+                                            val newTypeValue = newType ?: StructuredPostal.TYPE_CUSTOM
+                                            addresses[index] = ContactAddress(
+                                                type = newTypeValue,
+                                                label = if (newType == null) newLabel else null,
+                                                formattedAddress = address.formattedAddress
+                                            )
+                                        }
+                                    )
+                                }
+                                AddButton(
+                                    text = stringResource(R.string.add_address),
+                                    onClick = { addresses.add(blankAddress) }
+                                )
+                            }
+                        }
+
+                        // Notes
+                        item {
+                            var appeared by remember { mutableStateOf(false) }
+                            LaunchedEffect(Unit) { appeared = true }
+                            val rowScale by animateFloatAsState(
+                                targetValue = if (appeared) 1f else 0.5f,
+                                animationSpec = spring(stiffness = Spring.StiffnessMedium),
+                                label = "rowScale"
+                            )
+                            val rowAlpha by animateFloatAsState(
+                                targetValue = if (appeared) 1f else 0f,
+                                animationSpec = tween(150),
+                                label = "rowAlpha"
+                            )
+                            OutlinedTextField(
+                                value = notes ?: "",
+                                onValueChange = { notes = it },
+                                label = { Text(stringResource(R.string.notes_contact)) },
+                                modifier = Modifier
+                                    .animateContentSize(
+                                        animationSpec = spring(
+                                            stiffness = Spring.StiffnessMediumLow,
+                                            dampingRatio = Spring.DampingRatioMediumBouncy
+                                        )
+                                    )
+                                    .scale(rowScale)
+                                    .alpha(rowAlpha)
+                                    .fillMaxWidth()
+                                    .padding(horizontal = paddingHorizontal),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                                    focusedBorderColor = MaterialTheme.colorScheme.primary
+                                )
+                            )
+                        }
+
+                        item {
+                            val interactionSource = remember { MutableInteractionSource() }
+                            val isPressed by interactionSource.collectIsPressedAsState()
+
+                            val cornerRadius by animateDpAsState(
+                                targetValue = if (isPressed) 12.dp else 50.dp,
+                                animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                                label = "ButtonShape"
+                            )
+                            Button(
+                                onClick = { showFieldsDialog = true },
+                                interactionSource = interactionSource,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = paddingHorizontal),
+                                shape = RoundedCornerShape(cornerRadius),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                ),
+                                contentPadding = PaddingValues(16.dp)
+                            ) {
+                                Icon(Icons.Rounded.PostAdd, null)
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(stringResource(R.string.add_field))
+                            }
+                        }
+
+                        item {
+                            val isNewContact = contactId == null || contactId == "0" || contactId == "null"
+                            Surface(
+                                modifier = Modifier.padding(horizontal = paddingHorizontal),
+                                onClick = { showPicker = true },
+                                shape = RoundedCornerShape(16.dp),
+                                color = MaterialTheme.colorScheme.surfaceContainerHigh
+                            ) {
+                                Row(
                                     modifier = Modifier
-                                        .size(width = 82.dp, height = 160.dp)
-                                        .clip(RoundedCornerShape(RillShapeDefaults.BaseMedium))
-                                        .background(MaterialTheme.colorScheme.surfaceContainerHighest),
-                                    contentAlignment = Alignment.Center
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Icon(
-                                        imageVector = Icons.Rounded.Wallpaper,
+                                        imageVector = ContactUtils.getAccountIcon(selectedAccount, isPrivate),
                                         contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        modifier = Modifier.size(40.dp)
+                                        tint = MaterialTheme.colorScheme.primary
                                     )
-                                }
-                            }
-
-                            if (displayBackground != null) {
-                                SmallFloatingActionButton(
-                                    onClick = {
-                                        // If this is a temporary background (not yet saved)
-                                        if (tempCallBackground != null) {
-                                            tempCallBackground = null
-                                            selectedBackgroundUri = null
-                                            tempBackgroundDeleted = true
-                                        } else if (callBackground != null) {
-                                            // If this is a saved background, mark it for deletion when saving
-                                            tempBackgroundDeleted = true
-                                            callBackground = null
-                                        }
-                                    },
-                                    containerColor = MaterialTheme.colorScheme.customColors.colorRed,
-                                    contentColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
-                                    shape = CircleShape,
-                                    elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
-                                    modifier = Modifier
-                                        .size(40.dp)
-                                        .align(Alignment.BottomStart)
-                                        .offset(x = (-16).dp, y = 12.dp)
-                                        .border(
-                                            border = BorderStroke(3.dp, MaterialTheme.colorScheme.surfaceContainerLowest),
-                                            shape = CircleShape
+                                    Spacer(Modifier.width(16.dp))
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = stringResource(R.string.save_to_account),
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
-                                ) {
-                                    Icon(
-                                        ImageVector.vectorResource(id = R.drawable.ic_delete),
-                                        stringResource(R.string.contact_call_background_remove),
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                }
-                            }
-
-                            SmallFloatingActionButton(
-                                onClick = onBackgroundClick,
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                                shape = CircleShape,
-                                elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .align(Alignment.BottomEnd)
-                                    .offset(x = 16.dp, y = 12.dp)
-                                    .border(
-                                        border = BorderStroke(3.dp, MaterialTheme.colorScheme.surfaceContainerLowest),
-                                        shape = CircleShape
-                                    )
-                            ) {
-                                Icon(
-                                    if (displayBackground != null) Icons.Outlined.Edit else Icons.Rounded.Add,
-                                    if (displayBackground != null) stringResource(R.string.contact_call_background_change)
-                                        else stringResource(R.string.contact_call_background_set),
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
-                        }
-                    }
-                }
-
-                item {
-                    var appeared by remember { mutableStateOf(false) }
-                    LaunchedEffect(Unit) { appeared = true }
-                    val rowScale by animateFloatAsState(
-                        targetValue = if (appeared) 1f else 0.5f,
-                        animationSpec = spring(stiffness = Spring.StiffnessMedium),
-                        label = "rowScale"
-                    )
-                    val rowAlpha by animateFloatAsState(
-                        targetValue = if (appeared) 1f else 0f,
-                        animationSpec = tween(150),
-                        label = "rowAlpha"
-                    )
-                    Column(
-                        modifier = Modifier
-                            .animateContentSize(
-                                animationSpec = spring(
-                                    stiffness = Spring.StiffnessMediumLow,
-                                    dampingRatio = Spring.DampingRatioMediumBouncy
-                                )
-                            )
-                            .scale(rowScale)
-                            .alpha(rowAlpha),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        AnimatedVisibility(
-                            visible = showNamePrefix,
-                            enter = expandVertically() + fadeIn(),
-                            exit = shrinkVertically() + fadeOut()
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                OutlinedTextField(
-                                    value = namePrefix,
-                                    onValueChange = { namePrefix = it },
-                                    label = { Text(stringResource(R.string.prefix)) },
-                                    modifier = Modifier.weight(1f)
-                                        .fillMaxWidth()
-                                        .padding(start = paddingHorizontal),
-                                    shape = RoundedCornerShape(12.dp),
-                                    colors = OutlinedTextFieldDefaults.colors(
-                                        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                        focusedBorderColor = MaterialTheme.colorScheme.primary
-                                    )
-                                )
-                                IconButton(
-                                    modifier = Modifier.padding(top = 8.dp),
-                                    onClick = {
-                                        namePrefix = ""
-                                        showNamePrefix = false
-                                    }
-                                ) {
-                                    Icon(
-                                        Icons.Rounded.RemoveCircleOutline,
-                                        null,
-                                        tint = MaterialTheme.colorScheme.error
-                                    )
-                                }
-                            }
-                        }
-                        OutlinedTextField(
-                            value = givenName,
-                            onValueChange = { givenName = it },
-                            label = { Text(stringResource(R.string.first_name)) },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = paddingHorizontal),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                focusedBorderColor = MaterialTheme.colorScheme.primary
-                            )
-                        )
-                        AnimatedVisibility(
-                            visible = showMiddleName,
-                            enter = expandVertically() + fadeIn(),
-                            exit = shrinkVertically() + fadeOut()
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                OutlinedTextField(
-                                    value = middleName,
-                                    onValueChange = { middleName = it },
-                                    label = { Text(stringResource(R.string.middle_name)) },
-                                    modifier = Modifier.weight(1f)
-                                        .fillMaxWidth()
-                                        .padding(start = paddingHorizontal),
-                                    shape = RoundedCornerShape(12.dp),
-                                    colors = OutlinedTextFieldDefaults.colors(
-                                        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                        focusedBorderColor = MaterialTheme.colorScheme.primary
-                                    )
-                                )
-                                IconButton(
-                                    modifier = Modifier.padding(top = 8.dp),
-                                    onClick = {
-                                        middleName = ""
-                                        showMiddleName = false
-                                    }
-                                ) {
-                                    Icon(
-                                        Icons.Rounded.RemoveCircleOutline,
-                                        null,
-                                        tint = MaterialTheme.colorScheme.error
-                                    )
-                                }
-                            }
-                        }
-                        OutlinedTextField(
-                            value = familyName,
-                            onValueChange = { familyName = it },
-                            label = { Text(stringResource(R.string.last_name)) },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = paddingHorizontal),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                focusedBorderColor = MaterialTheme.colorScheme.primary
-                            )
-                        )
-                        AnimatedVisibility(
-                            visible = showNameSuffix,
-                            enter = expandVertically() + fadeIn(),
-                            exit = shrinkVertically() + fadeOut()
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                OutlinedTextField(
-                                    value = nameSuffix,
-                                    onValueChange = { nameSuffix = it },
-                                    label = { Text(stringResource(R.string.suffix)) },
-                                    modifier = Modifier.weight(1f)
-                                        .fillMaxWidth()
-                                        .padding(start = paddingHorizontal),
-                                    shape = RoundedCornerShape(12.dp),
-                                    colors = OutlinedTextFieldDefaults.colors(
-                                        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                        focusedBorderColor = MaterialTheme.colorScheme.primary
-                                    )
-                                )
-                                IconButton(
-                                    modifier = Modifier.padding(top = 8.dp),
-                                    onClick = {
-                                        nameSuffix = ""
-                                        showNameSuffix = false
-                                    }
-                                ) {
-                                    Icon(
-                                        Icons.Rounded.RemoveCircleOutline,
-                                        null,
-                                        tint = MaterialTheme.colorScheme.error
-                                    )
-                                }
-                            }
-                        }
-                        AnimatedVisibility(
-                            visible = showNickname,
-                            enter = expandVertically() + fadeIn(),
-                            exit = shrinkVertically() + fadeOut()
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                OutlinedTextField(
-                                    value = nickname,
-                                    onValueChange = { nickname = it },
-                                    label = { Text(stringResource(R.string.nickname)) },
-                                    modifier = Modifier.weight(1f)
-                                        .fillMaxWidth()
-                                        .padding(start = paddingHorizontal),
-                                    shape = RoundedCornerShape(12.dp),
-                                    colors = OutlinedTextFieldDefaults.colors(
-                                        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                        focusedBorderColor = MaterialTheme.colorScheme.primary
-                                    )
-                                )
-                                IconButton(
-                                    modifier = Modifier.padding(top = 8.dp),
-                                    onClick = {
-                                        nickname = ""
-                                        showNickname = false
-                                    }
-                                ) {
-                                    Icon(
-                                        Icons.Rounded.RemoveCircleOutline,
-                                        null,
-                                        tint = MaterialTheme.colorScheme.error
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // Organization
-                item {
-                    var appeared by remember { mutableStateOf(false) }
-                    LaunchedEffect(Unit) { appeared = true }
-                    val rowScale by animateFloatAsState(
-                        targetValue = if (appeared) 1f else 0.5f,
-                        animationSpec = spring(stiffness = Spring.StiffnessMedium),
-                        label = "rowScale"
-                    )
-                    val rowAlpha by animateFloatAsState(
-                        targetValue = if (appeared) 1f else 0f,
-                        animationSpec = tween(150),
-                        label = "rowAlpha"
-                    )
-                    Column(
-                        modifier = Modifier
-                            .animateContentSize(
-                                animationSpec = spring(
-                                    stiffness = Spring.StiffnessMediumLow,
-                                    dampingRatio = Spring.DampingRatioMediumBouncy
-                                )
-                            )
-                            .scale(rowScale)
-                            .alpha(rowAlpha),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        OutlinedTextField(
-                            value = company,
-                            onValueChange = { company = it },
-                            label = { Text(stringResource(R.string.company)) },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = paddingHorizontal),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                focusedBorderColor = MaterialTheme.colorScheme.primary
-                            )
-                        )
-                        AnimatedVisibility(
-                            visible = showJobTitle,
-                            enter = expandVertically() + fadeIn(),
-                            exit = shrinkVertically() + fadeOut()
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                OutlinedTextField(
-                                    value = jobTitle,
-                                    onValueChange = { jobTitle = it },
-                                    label = { Text(stringResource(R.string.job_title)) },
-                                    modifier = Modifier.weight(1f)
-                                        .fillMaxWidth()
-                                        .padding(start = paddingHorizontal),
-                                    shape = RoundedCornerShape(12.dp),
-                                    colors = OutlinedTextFieldDefaults.colors(
-                                        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                        focusedBorderColor = MaterialTheme.colorScheme.primary
-                                    )
-                                )
-                                IconButton(
-                                    modifier = Modifier.padding(top = 8.dp),
-                                    onClick = {
-                                        jobTitle = ""
-                                        showJobTitle = false
-                                    }
-                                ) {
-                                    Icon(
-                                        Icons.Rounded.RemoveCircleOutline,
-                                        null,
-                                        tint = MaterialTheme.colorScheme.error
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-
-
-                item {
-                    Column(
-                        modifier = Modifier.animateContentSize(
-                            animationSpec = spring(
-                                stiffness = Spring.StiffnessMediumLow,
-                                dampingRatio = Spring.DampingRatioMediumBouncy
-                            )
-                        ),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        phoneDetails.forEachIndexed { index, phoneDetail ->
-                            EditPhoneField(
-                                value = phoneDetail.number,
-                                onValueChange = {
-                                    if (index < phoneDetails.size && index < phoneNumbers.size) {
-                                        phoneDetails[index] = ContactPhoneDetail(phoneDetail.type, phoneDetail.label, it)
-                                        phoneNumbers[index] = it
-                                    }
-                                },
-                                label = getPhoneTypeText(context, phoneDetail.type, phoneDetail.label),
-                                onDelete = if (phoneDetails.size > 1) {
-                                    {
-                                        if (index < phoneDetails.size && index < phoneNumbers.size) {
-                                            phoneDetails.removeAt(index)
-                                            phoneNumbers.removeAt(index)
-                                        }
-                                    }
-                                } else null,
-                                onLabelChange = { newLabel, newType ->
-                                    val newTypeValue = newType ?: Phone.TYPE_CUSTOM
-                                    phoneDetails[index] = ContactPhoneDetail(
-                                        type = newTypeValue,
-                                        label = if (newType == null) newLabel else null,
-                                        number = phoneDetail.number
-                                    )
-                                    phoneNumbers[index] = phoneDetail.number
-                                }
-                            )
-                        }
-                        AddButton(
-                            text = stringResource(R.string.add_phone),
-                            onClick = {
-                                phoneDetails.add(blankPhoneDetail)
-                                phoneNumbers.add("")
-                            }
-                        )
-                    }
-                }
-
-
-                item {
-                    Column(
-                        modifier = Modifier.animateContentSize(
-                            animationSpec = spring(
-                                stiffness = Spring.StiffnessMediumLow,
-                                dampingRatio = Spring.DampingRatioMediumBouncy
-                            )
-                        ),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        emails.forEachIndexed { index, email ->
-                            EditEmailField(
-                                value = email.value,
-                                onValueChange = { emails[index] = ContactEmail(email.type, email.label, it) },
-                                label = getEmailTypeText(context, email.type, email.label),
-                                onDelete = if (emails.size > 1) { { if (index < emails.size) { emails.removeAt(index) } } } else null,
-                                onLabelChange = { newLabel, newType ->
-                                    val newTypeValue = newType ?: Email.TYPE_CUSTOM
-                                    emails[index] = ContactEmail(
-                                        type = newTypeValue,
-                                        label = if (newType == null) newLabel else null,
-                                        value = email.value
-                                    )
-                                }
-                            )
-                        }
-                        AddButton(
-                            text = stringResource(R.string.add_email),
-                            onClick = { emails.add(blankEmail) }
-                        )
-                    }
-                }
-
-
-                item {
-                    Column(
-                        modifier = Modifier.animateContentSize(
-                            animationSpec = spring(
-                                stiffness = Spring.StiffnessMediumLow,
-                                dampingRatio = Spring.DampingRatioMediumBouncy
-                            )
-                        ),verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        events.forEachIndexed { index, event ->
-                            EditEventField(
-                                value = event.date,
-                                onValueChange = { events[index] = ContactEvent(event.type, event.label, it) },
-                                label = getEventTypeText(context, event.type, event.label),
-                                onDelete = if (events.size > 1) { { if (index < events.size) { events.removeAt(index) } } } else null,
-                                onLabelChange = { newLabel, newType ->
-                                    val newTypeValue = newType ?: Event.TYPE_CUSTOM
-                                    events[index] = ContactEvent(
-                                        type = newTypeValue,
-                                        label = if (newType == null) newLabel else null,
-                                        date = event.date
-                                    )
-                                }
-                            )
-                        }
-                        AddButton(
-                            text = stringResource(R.string.add_event),
-                            onClick = { events.add(blankEvent) }
-                        )
-                    }
-                }
-
-
-                item {
-                    Column(
-                        modifier = Modifier.animateContentSize(
-                            animationSpec = spring(
-                                stiffness = Spring.StiffnessMediumLow,
-                                dampingRatio = Spring.DampingRatioMediumBouncy
-                            )
-                        ),verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        addresses.forEachIndexed { index, address ->
-                            EditAddressField(
-                                value = address.formattedAddress,
-                                onValueChange = { addresses[index] = ContactAddress(address.type, address.label, it) },
-                                label = getAddressTypeText(context, address.type, address.label),
-                                onDelete = if (addresses.size > 1) { { if (index < addresses.size) { addresses.removeAt(index) } } } else null,
-                                onLabelChange = { newLabel, newType ->
-                                    val newTypeValue = newType ?: StructuredPostal.TYPE_CUSTOM
-                                    addresses[index] = ContactAddress(
-                                        type = newTypeValue,
-                                        label = if (newType == null) newLabel else null,
-                                        formattedAddress = address.formattedAddress
-                                    )
-                                }
-                            )
-                        }
-                        AddButton(
-                            text = stringResource(R.string.add_address),
-                            onClick = { addresses.add(blankAddress) }
-                        )
-                    }
-                }
-
-                // Notes
-                item {
-                    var appeared by remember { mutableStateOf(false) }
-                    LaunchedEffect(Unit) { appeared = true }
-                    val rowScale by animateFloatAsState(
-                        targetValue = if (appeared) 1f else 0.5f,
-                        animationSpec = spring(stiffness = Spring.StiffnessMedium),
-                        label = "rowScale"
-                    )
-                    val rowAlpha by animateFloatAsState(
-                        targetValue = if (appeared) 1f else 0f,
-                        animationSpec = tween(150),
-                        label = "rowAlpha"
-                    )
-                    OutlinedTextField(
-                        value = notes ?: "",
-                        onValueChange = { notes = it },
-                        label = { Text(stringResource(R.string.notes_contact)) },
-                        modifier = Modifier
-                            .animateContentSize(
-                                animationSpec = spring(
-                                    stiffness = Spring.StiffnessMediumLow,
-                                    dampingRatio = Spring.DampingRatioMediumBouncy
-                                )
-                            )
-                            .scale(rowScale)
-                            .alpha(rowAlpha)
-                            .fillMaxWidth()
-                            .padding(horizontal = paddingHorizontal),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                            focusedBorderColor = MaterialTheme.colorScheme.primary
-                        )
-                    )
-                }
-
-                item {
-                    val interactionSource = remember { MutableInteractionSource() }
-                    val isPressed by interactionSource.collectIsPressedAsState()
-
-                    val cornerRadius by animateDpAsState(
-                        targetValue = if (isPressed) 12.dp else 50.dp,
-                        animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
-                        label = "ButtonShape"
-                    )
-                    Button(
-                        onClick = { showFieldsDialog = true },
-                        interactionSource = interactionSource,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = paddingHorizontal),
-                        shape = RoundedCornerShape(cornerRadius),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                        ),
-                        contentPadding = PaddingValues(16.dp)
-                    ) {
-                        Icon(Icons.Rounded.PostAdd, null)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.add_field))
-                    }
-                }
-
-                item {
-                    val isNewContact = contactId == null || contactId == "0" || contactId == "null"
-                    Surface(
-                        modifier = Modifier.padding(horizontal = paddingHorizontal),
-                        onClick = { showPicker = true },
-                        shape = RoundedCornerShape(16.dp),
-                        color = MaterialTheme.colorScheme.surfaceContainerHigh
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = ContactUtils.getAccountIcon(selectedAccount, isPrivate),
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                            Spacer(Modifier.width(16.dp))
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = stringResource(R.string.save_to_account),
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                Text(
-                                    text = if (selectedAccount != null) ContactUtils.getAccountName(selectedAccount!!)
+                                        Text(
+                                            text = if (selectedAccount != null) ContactUtils.getAccountName(selectedAccount!!)
                                             else ContactUtils.getFriendlyAccountName(null, isPrivate),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    fontWeight = FontWeight.Bold
-                                )
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                    if (isNewContact) Icon(Icons.Default.ArrowDropDown, null)
+                                }
                             }
-                            if (isNewContact) Icon(Icons.Default.ArrowDropDown, null)
                         }
+
+                        item { Spacer(modifier = Modifier.height(100.dp)) }
                     }
                 }
 
-                item { Spacer(modifier = Modifier.height(100.dp)) }
+                ScrollToTopButton(
+                    modifier = Modifier
+                        .navigationBarsPadding()
+                        .padding(bottom = 24.dp, end = 24.dp),
+                    visible = showButton,
+                    onClick = { scope.launch { listState.animateScrollToItem(0) } }
+                )
             }
         }
-
-        ScrollToTopButton(
-            modifier = Modifier
-                .navigationBarsPadding()
-                .padding(bottom = 24.dp, end = 24.dp),
-            visible = showButton,
-            onClick = { scope.launch { listState.animateScrollToItem(0) } }
-        )
     }
 }
 

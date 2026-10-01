@@ -75,7 +75,7 @@ fun PrivateContactsScreen(
     )
 
     val importLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent(),
+        contract = ActivityResultContracts.OpenDocument(),
         onResult = { uri ->
             uri?.let {
                 viewModel.importPrivateContacts(it)
@@ -125,15 +125,9 @@ fun PrivateContactsScreen(
                     NavigationIcon(onClick = { navigateBack() })
                 },
                 actions = {
-//                    IconButton(onClick = { importLauncher.launch("text/vcard") }) {
-//                        Icon(Icons.Default.FileDownload, stringResource(R.string.import_text))
-//                    }
-//                    IconButton(onClick = { exportLauncher.launch("private_contacts.vcf") }) {
-//                        Icon(Icons.Default.FileUpload, stringResource(R.string.export_text))
-//                    }
                     val importText = stringResource(R.string.import_text)
                     RillIconButton(
-                        onClick = { importLauncher.launch("text/vcard") },
+                        onClick = { importLauncher.launch(arrayOf("text/x-vcard", "text/vcard")) },
                         imageVector = Icons.Default.FileDownload,
                         contentDescription = importText
                     )

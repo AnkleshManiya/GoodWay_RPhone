@@ -48,6 +48,7 @@
     <string name="search_contacts">Buscar contactos</string>
     <string name="no_results">Sin resultados</string>
     <string name="no_contacts_found">No se encontraron contactos</string>
+    <string name="no_calls_found">No se encontraron llamadas</string>
     <string name="call_query">Llamar a %s</string>
     <string name="voice_input">Entrada de voz</string>
     <string name="filter_results">Filtrar resultados</string>
@@ -378,6 +379,25 @@
     <string name="all_numbers_are_already_standardized">✅ ¡Todos los números ya están estandarizados!</string>
     <string name="examples_of_changes">Ejemplos de cambios:</string>
     <string name="and_more">Y %s más…</string>
+
+    <string name="contacts_trash_title">Papelera</string>
+    <string name="contacts_trash_empty_title">La papelera está vacía</string>
+    <string name="contacts_trash_empty_desc">Los contactos eliminados con la papelera activada aparecerán aquí durante 30 días antes de eliminarse permanentemente.</string>
+    <string name="contacts_trash_header_hint">Los elementos de la papelera se eliminan permanentemente después de 30 días</string>
+    <string name="contacts_trash_restore_action">Restaurar</string>
+    <string name="contacts_trash_delete_action">Eliminar permanentemente</string>
+    <string name="contacts_trash_delete_action_subtitle">¿Eliminar permanentemente «%1$s»? Esta acción no se puede deshacer.</string>
+    <string name="contacts_trash_empty_all">Vaciar papelera</string>
+    <string name="contacts_trash_empty_all_confirm_title">¿Vaciar la papelera?</string>
+    <string name="contacts_trash_empty_all_confirm_msg">Los %1$d contactos de la papelera se eliminarán permanentemente. Esta acción no se puede deshacer.</string>
+    <string name="contacts_trash_restored_toast">%1$s restaurado</string>
+    <string name="contacts_trash_days_left">Quedan %1$s días</string>
+    <string name="settings_contacts_trash_title">Papelera para contactos eliminados</string>
+    <string name="settings_contacts_trash_supporting">Conservar los contactos eliminados en la papelera durante 30 días antes de eliminarlos permanentemente</string>
+    <string name="settings_contacts_trash_view_supporting">Ver y restaurar contactos eliminados (%1$d en la papelera)</string>
+    <string name="trash_contact">Mover a la papelera</string>
+    <string name="trash_contact_subtitle">¿Mover este contacto a la papelera? Se puede restaurar en un plazo de 30 días.</string>
+    <string name="trash_contacts_subtitle">¿Mover %s contactos seleccionados a la papelera? Se pueden restaurar en un plazo de 30 días.</string>
 
     <string name="merging_contacts">Combinar contactos</string>
     <string name="merging_contacts_subtitle">Buscar y combinar contactos duplicados</string>

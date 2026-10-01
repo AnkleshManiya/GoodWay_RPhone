@@ -380,6 +380,25 @@
     <string name="examples_of_changes">Примеры изменений:</string>
     <string name="and_more">И ещё %s…</string>
 
+    <string name="contacts_trash_title">Корзина</string>
+    <string name="contacts_trash_empty_title">Корзина пуста</string>
+    <string name="contacts_trash_empty_desc">Удалённые контакты (при включенной корзине) будут отображаться здесь в течение 30 дней, прежде чем будут окончательно удалены.</string>
+    <string name="contacts_trash_header_hint">Элементы в корзине окончательно удаляются через 30 дней</string>
+    <string name="contacts_trash_restore_action">Восстановить</string>
+    <string name="contacts_trash_delete_action">Удалить навсегда</string>
+    <string name="contacts_trash_delete_action_subtitle">Удалить «%1$s» навсегда? Это действие нельзя отменить.</string>
+    <string name="contacts_trash_empty_all">Очистить корзину</string>
+    <string name="contacts_trash_empty_all_confirm_title">Очистить корзину?</string>
+    <string name="contacts_trash_empty_all_confirm_msg">Все %1$d контактов в корзине будут удалены навсегда. Это действие нельзя отменить.</string>
+    <string name="contacts_trash_restored_toast">«%1$s» восстановлен</string>
+    <string name="contacts_trash_days_left">Осталось %1$s дн.</string>
+    <string name="settings_contacts_trash_title">Корзина для удалённых контактов</string>
+    <string name="settings_contacts_trash_supporting">Хранить удалённые контакты в корзине 30 дней перед окончательным удалением</string>
+    <string name="settings_contacts_trash_view_supporting">Просмотр и восстановление удалённых контактов (в корзине %1$d)</string>
+    <string name="trash_contact">Удалить в корзину</string>
+    <string name="trash_contact_subtitle">Переместить этот контакт в корзину? Его можно будет восстановить в течение 30 дней.</string>
+    <string name="trash_contacts_subtitle">Переместить %s выбранных контактов в корзину? Их можно будет восстановить в течение 30 дней.</string>
+
     <string name="merging_contacts">Объединить контакты</string>
     <string name="merging_contacts_subtitle">Поиск и объединение дубликатов контактов</string>
     <string name="merging_contacts_description">Объединенные контакты — это несколько записей из разных аккаунтов, связанных в одну. Вы можете редактировать каждый источник отдельно или разъединить их.</string>

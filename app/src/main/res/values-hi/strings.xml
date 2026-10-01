@@ -48,6 +48,7 @@
     <string name="search_contacts">संपर्क खोजें</string>
     <string name="no_results">कोई परिणाम नहीं</string>
     <string name="no_contacts_found">कोई संपर्क नहीं मिला</string>
+    <string name="no_calls_found">कोई कॉल नहीं मिली</string>
     <string name="call_query">%s को कॉल करें</string>
     <string name="voice_input">वॉइस इनपुट</string>
     <string name="filter_results">परिणाम फ़िल्टर करें</string>
@@ -378,6 +379,25 @@
     <string name="all_numbers_are_already_standardized">✅ सभी नंबर पहले से ही मानकीकृत हैं!</string>
     <string name="examples_of_changes">परिवर्तनों के उदाहरण:</string>
     <string name="and_more">और %s और…</string>
+
+    <string name="contacts_trash_title">ट्रैश</string>
+    <string name="contacts_trash_empty_title">ट्रैश खाली है</string>
+    <string name="contacts_trash_empty_desc">ट्रैश सक्षम होने पर हटाए गए संपर्क स्थायी रूप से हटाए जाने से पहले 30 दिनों तक यहाँ दिखाई देंगे।</string>
+    <string name="contacts_trash_header_hint">ट्रैश में मौजूद आइटम 30 दिनों के बाद स्थायी रूप से हटा दिए जाते हैं</string>
+    <string name="contacts_trash_restore_action">पुनर्स्थापित करें</string>
+    <string name="contacts_trash_delete_action">स्थायी रूप से हटाएँ</string>
+    <string name="contacts_trash_delete_action_subtitle">\"%1$s\" को स्थायी रूप से हटाएँ? यह क्रिया पूर्ववत नहीं की जा सकती।</string>
+    <string name="contacts_trash_empty_all">ट्रैश खाली करें</string>
+    <string name="contacts_trash_empty_all_confirm_title">ट्रैश खाली करें?</string>
+    <string name="contacts_trash_empty_all_confirm_msg">ट्रैश में मौजूद सभी %1$d संपर्क स्थायी रूप से हटा दिए जाएँगे। यह क्रिया पूर्ववत नहीं की जा सकती।</string>
+    <string name="contacts_trash_restored_toast">%1$s पुनर्स्थापित किया गया</string>
+    <string name="contacts_trash_days_left">%1$s दिन शेष</string>
+    <string name="settings_contacts_trash_title">हटाए गए संपर्कों के लिए ट्रैश</string>
+    <string name="settings_contacts_trash_supporting">स्थायी रूप से हटाने से पहले हटाए गए संपर्कों को 30 दिनों तक ट्रैश में रखें</string>
+    <string name="settings_contacts_trash_view_supporting">हटाए गए संपर्क देखें और पुनर्स्थापित करें (ट्रैश में %1$d)</string>
+    <string name="trash_contact">ट्रैश में ले जाएँ</string>
+    <string name="trash_contact_subtitle">इस संपर्क को ट्रैश में ले जाएँ? इसे 30 दिनों के भीतर पुनर्स्थापित किया जा सकता है।</string>
+    <string name="trash_contacts_subtitle">%s चयनित संपर्कों को ट्रैश में ले जाएँ? उन्हें 30 दिनों के भीतर पुनर्स्थापित किया जा सकता है।</string>
 
     <string name="merging_contacts">संपर्क मर्ज करना</string>
     <string name="merging_contacts_subtitle">डुप्लिकेट संपर्क ढूँढना और मर्ज करना</string>

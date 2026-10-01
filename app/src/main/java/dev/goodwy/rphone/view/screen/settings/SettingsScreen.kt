@@ -44,6 +44,7 @@ import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.PeopleAlt
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.PrivacyTip
+import androidx.compose.material.icons.rounded.Recycling
 import androidx.compose.material.icons.rounded.Restore
 import androidx.compose.material.icons.rounded.StarRate
 import androidx.compose.material.icons.rounded.SystemUpdate
@@ -87,6 +88,7 @@ import dev.goodwy.rphone.GP_DEV_URL
 import dev.goodwy.rphone.PRIVACY_POLICY
 import dev.goodwy.rphone.SITE_URL
 import dev.goodwy.rphone.bottomBarHeight
+import dev.goodwy.rphone.controller.ContactsViewModel
 import dev.goodwy.rphone.controller.PurchaseHelper
 import dev.goodwy.rphone.controller.util.ContactUtils.getAccountIcon
 import dev.goodwy.rphone.controller.util.openLink
@@ -98,6 +100,7 @@ import dev.goodwy.rphone.view.theme.TabTransitionStyle
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinActivityViewModel
 import java.io.File
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -263,6 +266,14 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
     fun restoreBackup() {
         restoreLauncher.launch("*/*")
     }
+
+
+    val viewModel: ContactsViewModel = koinActivityViewModel()
+    val trashedContacts by viewModel.trashedContacts.collectAsState()
+    LaunchedEffect(Unit) {
+        viewModel.fetchTrashedContacts()
+    }
+    var trashEnabled by remember(settingsState) { mutableStateOf(prefs.isContactsTrashEnabled()) }
 
     // ── Search in Settings ─────────────────────────────────────────────────
     var settingsSearchQuery by remember { mutableStateOf("") }
@@ -560,8 +571,21 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 stringResource(R.string.merge_and_fix),
                 stringResource(R.string.standardize_phone_numbers),
                 stringResource(R.string.standardize_phone_numbers_subtitle),
+                stringResource(R.string.settings_contacts_trash_title),
+                stringResource(R.string.settings_contacts_trash_supporting),
             )
         ) { navigator.navigate(ContactManagementScreenDestination) },
+        SettingsSearchEntry(
+            headline = stringResource(R.string.contacts_trash_title),
+            supporting = stringResource(R.string.settings_contacts_trash_view_supporting, trashedContacts.size),
+            leadingIcon = ImageVector.vectorResource(id = R.drawable.ic_delete),
+            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
+            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
+            options = listOf(
+                stringResource(R.string.contacts_trash_restore_action),
+                stringResource(R.string.contacts_trash_delete_action),
+            )
+        ) { navigator.navigate(TrashContactsScreenDestination) },
         SettingsSearchEntry(
             headline = stringResource(R.string.merging_contacts),
             supporting = stringResource(R.string.merging_contacts_subtitle),

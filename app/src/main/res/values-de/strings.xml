@@ -48,6 +48,7 @@
     <string name="search_contacts">Kontakte durchsuchen</string>
     <string name="no_results">Keine Ergebnisse</string>
     <string name="no_contacts_found">Keine Kontakte gefunden</string>
+    <string name="no_calls_found">Keine Anrufe gefunden</string>
     <string name="call_query">%s anrufen</string>
     <string name="voice_input">Spracheingabe</string>
     <string name="filter_results">Ergebnisse filtern</string>
@@ -378,6 +379,25 @@
     <string name="all_numbers_are_already_standardized">✅ Alle Nummern sind bereits standardisiert!</string>
     <string name="examples_of_changes">Beispiele für Änderungen:</string>
     <string name="and_more">Und %s weitere…</string>
+
+    <string name="contacts_trash_title">Papierkorb</string>
+    <string name="contacts_trash_empty_title">Papierkorb ist leer</string>
+    <string name="contacts_trash_empty_desc">Mit aktiviertem Papierkorb gelöschte Kontakte werden hier 30 Tage lang angezeigt, bevor sie endgültig entfernt werden.</string>
+    <string name="contacts_trash_header_hint">Elemente im Papierkorb werden nach 30 Tagen endgültig gelöscht</string>
+    <string name="contacts_trash_restore_action">Wiederherstellen</string>
+    <string name="contacts_trash_delete_action">Endgültig löschen</string>
+    <string name="contacts_trash_delete_action_subtitle">„%1$s“ endgültig löschen? Diese Aktion kann nicht rückgängig gemacht werden.</string>
+    <string name="contacts_trash_empty_all">Papierkorb leeren</string>
+    <string name="contacts_trash_empty_all_confirm_title">Papierkorb leeren?</string>
+    <string name="contacts_trash_empty_all_confirm_msg">Alle %1$d Kontakte im Papierkorb werden endgültig gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.</string>
+    <string name="contacts_trash_restored_toast">%1$s wiederhergestellt</string>
+    <string name="contacts_trash_days_left">Noch %1$s Tage</string>
+    <string name="settings_contacts_trash_title">Papierkorb für gelöschte Kontakte</string>
+    <string name="settings_contacts_trash_supporting">Gelöschte Kontakte 30 Tage lang im Papierkorb aufbewahren, bevor sie endgültig entfernt werden</string>
+    <string name="settings_contacts_trash_view_supporting">Gelöschte Kontakte anzeigen und wiederherstellen (%1$d im Papierkorb)</string>
+    <string name="trash_contact">In den Papierkorb verschieben</string>
+    <string name="trash_contact_subtitle">Diesen Kontakt in den Papierkorb verschieben? Er kann innerhalb von 30 Tagen wiederhergestellt werden.</string>
+    <string name="trash_contacts_subtitle">%s ausgewählte Kontakte in den Papierkorb verschieben? Sie können innerhalb von 30 Tagen wiederhergestellt werden.</string>
 
     <string name="merging_contacts">Kontakte zusammenführen</string>
     <string name="merging_contacts_subtitle">Doppelte Kontakte finden und zusammenführen</string>

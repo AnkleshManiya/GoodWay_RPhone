@@ -9,6 +9,8 @@ import androidx.lifecycle.viewModelScope
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.device_only
 import dev.goodwy.rphone.modal.data.Contact
+import dev.goodwy.rphone.modal.db.TrashedContactDao
+import dev.goodwy.rphone.modal.db.TrashedContactEntity
 import dev.goodwy.rphone.modal.repository.ContactsRepository
 import dev.goodwy.rphone.private_only
 import dev.goodwy.rphone.view.screen.settings.NumberChangeExample
@@ -26,11 +28,15 @@ import kotlinx.coroutines.withContext
 class ContactsViewModel(
     application: Application,
     private val contactsRepo: IContactsRepository,
-    private val preferenceManager: PreferenceManager
+    private val preferenceManager: PreferenceManager,
+    private val trashedContactDao: TrashedContactDao
 ) : AndroidViewModel(application) {
 
     private val _allContacts = MutableStateFlow<List<Contact>>(emptyList())
     val allContacts: StateFlow<List<Contact>> = _allContacts.asStateFlow()
+
+    private val _trashedContacts = MutableStateFlow<List<TrashedContactEntity>>(emptyList())
+    val trashedContacts: StateFlow<List<TrashedContactEntity>> = _trashedContacts.asStateFlow()
 
     private val _allContactsFull = MutableStateFlow<List<Contact>>(emptyList())
     val allContactsFull: StateFlow<List<Contact>> = _allContactsFull.asStateFlow()
@@ -316,8 +322,48 @@ class ContactsViewModel(
         return maxEntry?.let { accountCounts[it.key] }
     }
 
+    fun fetchTrashedContacts() {
+        viewModelScope.launch(Dispatchers.IO) {
+            _trashedContacts.value = contactsRepo.getTrashedContacts()
+        }
+    }
+
+    fun restoreTrashedContact(localId: Long, onDone: (() -> Unit)? = null) {
+        viewModelScope.launch(Dispatchers.IO) {
+            contactsRepo.restoreTrashedContact(localId)
+            _trashedContacts.value = contactsRepo.getTrashedContacts()
+            fetchContacts()
+            withContext(Dispatchers.Main) {
+                onDone?.invoke()
+            }
+        }
+    }
+
+    fun permanentlyDeleteTrashedContact(localId: Long) {
+        viewModelScope.launch(Dispatchers.IO) {
+            contactsRepo.permanentlyDeleteTrashedContact(localId)
+            _trashedContacts.value = contactsRepo.getTrashedContacts()
+        }
+    }
+
+    fun emptyTrash(onDone: (() -> Unit)? = null) {
+        viewModelScope.launch(Dispatchers.IO) {
+            contactsRepo.emptyTrash()
+            _trashedContacts.value = emptyList()
+            withContext(Dispatchers.Main) {
+                onDone?.invoke()
+            }
+        }
+    }
+
     fun deleteContact(contactId: String) {
         viewModelScope.launch {
+            if (preferenceManager.isContactsTrashEnabled()) {
+                val fullContact = contactsRepo.getContactById(contactId)
+                if (fullContact != null) {
+                    trashedContactDao.insert(TrashedContactEntity.fromContact(fullContact))
+                }
+            }
             contactsRepo.deleteContact(contactId)
 
             val currentOrder = preferenceManager.getFavoritesOrder().toMutableList()
@@ -327,11 +373,18 @@ class ContactsViewModel(
             }
 
             fetchContacts()
+            fetchTrashedContacts()
         }
     }
 
     fun deleteContacts(contactIds: List<String>) {
         viewModelScope.launch {
+            if (preferenceManager.isContactsTrashEnabled()) {
+                val toTrash = contactIds.mapNotNull { contactsRepo.getContactById(it) }
+                if (toTrash.isNotEmpty()) {
+                    trashedContactDao.insertAll(toTrash.map { TrashedContactEntity.fromContact(it) })
+                }
+            }
             contactsRepo.deleteContacts(contactIds)
 
             val currentOrder = preferenceManager.getFavoritesOrder().toMutableList()
@@ -347,6 +400,7 @@ class ContactsViewModel(
             }
 
             fetchContacts()
+            fetchTrashedContacts()
         }
     }
 

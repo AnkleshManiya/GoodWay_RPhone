@@ -52,6 +52,7 @@
     <string name="search_contacts">Cerca contatti</string>
     <string name="no_results">Nessun risultato</string>
     <string name="no_contacts_found">Nessun contatto trovato</string>
+    <string name="no_calls_found">Nessuna chiamata trovata</string>
     <string name="call_query">Chiama %s</string>
     <string name="voice_input">Input vocale</string>
     <string name="filter_results">Filtra risultati</string>
@@ -381,6 +382,25 @@
     <string name="all_numbers_are_already_standardized">✅ Tutti i numeri sono già standardizzati!</string>
     <string name="examples_of_changes">Esempi di modifiche:</string>
     <string name="and_more">E altri %s…</string>
+
+    <string name="contacts_trash_title">Cestino</string>
+    <string name="contacts_trash_empty_title">Il cestino è vuoto</string>
+    <string name="contacts_trash_empty_desc">I contatti eliminati con il cestino attivo appariranno qui per 30 giorni prima di essere rimossi definitivamente.</string>
+    <string name="contacts_trash_header_hint">Gli elementi nel cestino vengono eliminati definitivamente dopo 30 giorni</string>
+    <string name="contacts_trash_restore_action">Ripristina</string>
+    <string name="contacts_trash_delete_action">Elimina definitivamente</string>
+    <string name="contacts_trash_delete_action_subtitle">Eliminare definitivamente \"%1$s\"? Questa azione non può essere annullata.</string>
+    <string name="contacts_trash_empty_all">Svuota cestino</string>
+    <string name="contacts_trash_empty_all_confirm_title">Svuotare il cestino?</string>
+    <string name="contacts_trash_empty_all_confirm_msg">Tutti i %1$d contatti nel cestino verranno eliminati definitivamente. Questa azione non può essere annullata.</string>
+    <string name="contacts_trash_restored_toast">%1$s ripristinato</string>
+    <string name="contacts_trash_days_left">%1$s giorni rimanenti</string>
+    <string name="settings_contacts_trash_title">Cestino per i contatti eliminati</string>
+    <string name="settings_contacts_trash_supporting">Conserva i contatti eliminati nel cestino per 30 giorni prima di rimuoverli definitivamente</string>
+    <string name="settings_contacts_trash_view_supporting">Visualizza e ripristina i contatti eliminati (%1$d nel cestino)</string>
+    <string name="trash_contact">Sposta nel cestino</string>
+    <string name="trash_contact_subtitle">Spostare questo contatto nel cestino? Può essere ripristinato entro 30 giorni.</string>
+    <string name="trash_contacts_subtitle">Spostare %s contatti selezionati nel cestino? Possono essere ripristinati entro 30 giorni.</string>
 
     <string name="merging_contacts">Unione contatti</string>
     <string name="merging_contacts_subtitle">Ricerca e unione di contatti duplicati</string>

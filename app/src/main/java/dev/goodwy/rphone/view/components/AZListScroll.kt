@@ -325,9 +325,10 @@ fun ContactListItem(
 
     // Delete confirmation dialog
     if (showDeleteConfirm) {
+        var trashEnabled by remember { mutableStateOf(prefs.isContactsTrashEnabled()) }
         RillDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            title = stringResource(R.string.delete_contact),
+            title = if (trashEnabled) stringResource(R.string.trash_contact) else stringResource(R.string.delete_contact),
             icon = ImageVector.vectorResource(id = R.drawable.ic_delete),
             iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
             iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
@@ -346,7 +347,7 @@ fun ContactListItem(
             }
         ) {
             Text(
-                stringResource(R.string.delete_contact_subtitle),
+                if (trashEnabled) stringResource(R.string.trash_contact_subtitle) else stringResource(R.string.delete_contact_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,

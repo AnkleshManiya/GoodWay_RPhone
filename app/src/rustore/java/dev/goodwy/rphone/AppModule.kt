@@ -34,12 +34,14 @@ val appModule = module {
             "rill_database"
         ).addMigrations(RillDatabase.MIGRATION_1_2)
             .addMigrations(RillDatabase.MIGRATION_2_3)
+            .addMigrations(RillDatabase.MIGRATION_3_4)
             .build()
     }
     single { get<RillDatabase>().privateContactDao() }
+    single { get<RillDatabase>().trashedContactDao() }
 
     single<IContactsRepository> {
-        ContactsRepository(androidContext(), get())
+        ContactsRepository(androidContext(), get(), get())
     }
     single<ICallLogRepository> {
         CallLogRepository(androidContext(), androidContext().contentResolver, get())
@@ -54,7 +56,7 @@ val appModule = module {
     single { CallNotificationManager(androidContext(), get()) }
     single<ICallRepository> { CallRepositoryImpl() }
 
-    viewModel { ContactsViewModel(androidApplication(), get(), get()) }
+    viewModel { ContactsViewModel(androidApplication(), get(), get(), get()) }
     viewModel { CallLogViewModel(androidApplication(), get(), androidContext().contentResolver, get()) }
     viewModel { CallViewModel(androidContext(), get(), get()) }
     viewModel { MainViewModel(get()) }

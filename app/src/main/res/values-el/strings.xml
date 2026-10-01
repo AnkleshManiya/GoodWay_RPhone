@@ -48,6 +48,7 @@
     <string name="search_contacts">Αναζήτηση επαφών</string>
     <string name="no_results">Κανένα αποτέλεσμα</string>
     <string name="no_contacts_found">Δεν βρέθηκαν επαφές</string>
+    <string name="no_calls_found">Δεν βρέθηκαν κλήσεις</string>
     <string name="call_query">Κλήση %s</string>
     <string name="voice_input">Φωνητική είσοδος</string>
     <string name="filter_results">Φιλτράρισμα αποτελεσμάτων</string>
@@ -378,6 +379,25 @@
     <string name="all_numbers_are_already_standardized">✅ Όλοι οι αριθμοί είναι ήδη τυποποιημένοι!</string>
     <string name="examples_of_changes">Παραδείγματα αλλαγών:</string>
     <string name="and_more">Και %s ακόμη…</string>
+
+    <string name="contacts_trash_title">Κάδος</string>
+    <string name="contacts_trash_empty_title">Ο κάδος είναι άδειος</string>
+    <string name="contacts_trash_empty_desc">Οι επαφές που διαγράφηκαν με ενεργοποιημένο τον κάδο θα εμφανίζονται εδώ για 30 ημέρες πριν διαγραφούν οριστικά.</string>
+    <string name="contacts_trash_header_hint">Τα στοιχεία στον κάδο διαγράφονται οριστικά μετά από 30 ημέρες</string>
+    <string name="contacts_trash_restore_action">Επαναφορά</string>
+    <string name="contacts_trash_delete_action">Οριστική διαγραφή</string>
+    <string name="contacts_trash_delete_action_subtitle">Οριστική διαγραφή του «%1$s»; Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.</string>
+    <string name="contacts_trash_empty_all">Άδειασμα κάδου</string>
+    <string name="contacts_trash_empty_all_confirm_title">Άδειασμα κάδου;</string>
+    <string name="contacts_trash_empty_all_confirm_msg">Και οι %1$d επαφές στον κάδο θα διαγραφούν οριστικά. Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.</string>
+    <string name="contacts_trash_restored_toast">Επαναφέρθηκε το %1$s</string>
+    <string name="contacts_trash_days_left">Απομένουν %1$s ημέρες</string>
+    <string name="settings_contacts_trash_title">Κάδος για διαγραμμένες επαφές</string>
+    <string name="settings_contacts_trash_supporting">Διατήρηση των διαγραμμένων επαφών στον κάδο για 30 ημέρες πριν από την οριστική διαγραφή</string>
+    <string name="settings_contacts_trash_view_supporting">Προβολή και επαναφορά διαγραμμένων επαφών (%1$d στον κάδο)</string>
+    <string name="trash_contact">Μετακίνηση στον κάδο</string>
+    <string name="trash_contact_subtitle">Μετακίνηση αυτής της επαφής στον κάδο; Μπορεί να επαναφερθεί εντός 30 ημερών.</string>
+    <string name="trash_contacts_subtitle">Μετακίνηση %s επιλεγμένων επαφών στον κάδο; Μπορούν να επαναφερθούν εντός 30 ημερών.</string>
 
     <string name="merging_contacts">Συγχώνευση επαφών</string>
     <string name="merging_contacts_subtitle">Εύρεση και συγχώνευση διπλότυπων επαφών</string>

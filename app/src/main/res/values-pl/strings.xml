@@ -48,6 +48,7 @@
     <string name="search_contacts">Szukaj kontaktów</string>
     <string name="no_results">Brak wyników</string>
     <string name="no_contacts_found">Nie znaleziono kontaktów</string>
+    <string name="no_calls_found">Nie znaleziono połączeń</string>
     <string name="call_query">Zadzwoń do %s</string>
     <string name="voice_input">Wejście głosowe</string>
     <string name="filter_results">Filtruj wyniki</string>
@@ -378,6 +379,25 @@
     <string name="all_numbers_are_already_standardized">✅ Wszystkie numery są już ujednolicone!</string>
     <string name="examples_of_changes">Przykłady zmian:</string>
     <string name="and_more">I %s więcej…</string>
+
+    <string name="contacts_trash_title">Kosz</string>
+    <string name="contacts_trash_empty_title">Kosz jest pusty</string>
+    <string name="contacts_trash_empty_desc">Kontakty usunięte przy włączonym koszu będą wyświetlane tutaj przez 30 dni, zanim zostaną trwale usunięte.</string>
+    <string name="contacts_trash_header_hint">Elementy w koszu są trwale usuwane po 30 dniach</string>
+    <string name="contacts_trash_restore_action">Przywróć</string>
+    <string name="contacts_trash_delete_action">Usuń trwale</string>
+    <string name="contacts_trash_delete_action_subtitle">Trwale usunąć „%1$s”? Tej operacji nie można cofnąć.</string>
+    <string name="contacts_trash_empty_all">Opróżnij kosz</string>
+    <string name="contacts_trash_empty_all_confirm_title">Opróżnić kosz?</string>
+    <string name="contacts_trash_empty_all_confirm_msg">Wszystkie %1$d kontakty w koszu zostaną trwale usunięte. Tej operacji nie można cofnąć.</string>
+    <string name="contacts_trash_restored_toast">Przywrócono %1$s</string>
+    <string name="contacts_trash_days_left">Pozostało %1$s dni</string>
+    <string name="settings_contacts_trash_title">Kosz dla usuniętych kontaktów</string>
+    <string name="settings_contacts_trash_supporting">Przechowuj usunięte kontakty w koszu przez 30 dni przed trwałym usunięciem</string>
+    <string name="settings_contacts_trash_view_supporting">Wyświetl i przywróć usunięte kontakty (%1$d w koszu)</string>
+    <string name="trash_contact">Przenieś do kosza</string>
+    <string name="trash_contact_subtitle">Przenieść ten kontakt do kosza? Można go przywrócić w ciągu 30 dni.</string>
+    <string name="trash_contacts_subtitle">Przenieść %s wybranych kontaktów do kosza? Można je przywrócić w ciągu 30 dni.</string>
 
     <string name="merging_contacts">Scalanie kontaktów</string>
     <string name="merging_contacts_subtitle">Znajdowanie i scalanie duplikatów kontaktów</string>

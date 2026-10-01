@@ -24,7 +24,9 @@ import androidx.compose.material.icons.rounded.FormatListNumbered
 import androidx.compose.material.icons.rounded.Handyman
 import androidx.compose.material.icons.rounded.Merge
 import androidx.compose.material.icons.rounded.PeopleAlt
+import androidx.compose.material.icons.rounded.Recycling
 import androidx.compose.material.icons.rounded.SortByAlpha
+import androidx.compose.material.icons.rounded.TouchApp
 import androidx.compose.material3.*
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.*
@@ -32,9 +34,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -51,17 +55,21 @@ import com.ramcosta.composedestinations.generated.destinations.ContactMergeDupli
 import com.ramcosta.composedestinations.generated.destinations.ContactUnmergeDuplicatesScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.ContactVisibilityScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.PrivateContactsScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.TrashContactsScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.ContactUtils.getAccountIcon
+import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.view.components.NavigationIcon
 import dev.goodwy.rphone.view.components.RillAnimatedSection
 import dev.goodwy.rphone.view.components.RillSelectListItem
+import dev.goodwy.rphone.view.components.RillSwitchListItem
 import dev.goodwy.rphone.view.components.ScrollHapticsEffect
 import dev.goodwy.rphone.view.components.Title
 import dev.goodwy.rphone.view.theme.customColors
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinActivityViewModel
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -89,6 +97,8 @@ fun ContactManagementScreen(
     var duplicateGroups by remember { mutableStateOf<List<List<Contact>>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     val standardizeProgress by viewModel.standardizeProgress.collectAsStateWithLifecycle()
+    val prefs = koinInject<PreferenceManager>()
+    val settingsState by prefs.settingsChanged.collectAsStateWithLifecycle()
 
     if (standardizeProgress != null) {
         RillDialog(
@@ -220,6 +230,33 @@ fun ContactManagementScreen(
                                 iconBgContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
                                 trailingIcon = Icons.Default.ChevronRight,
                                 onClick = { navigator.navigate(PrivateContactsScreenDestination) }
+                            )
+                            var trashEnabled by remember(settingsState) { mutableStateOf(prefs.isContactsTrashEnabled()) }
+                            RillSwitchListItem(
+                                headline = stringResource(R.string.settings_contacts_trash_title),
+                                supporting = stringResource(R.string.settings_contacts_trash_supporting),
+                                leadingIcon = Icons.Rounded.Recycling,
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
+                                checked = trashEnabled,
+                                onCheckedChange = { enabled ->
+                                    trashEnabled = enabled
+                                    prefs.setContactsTrashEnabled(enabled)
+                                }
+                            )
+
+                            val trashedContacts by viewModel.trashedContacts.collectAsState()
+                            LaunchedEffect(Unit) {
+                                viewModel.fetchTrashedContacts()
+                            }
+                            RillListItem(
+                                headline = stringResource(R.string.contacts_trash_title),
+                                supporting = stringResource(R.string.settings_contacts_trash_view_supporting, trashedContacts.size),
+                                leadingIcon = ImageVector.vectorResource(id = R.drawable.ic_delete),
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
+                                trailingIcon = Icons.Default.ChevronRight,
+                                onClick = { navigator.navigate(TrashContactsScreenDestination) }
                             )
                         }
                     }

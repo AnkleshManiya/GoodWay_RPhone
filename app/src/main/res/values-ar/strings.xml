@@ -49,6 +49,7 @@
     <string name="search_contacts">بحث في جهات الاتصال</string>
     <string name="no_results">لا توجد نتائج</string>
     <string name="no_contacts_found">لم يتم العثور على جهات اتصال</string>
+    <string name="no_calls_found">لم يتم العثور على مكالمات</string>
     <string name="call_query">الاتصال بـ %s</string>
     <string name="voice_input">إدخال صوتي</string>
     <string name="filter_results">تصفية النتائج</string>
@@ -379,6 +380,25 @@
     <string name="all_numbers_are_already_standardized">✅ جميع الأرقام موحدة بالفعل!</string>
     <string name="examples_of_changes">أمثلة على التغييرات:</string>
     <string name="and_more">و %s أكثر…</string>
+
+    <string name="contacts_trash_title">سلة المحذوفات</string>
+    <string name="contacts_trash_empty_title">سلة المحذوفات فارغة</string>
+    <string name="contacts_trash_empty_desc">ستظهر جهات الاتصال المحذوفة مع تمكين سلة المحذوفات هنا لمدة 30 يومًا قبل إزالتها نهائيًا.</string>
+    <string name="contacts_trash_header_hint">يتم حذف العناصر الموجودة في سلة المحذوفات نهائيًا بعد 30 يومًا</string>
+    <string name="contacts_trash_restore_action">استعادة</string>
+    <string name="contacts_trash_delete_action">حذف نهائي</string>
+    <string name="contacts_trash_delete_action_subtitle">حذف \"%1$s\" نهائيًا؟ لا يمكن التراجع عن هذا الإجراء.</string>
+    <string name="contacts_trash_empty_all">إفراغ سلة المحذوفات</string>
+    <string name="contacts_trash_empty_all_confirm_title">إفراغ سلة المحذوفات؟</string>
+    <string name="contacts_trash_empty_all_confirm_msg">سيتم حذف جميع جهات الاتصال الـ %1$d في سلة المحذوفات نهائيًا. لا يمكن التراجع عن هذا الإجراء.</string>
+    <string name="contacts_trash_restored_toast">تمت استعادة %1$s</string>
+    <string name="contacts_trash_days_left">تبقى %1$s أيام</string>
+    <string name="settings_contacts_trash_title">سلة المحذوفات لجهات الاتصال المحذوفة</string>
+    <string name="settings_contacts_trash_supporting">الاحتفاظ بجهات الاتصال المحذوفة في سلة المحذوفات لمدة 30 يومًا قبل إزالتها نهائيًا</string>
+    <string name="settings_contacts_trash_view_supporting">عرض واستعادة جهات الاتصال المحذوفة (%1$d في سلة المحذوفات)</string>
+    <string name="trash_contact">نقل إلى سلة المحذوفات</string>
+    <string name="trash_contact_subtitle">نقل جهة الاتصال هذه إلى سلة المحذوفات؟ يمكن استعادتها خلال 30 يومًا.</string>
+    <string name="trash_contacts_subtitle">نقل %s جهات اتصال محددة إلى سلة المحذوفات؟ يمكن استعادتها خلال 30 يومًا.</string>
 
     <string name="merging_contacts">دمج جهات الاتصال</string>
     <string name="merging_contacts_subtitle">العثور على جهات الاتصال المكررة ودمجها</string>

@@ -346,6 +346,8 @@ class PreferenceManager(context: Context) {
         const val KEY_SPEED_DIAL            = "speed_dial"
         const val KEY_T9_DIALING            = "t9_dialing"
         const val KEY_PROXIMITY_SENSOR = "proximity_sensor"
+        const val KEY_AUTO_SPEAKER_PROXIMITY = "auto_speaker_proximity"
+        const val KEY_CONTACTS_TRASH_ENABLED = "contacts_trash_enabled"
         const val KEY_INCOMING_CALL_POPUP = "incoming_call_popup"
         const val KEY_ALWAYS_FULL_SCREEN_CALLS = "always_full_screen_calls"
         const val KEY_AUTO_REDIAL_BUSY = "auto_redial_busy"
@@ -647,6 +649,12 @@ class PreferenceManager(context: Context) {
 
     fun isDualSimDialpadButtonsEnabled(): Boolean = getBoolean(KEY_DUAL_SIM_DIALPAD_BUTTONS, false)
     fun setDualSimDialpadButtonsEnabled(enabled: Boolean) = setBoolean(KEY_DUAL_SIM_DIALPAD_BUTTONS, enabled)
+
+    fun isAutoSpeakerProximityEnabled(): Boolean = getBoolean(KEY_AUTO_SPEAKER_PROXIMITY, false)
+    fun setAutoSpeakerProximityEnabled(enabled: Boolean) = setBoolean(KEY_AUTO_SPEAKER_PROXIMITY, enabled)
+
+    fun isContactsTrashEnabled(): Boolean = getBoolean(KEY_CONTACTS_TRASH_ENABLED, true)
+    fun setContactsTrashEnabled(enabled: Boolean) = setBoolean(KEY_CONTACTS_TRASH_ENABLED, enabled)
 
     fun resetSwipeActions() {
         setBoolean(KEY_SWIPE_ACTIONS_ENABLED, false)

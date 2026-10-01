@@ -49,6 +49,7 @@
     <string name="search_contacts">חיפוש אנשי קשר</string>
     <string name="no_results">אין תוצאות</string>
     <string name="no_contacts_found">לא נמצאו אנשי קשר</string>
+    <string name="no_calls_found">לא נמצאו שיחות</string>
     <string name="call_query">התקשר ל-%s</string>
     <string name="voice_input">קלט קולי</string>
     <string name="filter_results">סנן תוצאות</string>
@@ -379,6 +380,25 @@
     <string name="all_numbers_are_already_standardized">✅ כל המספרים כבר תקינים!</string>
     <string name="examples_of_changes">דוגמאות לשינויים:</string>
     <string name="and_more">ועוד %s…</string>
+
+    <string name="contacts_trash_title">אשפה</string>
+    <string name="contacts_trash_empty_title">האשפה ריקה</string>
+    <string name="contacts_trash_empty_desc">אנשי קשר שנמחקו כשהאשפה מופעלת יופיעו כאן למשך 30 יום לפני שיוסרו לצמיתות.</string>
+    <string name="contacts_trash_header_hint">פריטים באשפה נמחקים לצמיתות לאחר 30 יום</string>
+    <string name="contacts_trash_restore_action">שחזר</string>
+    <string name="contacts_trash_delete_action">מחק לצמיתות</string>
+    <string name="contacts_trash_delete_action_subtitle">למחוק את \"%1$s\" לצמיתות? לא ניתן לבטל פעולה זו.</string>
+    <string name="contacts_trash_empty_all">רוקן אשפה</string>
+    <string name="contacts_trash_empty_all_confirm_title">לרוקן את האשפה?</string>
+    <string name="contacts_trash_empty_all_confirm_msg">כל %1$d אנשי הקשר באשפה יימחקו לצמיתות. לא ניתן לבטל פעולה זו.</string>
+    <string name="contacts_trash_restored_toast">%1$s שוחזר</string>
+    <string name="contacts_trash_days_left">נותרו %1$s ימים</string>
+    <string name="settings_contacts_trash_title">אשפה עבור אנשי קשר שנמחקו</string>
+    <string name="settings_contacts_trash_supporting">שמור אנשי קשר שנמחקו באשפה למשך 30 יום לפני הסרתם לצמיתות</string>
+    <string name="settings_contacts_trash_view_supporting">הצג ושחזר אנשי קשר שנמחקו (%1$d באשפה)</string>
+    <string name="trash_contact">העבר לאשפה</string>
+    <string name="trash_contact_subtitle">להעביר איש קשר זה לאשפה? ניתן לשחזרו תוך 30 יום.</string>
+    <string name="trash_contacts_subtitle">להעביר %s אנשי קשר נבחרים לאשפה? ניתן לשחזרם תוך 30 יום.</string>
 
     <string name="merging_contacts">מיזוג אנשי קשר</string>
     <string name="merging_contacts_subtitle">איתור ומיזוג אנשי קשר כפולים</string>

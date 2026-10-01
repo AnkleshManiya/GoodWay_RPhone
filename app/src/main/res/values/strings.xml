@@ -383,6 +383,25 @@
     <string name="examples_of_changes">Examples of changes:</string>
     <string name="and_more">And %s more…</string>
 
+    <string name="contacts_trash_title">Trash</string>
+    <string name="contacts_trash_empty_title">Trash is empty</string>
+    <string name="contacts_trash_empty_desc">Contacts deleted with Trash enabled will appear here for 30 days before being permanently removed.</string>
+    <string name="contacts_trash_header_hint">Items in Trash are permanently deleted after 30 days</string>
+    <string name="contacts_trash_restore_action">Restore</string>
+    <string name="contacts_trash_delete_action">Delete permanently</string>
+    <string name="contacts_trash_delete_action_subtitle">Permanently delete \"%1$s\"? This action cannot be undone.</string>
+    <string name="contacts_trash_empty_all">Empty Trash</string>
+    <string name="contacts_trash_empty_all_confirm_title">Empty Trash?</string>
+    <string name="contacts_trash_empty_all_confirm_msg">All %1$d contacts in Trash will be permanently deleted. This action cannot be undone.</string>
+    <string name="contacts_trash_restored_toast">Restored %1$s</string>
+    <string name="contacts_trash_days_left">%1$s days left</string>
+    <string name="settings_contacts_trash_title">Trash for deleted contacts</string>
+    <string name="settings_contacts_trash_supporting">Keep deleted contacts in Trash for 30 days before permanently removing them</string>
+    <string name="settings_contacts_trash_view_supporting">View and restore deleted contacts (%1$d in Trash)</string>
+    <string name="trash_contact">Move to Trash</string>
+    <string name="trash_contact_subtitle">Are you sure you want to move this contact to Trash? It can be restored within 30 days.</string>
+    <string name="trash_contacts_subtitle">Are you sure you want to move %s selected contacts to Trash? They can be restored within 30 days.</string>
+
     <string name="merging_contacts">Merging Contacts</string>
     <string name="merging_contacts_subtitle">Finding and merging duplicate contacts</string>
     <string name="merging_contacts_description">Merged contacts are multiple entries from different accounts linked into one. You can edit each source separately or unlink them.</string>

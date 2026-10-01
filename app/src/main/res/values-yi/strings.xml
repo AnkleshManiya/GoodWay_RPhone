@@ -49,6 +49,7 @@
     <string name="search_contacts">זוכן קאָנטאַקטן</string>
     <string name="no_results">קיין רעזולטאַטן</string>
     <string name="no_contacts_found">קיין קאָנטאַקטן געפֿונען</string>
+    <string name="no_calls_found">קיין רופן נישט געפֿונען</string>
     <string name="call_query">רופן %s</string>
     <string name="voice_input">שטים איינגאַב</string>
     <string name="filter_results">פֿילטער רעזולטאַטן</string>
@@ -378,6 +379,25 @@
     <string name="all_numbers_are_already_standardized">✅ אַלע נומערן זענען שוין סטאַנדאַרדיזירט!</string>
     <string name="examples_of_changes">בייַשפּילן פֿון ענדערונגען:</string>
     <string name="and_more">און נאָך %s…</string>
+
+    <string name="contacts_trash_title">אָפּפֿאַל</string>
+    <string name="contacts_trash_empty_title">דער אָפּפֿאַל איז ליידיק</string>
+    <string name="contacts_trash_empty_desc">קאָנטאַקטן אויסגעמעקט מיט אָפּפֿאַל אַקטיוו וועלן דערשייַנען דאָ פֿאַר 30 טעג איידער זיי ווערן אויסגעמעקט אויף אייביק.</string>
+    <string name="contacts_trash_header_hint">זאַכן אין אָפּפֿאַל ווערן אויסגעמעקט אויף אייביק נאָך 30 טעג</string>
+    <string name="contacts_trash_restore_action">צוריקשטעלן</string>
+    <string name="contacts_trash_delete_action">אויסמעקן אויף אייביק</string>
+    <string name="contacts_trash_delete_action_subtitle">אויסמעקן \"%1$s\" אויף אייביק? דער אַקציע קען מען נישט צוריקקערן.</string>
+    <string name="contacts_trash_empty_all">ליידיקן אָפּפֿאַל</string>
+    <string name="contacts_trash_empty_all_confirm_title">ליידיקן דעם אָפּפֿאַל?</string>
+    <string name="contacts_trash_empty_all_confirm_msg">אַלע %1$d קאָנטאַקטן אין אָפּפֿאַל וועלן אויסגעמעקט ווערן אויף אייביק. דער אַקציע קען מען נישט צוריקקערן.</string>
+    <string name="contacts_trash_restored_toast">%1$s צוריקגעשטעלט</string>
+    <string name="contacts_trash_days_left">נאָך %1$s טעג</string>
+    <string name="settings_contacts_trash_title">אָפּפֿאַל פֿאַר אויסגעמעקטע קאָנטאַקטן</string>
+    <string name="settings_contacts_trash_supporting">האַלטן אויסגעמעקטע קאָנטאַקטן אין אָפּפֿאַל פֿאַר 30 טעג איידער זיי ווערן אויסגעמעקט אויף אייביק</string>
+    <string name="settings_contacts_trash_view_supporting">זען און צוריקשטעלן אויסגעמעקטע קאָנטאַקטן (%1$d אין אָפּפֿאַל)</string>
+    <string name="trash_contact">באַוועגן צו אָפּפֿאַל</string>
+    <string name="trash_contact_subtitle">באַוועגן דעם קאָנטאַקט צו אָפּפֿאַל? מען קען אים צוריקשטעלן אין 30 טעג.</string>
+    <string name="trash_contacts_subtitle">באַוועגן %s אויסגעוויילטע קאָנטאַקטן צו אָפּפֿאַל? מען קען זיי צוריקשטעלן אין 30 טעג.</string>
 
     <string name="merging_contacts">פֿאַראייניקן קאָנטאַקטן</string>
     <string name="merging_contacts_subtitle">געפֿינען און פֿאַראייניקן צווייענדיקע קאָנטאַקטן</string>

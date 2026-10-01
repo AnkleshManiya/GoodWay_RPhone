@@ -48,6 +48,7 @@
     <string name="search_contacts">Pesquisar contatos</string>
     <string name="no_results">Sem resultados</string>
     <string name="no_contacts_found">Nenhum contato encontrado</string>
+    <string name="no_calls_found">Nenhuma chamada encontrada</string>
     <string name="call_query">Ligar para %s</string>
     <string name="voice_input">Entrada de voz</string>
     <string name="filter_results">Filtrar resultados</string>
@@ -378,6 +379,25 @@
     <string name="all_numbers_are_already_standardized">✅ Todos os números já estão padronizados!</string>
     <string name="examples_of_changes">Exemplos de alterações:</string>
     <string name="and_more">E %s mais…</string>
+
+    <string name="contacts_trash_title">Lixeira</string>
+    <string name="contacts_trash_empty_title">A lixeira está vazia</string>
+    <string name="contacts_trash_empty_desc">Os contatos excluídos com a lixeira ativada aparecerão aqui por 30 dias antes de serem removidos permanentemente.</string>
+    <string name="contacts_trash_header_hint">Os itens na lixeira são excluídos permanentemente após 30 dias</string>
+    <string name="contacts_trash_restore_action">Restaurar</string>
+    <string name="contacts_trash_delete_action">Excluir permanentemente</string>
+    <string name="contacts_trash_delete_action_subtitle">Excluir permanentemente «%1$s»? Esta ação não pode ser desfeita.</string>
+    <string name="contacts_trash_empty_all">Esvaziar lixeira</string>
+    <string name="contacts_trash_empty_all_confirm_title">Esvaziar a lixeira?</string>
+    <string name="contacts_trash_empty_all_confirm_msg">Todos os %1$d contatos na lixeira serão excluídos permanentemente. Esta ação não pode ser desfeita.</string>
+    <string name="contacts_trash_restored_toast">%1$s restaurado</string>
+    <string name="contacts_trash_days_left">Restam %1$s dias</string>
+    <string name="settings_contacts_trash_title">Lixeira para contatos excluídos</string>
+    <string name="settings_contacts_trash_supporting">Manter os contatos excluídos na lixeira por 30 dias antes de removê-los permanentemente</string>
+    <string name="settings_contacts_trash_view_supporting">Ver e restaurar contatos excluídos (%1$d na lixeira)</string>
+    <string name="trash_contact">Mover para a lixeira</string>
+    <string name="trash_contact_subtitle">Mover este contato para a lixeira? Ele pode ser restaurado em até 30 dias.</string>
+    <string name="trash_contacts_subtitle">Mover %s contatos selecionados para a lixeira? Eles podem ser restaurados em até 30 dias.</string>
 
     <string name="merging_contacts">Mesclar contatos</string>
     <string name="merging_contacts_subtitle">Encontrar e mesclar contatos duplicados</string>

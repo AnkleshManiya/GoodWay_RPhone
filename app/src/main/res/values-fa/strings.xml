@@ -49,6 +49,7 @@
     <string name="search_contacts">جستجوی مخاطبان</string>
     <string name="no_results">نتیجه‌ای یافت نشد</string>
     <string name="no_contacts_found">مخاطبی یافت نشد</string>
+    <string name="no_calls_found">هیچ تماسی یافت نشد</string>
     <string name="call_query">تماس با %s</string>
     <string name="voice_input">ورودی صوتی</string>
     <string name="filter_results">فیلتر نتایج</string>
@@ -378,6 +379,25 @@
     <string name="all_numbers_are_already_standardized">✅ همه شماره‌ها قبلاً استاندارد شده‌اند!</string>
     <string name="examples_of_changes">نمونه‌هایی از تغییرات:</string>
     <string name="and_more">و %s بیشتر…</string>
+
+    <string name="contacts_trash_title">سطل زباله</string>
+    <string name="contacts_trash_empty_title">سطل زباله خالی است</string>
+    <string name="contacts_trash_empty_desc">مخاطبانی که با فعال بودن سطل زباله حذف شده‌اند، به مدت ۳۰ روز در اینجا نمایش داده می‌شوند و سپس برای همیشه حذف می‌شوند.</string>
+    <string name="contacts_trash_header_hint">موارد موجود در سطل زباله پس از ۳۰ روز برای همیشه حذف می‌شوند</string>
+    <string name="contacts_trash_restore_action">بازیابی</string>
+    <string name="contacts_trash_delete_action">حذف برای همیشه</string>
+    <string name="contacts_trash_delete_action_subtitle">«%1$s» برای همیشه حذف شود؟ این عمل قابل بازگشت نیست.</string>
+    <string name="contacts_trash_empty_all">خالی کردن سطل زباله</string>
+    <string name="contacts_trash_empty_all_confirm_title">سطل زباله خالی شود؟</string>
+    <string name="contacts_trash_empty_all_confirm_msg">همه %1$d مخاطب موجود در سطل زباله برای همیشه حذف خواهند شد. این عمل قابل بازگشت نیست.</string>
+    <string name="contacts_trash_restored_toast">%1$s بازیابی شد</string>
+    <string name="contacts_trash_days_left">%1$s روز باقی مانده</string>
+    <string name="settings_contacts_trash_title">سطل زباله برای مخاطبان حذف‌شده</string>
+    <string name="settings_contacts_trash_supporting">نگهداری مخاطبان حذف‌شده در سطل زباله به مدت ۳۰ روز قبل از حذف برای همیشه</string>
+    <string name="settings_contacts_trash_view_supporting">مشاهده و بازیابی مخاطبان حذف‌شده (%1$d در سطل زباله)</string>
+    <string name="trash_contact">انتقال به سطل زباله</string>
+    <string name="trash_contact_subtitle">این مخاطب به سطل زباله منتقل شود؟ می‌توان آن را تا ۳۰ روز بازیابی کرد.</string>
+    <string name="trash_contacts_subtitle">%s مخاطب انتخاب‌شده به سطل زباله منتقل شوند؟ می‌توان آنها را تا ۳۰ روز بازیابی کرد.</string>
 
     <string name="merging_contacts">ادغام مخاطبان</string>
     <string name="merging_contacts_subtitle">یافتن و ادغام مخاطبان تکراری</string>

@@ -48,6 +48,7 @@
     <string name="search_contacts">Kişilerde Ara</string>
     <string name="no_results">Sonuç yok</string>
     <string name="no_contacts_found">Kişi bulunamadı</string>
+    <string name="no_calls_found">Arama bulunamadı</string>
     <string name="call_query">%s\'i Ara</string>
     <string name="voice_input">Sesli Giriş</string>
     <string name="filter_results">Sonuçları Filtrele</string>
@@ -378,6 +379,25 @@
     <string name="all_numbers_are_already_standardized">✅ Tüm numaralar zaten standartlaştırılmış!</string>
     <string name="examples_of_changes">Değişiklik örnekleri:</string>
     <string name="and_more">Ve %s daha…</string>
+
+    <string name="contacts_trash_title">Çöp Kutusu</string>
+    <string name="contacts_trash_empty_title">Çöp kutusu boş</string>
+    <string name="contacts_trash_empty_desc">Çöp kutusu etkinken silinen kişiler, kalıcı olarak kaldırılmadan önce 30 gün boyunca burada görünür.</string>
+    <string name="contacts_trash_header_hint">Çöp kutusundaki öğeler 30 gün sonra kalıcı olarak silinir</string>
+    <string name="contacts_trash_restore_action">Geri yükle</string>
+    <string name="contacts_trash_delete_action">Kalıcı olarak sil</string>
+    <string name="contacts_trash_delete_action_subtitle">\"%1$s\" kalıcı olarak silinsin mi? Bu işlem geri alınamaz.</string>
+    <string name="contacts_trash_empty_all">Çöp kutusunu boşalt</string>
+    <string name="contacts_trash_empty_all_confirm_title">Çöp kutusu boşaltılsın mı?</string>
+    <string name="contacts_trash_empty_all_confirm_msg">Çöp kutusundaki %1$d kişi kalıcı olarak silinecek. Bu işlem geri alınamaz.</string>
+    <string name="contacts_trash_restored_toast">%1$s geri yüklendi</string>
+    <string name="contacts_trash_days_left">%1$s gün kaldı</string>
+    <string name="settings_contacts_trash_title">Silinen kişiler için çöp kutusu</string>
+    <string name="settings_contacts_trash_supporting">Silinen kişileri kalıcı olarak kaldırmadan önce 30 gün boyunca çöp kutusunda sakla</string>
+    <string name="settings_contacts_trash_view_supporting">Silinen kişileri görüntüle ve geri yükle (çöp kutusunda %1$d)</string>
+    <string name="trash_contact">Çöp kutusuna taşı</string>
+    <string name="trash_contact_subtitle">Bu kişi çöp kutusuna taşınsın mı? 30 gün içinde geri yüklenebilir.</string>
+    <string name="trash_contacts_subtitle">%s seçili kişi çöp kutusuna taşınsın mı? 30 gün içinde geri yüklenebilirler.</string>
 
     <string name="merging_contacts">Kişileri Birleştirme</string>
     <string name="merging_contacts_subtitle">Yinelenen kişileri bulma ve birleştirme</string>

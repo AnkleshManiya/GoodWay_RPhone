@@ -48,6 +48,7 @@
     <string name="search_contacts">Sök kontakter</string>
     <string name="no_results">Inga resultat</string>
     <string name="no_contacts_found">Inga kontakter hittades</string>
+    <string name="no_calls_found">Inga samtal hittades</string>
     <string name="call_query">Ring %s</string>
     <string name="voice_input">Röstinmatning</string>
     <string name="filter_results">Filtrera resultat</string>
@@ -378,6 +379,25 @@
     <string name="all_numbers_are_already_standardized">✅ Alla nummer är redan standardiserade!</string>
     <string name="examples_of_changes">Exempel på ändringar:</string>
     <string name="and_more">Och %s till…</string>
+
+    <string name="contacts_trash_title">Papperskorg</string>
+    <string name="contacts_trash_empty_title">Papperskorgen är tom</string>
+    <string name="contacts_trash_empty_desc">Kontakter som raderats med papperskorgen aktiverad visas här i 30 dagar innan de tas bort permanent.</string>
+    <string name="contacts_trash_header_hint">Objekt i papperskorgen tas bort permanent efter 30 dagar</string>
+    <string name="contacts_trash_restore_action">Återställ</string>
+    <string name="contacts_trash_delete_action">Ta bort permanent</string>
+    <string name="contacts_trash_delete_action_subtitle">Ta bort \"%1$s\" permanent? Denna åtgärd kan inte ångras.</string>
+    <string name="contacts_trash_empty_all">Töm papperskorgen</string>
+    <string name="contacts_trash_empty_all_confirm_title">Töm papperskorgen?</string>
+    <string name="contacts_trash_empty_all_confirm_msg">Alla %1$d kontakter i papperskorgen tas bort permanent. Denna åtgärd kan inte ångras.</string>
+    <string name="contacts_trash_restored_toast">%1$s återställd</string>
+    <string name="contacts_trash_days_left">%1$s dagar kvar</string>
+    <string name="settings_contacts_trash_title">Papperskorg för raderade kontakter</string>
+    <string name="settings_contacts_trash_supporting">Behåll raderade kontakter i papperskorgen i 30 dagar innan de tas bort permanent</string>
+    <string name="settings_contacts_trash_view_supporting">Visa och återställ raderade kontakter (%1$d i papperskorgen)</string>
+    <string name="trash_contact">Flytta till papperskorgen</string>
+    <string name="trash_contact_subtitle">Flytta denna kontakt till papperskorgen? Den kan återställas inom 30 dagar.</string>
+    <string name="trash_contacts_subtitle">Flytta %s valda kontakter till papperskorgen? De kan återställas inom 30 dagar.</string>
 
     <string name="merging_contacts">Sammanfoga kontakter</string>
     <string name="merging_contacts_subtitle">Hitta och sammanfoga dubblettkontakter</string>

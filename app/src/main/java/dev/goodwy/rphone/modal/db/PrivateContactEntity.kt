@@ -50,11 +50,11 @@ data class PrivateContactEntity(
             nickname = nickname,
             company = company,
             jobTitle = jobTitle,
-            phoneNumbers = runCatching { Json.decodeFromString<List<String>>(phoneNumbersJson) }.getOrDefault(emptyList()),
-            phoneDetails = runCatching { Json.decodeFromString<List<ContactPhoneDetail>>(phoneDetailsJson) }.getOrDefault(emptyList()),
-            emails = runCatching { Json.decodeFromString<List<ContactEmail>>(emailsJson) }.getOrDefault(emptyList()),
-            addresses = runCatching { Json.decodeFromString<List<ContactAddress>>(addressesJson) }.getOrDefault(emptyList()),
-            events = runCatching { Json.decodeFromString<List<ContactEvent>>(eventsJson) }.getOrDefault(emptyList()),
+            phoneNumbers = runCatching { json.decodeFromString<List<String>>(phoneNumbersJson) }.getOrDefault(emptyList()),
+            phoneDetails = runCatching { json.decodeFromString<List<ContactPhoneDetail>>(phoneDetailsJson) }.getOrDefault(emptyList()),
+            emails = runCatching { json.decodeFromString<List<ContactEmail>>(emailsJson) }.getOrDefault(emptyList()),
+            addresses = runCatching { json.decodeFromString<List<ContactAddress>>(addressesJson) }.getOrDefault(emptyList()),
+            events = runCatching { json.decodeFromString<List<ContactEvent>>(eventsJson) }.getOrDefault(emptyList()),
             notes = notes,
             photoUri = photoUri,
             isFavorite = isFavorite,
@@ -65,6 +65,11 @@ data class PrivateContactEntity(
     }
 
     companion object {
+        private val json = Json {
+            encodeDefaults = true
+            ignoreUnknownKeys = true
+        }
+
         fun fromContact(contact: Contact): PrivateContactEntity {
             val entity = PrivateContactEntity(
                 localId = if (contact.id.startsWith("p")) contact.id.substring(1).toLongOrNull() ?: 0L else 0L,
@@ -76,11 +81,11 @@ data class PrivateContactEntity(
                 nickname = contact.nickname,
                 company = contact.company,
                 jobTitle = contact.jobTitle,
-                phoneNumbersJson = Json.encodeToString(contact.phoneNumbers),
-                phoneDetailsJson = Json.encodeToString(contact.phoneDetails),
-                emailsJson = Json.encodeToString(contact.emails),
-                addressesJson = Json.encodeToString(contact.addresses),
-                eventsJson = Json.encodeToString(contact.events),
+                phoneNumbersJson = json.encodeToString(contact.phoneNumbers),
+                phoneDetailsJson = json.encodeToString(contact.phoneDetails),
+                emailsJson = json.encodeToString(contact.emails),
+                addressesJson = json.encodeToString(contact.addresses),
+                eventsJson = json.encodeToString(contact.events),
                 notes = contact.notes,
                 photoUri = contact.photoUri,
                 isFavorite = contact.isFavorite,
@@ -130,7 +135,7 @@ data class PrivateContactEntity(
             }
             if (isEmpty() && phoneNumbersJson.isNotEmpty()) {
                 try {
-                    val phones = Json.decodeFromString<List<String>>(phoneNumbersJson)
+                    val phones = json.decodeFromString<List<String>>(phoneNumbersJson)
                     if (phones.isNotEmpty()) {
                         append(phones.first())
                     }

@@ -3,6 +3,7 @@ package dev.goodwy.rphone.modal.`interface`
 import android.accounts.Account
 import android.net.Uri
 import dev.goodwy.rphone.modal.data.Contact
+import dev.goodwy.rphone.modal.db.TrashedContactEntity
 import dev.goodwy.rphone.modal.repository.ContactsRepository.RawContactInfo
 
 interface IContactsRepository {
@@ -36,4 +37,10 @@ interface IContactsRepository {
     suspend fun importPrivateContacts(uri: Uri)
     suspend fun isNumberHidden(number: String): Boolean
     suspend fun getHiddenNumbers(): List<String>
+
+    suspend fun getTrashedContacts(): List<TrashedContactEntity>
+    suspend fun restoreTrashedContact(localId: Long): Boolean
+    suspend fun permanentlyDeleteTrashedContact(localId: Long)
+    suspend fun emptyTrash()
+    suspend fun pruneOldTrash()
 }

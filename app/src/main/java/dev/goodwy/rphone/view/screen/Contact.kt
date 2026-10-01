@@ -60,6 +60,7 @@ import androidx.compose.material.icons.rounded.PeopleAlt
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -622,6 +623,7 @@ fun BatchActionBar(
     onSelectAll: () -> Unit,
     isAllSelected: Boolean
 ) {
+    val prefs = koinInject<PreferenceManager>()
     var showSelectionMenuOuter by remember { mutableStateOf(false) }
     var showMoveDialog by remember { mutableStateOf(false) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
@@ -776,9 +778,10 @@ fun BatchActionBar(
     }
 
     if (showDeleteConfirm) {
+        var trashEnabled by remember { mutableStateOf(prefs.isContactsTrashEnabled()) }
         RillDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            title = stringResource(R.string.delete_contacts),
+            title = if (trashEnabled) stringResource(R.string.trash_contact) else stringResource(R.string.delete_contacts),
             icon = ImageVector.vectorResource(id = R.drawable.ic_delete),
             iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
             iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
@@ -797,7 +800,7 @@ fun BatchActionBar(
             }
         ) {
             Text(
-                stringResource(R.string.delete_contacts_subtitle, selectedCount),
+                if (trashEnabled) stringResource(R.string.trash_contacts_subtitle, selectedCount) else stringResource(R.string.delete_contacts_subtitle, selectedCount),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,

@@ -29,6 +29,8 @@ import dev.goodwy.rphone.controller.util.areNumbersEqual
 import dev.goodwy.rphone.controller.util.deduplicateNumbers
 import dev.goodwy.rphone.device_only
 import dev.goodwy.rphone.modal.db.PrivateContactEntity
+import dev.goodwy.rphone.modal.db.TrashedContactDao
+import dev.goodwy.rphone.modal.db.TrashedContactEntity
 import dev.goodwy.rphone.private_only
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -41,7 +43,8 @@ import kotlin.time.Duration.Companion.milliseconds
 
 class ContactsRepository(
     private val context: Context,
-    private val privateContactDao: PrivateContactDao
+    private val privateContactDao: PrivateContactDao,
+    private val trashedContactDao: TrashedContactDao
 ) : IContactsRepository {
 
     private val contentResolver: ContentResolver = context.contentResolver
@@ -2060,6 +2063,40 @@ class ContactsRepository(
         if (number.isBlank()) return@withContext false
         val clean = number.replace(" ", "")
         return@withContext getHiddenNumbers().any { areNumbersEqual(it, clean) }
+    }
+
+    override suspend fun getTrashedContacts(): List<TrashedContactEntity> = withContext(Dispatchers.IO) {
+        pruneOldTrash()
+        return@withContext try {
+            trashedContactDao.getAll()
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    override suspend fun restoreTrashedContact(localId: Long): Boolean = withContext(Dispatchers.IO) {
+        val entry = trashedContactDao.getById(localId) ?: return@withContext false
+        val contact = entry.toContact() ?: return@withContext false
+        saveContact(contact.copy(id = "0"))
+        trashedContactDao.deleteById(localId)
+        return@withContext true
+    }
+
+    override suspend fun permanentlyDeleteTrashedContact(localId: Long) = withContext(Dispatchers.IO) {
+        trashedContactDao.deleteById(localId)
+    }
+
+    override suspend fun emptyTrash() = withContext(Dispatchers.IO) {
+        trashedContactDao.deleteAll()
+    }
+
+    override suspend fun pruneOldTrash() {
+        val thirtyDaysAgo = System.currentTimeMillis() - (30L * 24 * 60 * 60 * 1000L)
+        try {
+            trashedContactDao.pruneOlderThan(thirtyDaysAgo)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     // Goodwy

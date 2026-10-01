@@ -648,7 +648,8 @@ fun RillDialog(
                                 shape = RoundedCornerShape(12.dp),
                                 color = iconBgContainerColor
                                     ?: MaterialTheme.colorScheme.primaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                shadowElevation = 1.dp
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Icon(
