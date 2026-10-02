@@ -13,6 +13,7 @@
     <string name="select">אויסוויילן</string>
     <string name="select_all">אויסוויילן אַלע</string>
     <string name="deselect_all">אַנולירן אויסוויילן אַלע</string>
+    <string name="plus_more">%1$s (+%2$s נאָך)</string>
     <string name="backspace">אַוועקנעמען</string>
     <string name="back">צוריק</string>
     <string name="edit">רעדאַקטירן</string>

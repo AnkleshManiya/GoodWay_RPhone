@@ -13,6 +13,7 @@
     <string name="select">בחר</string>
     <string name="select_all">בחר הכול</string>
     <string name="deselect_all">בטל בחירת הכול</string>
+    <string name="plus_more">%1$s (+%2$s נוספים)</string>
     <string name="backspace">מחק</string>
     <string name="back">חזור</string>
     <string name="edit">ערוך</string>

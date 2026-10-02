@@ -1,5 +1,6 @@
 package dev.goodwy.rphone.view.screen
 
+import android.app.Activity
 import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
@@ -124,6 +125,7 @@ fun ContactEditScreen(
     contactId: String? = null,
     rawContactId: String? = null,
     isEditingSource: Boolean = false,
+    isExternalEdit: Boolean = false,
     initialName: String? = null,
     initialPhone: String? = null,
     navigator: DestinationsNavigator
@@ -368,10 +370,7 @@ fun ContactEditScreen(
 
     // Track Changes
     fun hasChanges(): Boolean {
-        if (tempPhotoUri != null) {
-            photoUri = tempPhotoUri
-            tempPhotoUri = null
-        }
+        val finalPhotoUri = tempPhotoUri ?: photoUri
 
         val currentContact = Contact(
             id = contactId ?: "0",
@@ -389,7 +388,7 @@ fun ContactEditScreen(
             addresses = addresses.filter { it.formattedAddress.isNotBlank() },
             events = events.filter { it.date.isNotBlank() },
             notes = notes,
-            photoUri = photoUri,
+            photoUri = finalPhotoUri,
             isFavorite = isFavorite,
 //            customRingtone=null,
             accountName = selectedAccount?.name,
@@ -399,7 +398,7 @@ fun ContactEditScreen(
             hasMultipleSources = existingContact?.hasMultipleSources ?: false,
         )
 
-        val originalContact = existingContact ?: Contact(
+        val originalContact = existingContact?.copy(customRingtone = null) ?: Contact(
             id = "0",
             namePrefix = "",
             givenName = initialName ?: "",
@@ -421,7 +420,7 @@ fun ContactEditScreen(
         )
 
         val hasPhotoChange = tempPhotoUri != null ||
-                (existingContact?.photoUri != photoUri)
+                (existingContact?.photoUri != finalPhotoUri)
 
         val hasBackgroundChange = selectedBackgroundUri != null ||
                 tempCallBackground != null ||
@@ -430,10 +429,24 @@ fun ContactEditScreen(
         return currentContact != originalContact || hasBackgroundChange || hasPhotoChange
     }
 
+    fun closeScreen(isSaved: Boolean = false) {
+        if (isExternalEdit) {
+            val activity = context as? Activity
+            activity?.setResult(if (isSaved) Activity.RESULT_OK else Activity.RESULT_CANCELED)
+            activity?.finish()
+        } else {
+            navigator.navigateUp()
+        }
+    }
+
     // Status for the exit confirmation dialog
     var showExitDialog by remember { mutableStateOf(false) }
-    BackHandler(enabled = hasChanges()) {
-        showExitDialog = true
+    BackHandler {
+        if (hasChanges()) {
+            showExitDialog = true
+        } else {
+            closeScreen(isSaved = false)
+        }
     }
 
     fun exitWithoutSaving() {
@@ -452,10 +465,13 @@ fun ContactEditScreen(
         if (existingContact != null) {
             callBackground = CallBackgroundStore.peek(context, backgroundContactId, backgroundNumbers)
         }
-        navigator.navigateUp()
+
+        closeScreen(isSaved = false)
     }
 
     fun saveAndExit() {
+        val finalPhotoUri = tempPhotoUri ?: photoUri
+
         val contactToSave = Contact(
             id = if (isEditingSource) rawContactData?.id ?: "0" else contactId ?: "0",
             namePrefix = namePrefix,
@@ -472,7 +488,7 @@ fun ContactEditScreen(
             addresses = addresses.filter { it.formattedAddress.isNotBlank() },
             events = events.filter { it.date.isNotBlank() },
             notes = notes,
-            photoUri = photoUri,
+            photoUri = finalPhotoUri,
             isFavorite = isFavorite,
 //            customRingtone=null,
             accountName = selectedAccount?.name,
@@ -523,7 +539,7 @@ fun ContactEditScreen(
             tempCallBackground = null
             tempBackgroundDeleted = false
 
-            navigator.navigateUp()
+            closeScreen(isSaved = true)
         }
     }
 
@@ -711,7 +727,7 @@ fun ContactEditScreen(
                         if (hasChanges()) {
                             showExitDialog = true
                         } else {
-                            navigator.navigateUp()
+                            closeScreen(isSaved = false)
                         }
                     })
                 },
@@ -778,7 +794,7 @@ fun ContactEditScreen(
                                     TextButton(onClick = {
                                         showDeleteConfirm = false
                                         contactsVM.deleteContact(contactId)
-                                        navigator.navigateUp()
+                                        closeScreen(isSaved = true)
                                     }) {
                                         Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
                                     }

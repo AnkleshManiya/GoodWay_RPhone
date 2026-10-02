@@ -819,6 +819,7 @@ fun RillListItem(
     modifierLeadingIcon: Modifier = Modifier,
     modifierTrailingIcon: Modifier = Modifier.size(20.dp),
     modifierPreTrailingIcon: Modifier = Modifier.size(20.dp),
+    paddingVertical: Dp = 14.dp,
     trailingContent: (@Composable RowScope.() -> Unit)? = null
 ) {
     val context = LocalContext.current
@@ -857,7 +858,7 @@ fun RillListItem(
                     },
                     onLongClick = onLongClick
                 )
-                .padding(horizontal = 16.dp, vertical = 14.dp),
+                .padding(horizontal = 16.dp, vertical = paddingVertical),
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (avatarName != null || photoUri != null) {

@@ -12,6 +12,7 @@
     <string name="select">Wybierz</string>
     <string name="select_all">Zaznacz wszystko</string>
     <string name="deselect_all">Odznacz wszystko</string>
+    <string name="plus_more">%1$s (+%2$s więcej)</string>
     <string name="backspace">Usuń</string>
     <string name="back">Wstecz</string>
     <string name="edit">Edytuj</string>

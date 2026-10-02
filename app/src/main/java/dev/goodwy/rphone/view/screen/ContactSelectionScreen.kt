@@ -1,9 +1,17 @@
 package dev.goodwy.rphone.view.screen
 
+import android.Manifest
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.provider.ContactsContract
 import android.view.HapticFeedbackConstants
 import android.view.Surface
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.Spring
@@ -26,11 +34,14 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.*
+import androidx.compose.material.icons.rounded.MicNone
 import androidx.compose.material.icons.rounded.People
 import androidx.compose.material.icons.rounded.PersonAdd
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -38,11 +49,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionStatus
+import com.google.accompanist.permissions.rememberPermissionState
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.ContactsViewModel
 import dev.goodwy.rphone.controller.util.formatPhoneNumber
@@ -55,6 +73,8 @@ import com.ramcosta.composedestinations.generated.destinations.ContactEditScreen
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.result.ResultBackNavigator
 import dev.goodwy.rphone.controller.util.PreferenceManager
+import dev.goodwy.rphone.controller.util.VoiceSearchContract
+import dev.goodwy.rphone.modal.data.getDisplayName
 import dev.goodwy.rphone.view.theme.MyColors.cardColor
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -62,7 +82,7 @@ import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinActivityViewModel
 import kotlin.time.Duration.Companion.milliseconds
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Destination<RootGraph>
 @Composable
 fun ContactSelectionScreen(
@@ -72,7 +92,8 @@ fun ContactSelectionScreen(
     isMultiSelect: Boolean = false,
     actionButtonText: String = "",
     returnContactId: Boolean = false,
-    initialPhoneToAssign: String? = null
+    initialPhoneToAssign: String? = null,
+    isExternalPick: Boolean = false
 ) {
     val context = LocalContext.current
     val view = LocalView.current
@@ -84,18 +105,63 @@ fun ContactSelectionScreen(
     val prefs = koinInject<PreferenceManager>()
     val scope = rememberCoroutineScope()
 
-    var searchQuery by remember { mutableStateOf("") }
+    var queryFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+        mutableStateOf(TextFieldValue(""))
+    }
+    val searchQuery = queryFieldValue.text
     var selectedFilterTab by remember { mutableIntStateOf(0) }
     var selectedContactIds by remember { mutableStateOf(setOf<String>()) }
     var selectedPhoneNumbers by remember { mutableStateOf(setOf<String>()) }
     var pendingMultiNumberContact by remember { mutableStateOf<Contact?>(null) }
 
     val hideVoiceSearch = remember { prefs.getBoolean(PreferenceManager.KEY_HIDE_VOICE_SEARCH, false) }
+    val displayOrder = remember { prefs.getInt(PreferenceManager.KEY_CONTACT_DISPLAY_ORDER, 0) }
+    val sortOrder = remember { prefs.getInt(PreferenceManager.KEY_CONTACT_SORT_ORDER, 0) }
     val cardCorner  = remember { prefs.getInt(PreferenceManager.KEY_CARD_ROUNDNESS, RillShapeDefaults.DefaultRoundness) }
 
-    LaunchedEffect(Unit) {
-        viewModel.fetchContacts()
+    // Voice search
+    val keyboardController = LocalSoftwareKeyboardController.current
+    var voiceSearchResult by remember { mutableStateOf<String?>(null) }
+    // Synchronizing the query with textFieldValue.text
+    LaunchedEffect(voiceSearchResult) {
+        voiceSearchResult?.let { result ->
+            queryFieldValue = TextFieldValue(result, selection = TextRange(result.length))
+            keyboardController?.hide()
+            voiceSearchResult = null
+        }
     }
+    val micPermissionState = rememberPermissionState(Manifest.permission.RECORD_AUDIO)
+    val voiceSearchLauncher = rememberLauncherForActivityResult(VoiceSearchContract()) { result ->
+        result?.let {
+            voiceSearchResult = result
+            keyboardController?.hide()
+        }
+    }
+
+    // ─── Checking Permissions ───────────────────────────────────
+    var hasContactsPermission by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED
+        )
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { permissions ->
+        hasContactsPermission = permissions
+        if (permissions) {
+            viewModel.fetchContacts()
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        if (hasContactsPermission) {
+            viewModel.fetchContacts()
+        } else {
+            permissionLauncher.launch(Manifest.permission.READ_CONTACTS)
+        }
+    }
+    // ────────────────────────────────────────────────────────────
 
     val filteredContacts = remember(allContacts, searchQuery, selectedFilterTab) {
         var list = when (selectedFilterTab) {
@@ -106,18 +172,37 @@ fun ContactSelectionScreen(
         if (searchQuery.isNotBlank()) {
             val cleanSearch = searchQuery.trim()
             list = list.filter {
-                it.name.contains(cleanSearch, ignoreCase = true) ||
+                it.displayName.contains(cleanSearch, ignoreCase = true) ||
                 it.phoneNumbers.any { num -> num.contains(cleanSearch) }
             }
         }
-        list.sortedBy { it.name.lowercase() }
+        list.sortedBy { it.displayName.lowercase() }
     }
 
+//    val groupedContacts = remember(filteredContacts) {
+//        filteredContacts.groupBy { contact ->
+//            val first = contact.name.trim().firstOrNull()?.uppercaseChar() ?: '#'
+//            if (first in 'A'..'Z') first.toString() else "#"
+//        }
+//    }
     val groupedContacts = remember(filteredContacts) {
-        filteredContacts.groupBy { contact ->
-            val first = contact.name.trim().firstOrNull()?.uppercaseChar() ?: '#'
-            if (first in 'A'..'Z') first.toString() else "#"
+        val mainGroups = filteredContacts.groupBy {
+            val firstChar =
+                if (sortOrder == 1) it.familyName.ifBlank { it.displayName }.firstOrNull()?.uppercaseChar() ?: '#'
+                else it.givenName.ifBlank { it.displayName }.firstOrNull()?.uppercaseChar() ?: '#'
+            if (firstChar.isLetter()) firstChar else '#'
+        }.toMutableMap()
+
+        val finalMap = linkedMapOf<Char, List<Contact>>()
+
+        mainGroups.keys.filter { it.isLetter() }.sorted().forEach { char ->
+            finalMap[char] = mainGroups[char]!!
         }
+
+        val hashGroup = mainGroups['#']
+        if (hashGroup != null) finalMap['#'] = hashGroup
+
+        finalMap
     }
 
     val totalSelectedCount = maxOf(selectedContactIds.size, selectedPhoneNumbers.size)
@@ -127,10 +212,18 @@ fun ContactSelectionScreen(
     var isClosing by remember { mutableStateOf(false) }
 
     fun navigateBack() {
+        if (isClosing) return
         isClosing = true
         scope.launch {
             delay(280.milliseconds)
-            navigator.navigateUp()
+
+            if (isExternalPick) {
+                val activity = context as? Activity
+                activity?.setResult(Activity.RESULT_CANCELED)
+                activity?.finish()
+            } else {
+                navigator.navigateUp()
+            }
         }
     }
 
@@ -175,7 +268,7 @@ fun ContactSelectionScreen(
                     NavigationIcon(onClick = { navigateBack() })
                 },
                 actions = {
-                    IconButton(onClick = { navigator.navigate(ContactEditScreenDestination(initialPhone = initialPhoneToAssign)) }) {
+                    if (hasContactsPermission) IconButton(onClick = { navigator.navigate(ContactEditScreenDestination(initialPhone = initialPhoneToAssign)) }) {
                         Icon(Icons.Rounded.PersonAdd, contentDescription = stringResource(R.string.create_contact))
                     }
                     if (isMultiSelect && totalSelectedCount > 0) {
@@ -213,339 +306,382 @@ fun ContactSelectionScreen(
         },
         containerColor = MaterialTheme.colorScheme.surface
     ) { padding ->
-        BackHandler { navigateBack() }
-        ScrollHapticsEffect(listState = listState)
-        if (isLoading && allContacts.isEmpty()) {
-            RillLoadingIndicatorView()
+        BackHandler(enabled = !isClosing) { navigateBack() }
+        if (!hasContactsPermission) {
+            PermissionDeniedView(
+                icon = Icons.Rounded.People,
+                title = stringResource(R.string.contacts_permission),
+                description = stringResource(R.string.contacts_permission_description),
+                onGrantClick = { permissionLauncher.launch(Manifest.permission.READ_CONTACTS) }
+            )
         } else {
-            LazyColumn(
-                state = listState,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(
-                        top = padding.calculateTopPadding(),
-                        start = 0.dp,
-                        end = 0.dp,
-                        bottom = 0.dp
-                    )
-                    .alpha(alpha)
-                    .offset(y = offsetY),
-                contentPadding = PaddingValues(/*start = 16.dp, end = 16.dp,*/ top = 8.dp, bottom = 96.dp),
-                verticalArrangement = Arrangement.spacedBy(0.dp)
-            ) {
-                // Search Bar
-                item {
-                    val shape = if (cardCorner > 12) CircleShape else MaterialTheme.shapes.extraExtraLarge
-                    Surface(
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp).padding(bottom = 12.dp)
-                            .fillMaxWidth().height(52.dp),
-                        shape = shape,
-                        color = cardColor
-                    ) {
-                        TextField(
-                            value = searchQuery,
-                            onValueChange = { searchQuery = it },
-                            modifier = Modifier.fillMaxWidth(),
-                            placeholder = { Text(stringResource(R.string.search_contacts)) },
-                            leadingIcon = {
-                                Icon(Icons.Default.Search, contentDescription = stringResource(R.string.search_contacts),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier
-                                        .padding(start = 12.dp)
-                                )
-                            },
-                            trailingIcon = {
-                                AnimatedVisibility(
-                                    visible = searchQuery.isNotEmpty(),
-                                    enter = fadeIn() + scaleIn(),
-                                    exit = fadeOut() + scaleOut()
-                                ) {
-                                    IconButton(
-                                        onClick = { searchQuery = "" },
-                                        modifier = Modifier.padding(end = 4.dp)
-                                    ) {
-                                        Icon(Icons.Default.Close, contentDescription = stringResource(R.string.clear))
-                                    }
-                                }
-                            },
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = Color.Transparent,
-                                unfocusedContainerColor = Color.Transparent,
-                                disabledContainerColor = Color.Transparent,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent
-                            ),
-                            singleLine = true
+            ScrollHapticsEffect(listState = listState)
+            if (isLoading && allContacts.isEmpty()) {
+                RillLoadingIndicatorView()
+            } else {
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(
+                            top = padding.calculateTopPadding(),
+                            start = 0.dp,
+                            end = 0.dp,
+                            bottom = 0.dp
                         )
-                    }
-                }
+                        .alpha(alpha)
+                        .offset(y = offsetY),
+                    contentPadding = PaddingValues(/*start = 16.dp, end = 16.dp,*/ top = 8.dp, bottom = 96.dp),
+                    verticalArrangement = Arrangement.spacedBy(0.dp)
+                ) {
+                    // Search Bar
+                    item {
+                        val shape = if (cardCorner > 12) CircleShape else MaterialTheme.shapes.extraExtraLarge
+                        Surface(
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp).padding(bottom = 12.dp)
+                                .fillMaxWidth().height(52.dp),
+                            shape = shape,
+                            color = cardColor
+                        ) {
+                            TextField(
+                                value = queryFieldValue,
+                                onValueChange = { queryFieldValue = it },
+                                modifier = Modifier.fillMaxWidth(),
+                                placeholder = { Text(stringResource(R.string.search_contacts)) },
+                                leadingIcon = {
+                                    Icon(Icons.Default.Search, contentDescription = stringResource(R.string.search_contacts),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier
+                                            .padding(start = 12.dp)
+                                    )
+                                },
+                                trailingIcon = {
+                                    Row {
+                                        AnimatedVisibility(
+                                            visible = searchQuery.isNotEmpty(),
+                                            enter = fadeIn() + scaleIn(),
+                                            exit = fadeOut() + scaleOut()
+                                        ) {
+                                            IconButton(
+                                                onClick = { queryFieldValue = TextFieldValue("", selection = TextRange(0)) }
+                                            ) {
+                                                Icon(Icons.Default.Close, contentDescription = stringResource(R.string.clear))
+                                            }
+                                        }
 
-                // Filter Chips
-                item {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState())
-                            .padding(horizontal = 16.dp).padding(bottom = 12.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        RillFilterChip(
-                            label = stringResource(R.string.filter_all) + " (${allContacts.size})",
-                            selected = selectedFilterTab == 0,
-                            onClick = { selectedFilterTab = 0 },
-//                            leadingIcon = { Icon(Icons.Rounded.People, contentDescription = null, modifier = Modifier.size(16.dp)) }
-                        )
-                        val favCount = remember(allContacts) { allContacts.count { it.isFavorite } }
-                        RillFilterChip(
-                            label = stringResource(R.string.favorites) + " ($favCount)",
-                            selected = selectedFilterTab == 1,
-                            onClick = { selectedFilterTab = 1 },
-//                            leadingIcon = { Icon(Icons.Outlined.Star, contentDescription = null, modifier = Modifier.size(16.dp)) }
-                        )
-                        val privCount = remember(allContacts) { allContacts.count { it.isPrivate } }
-                        if (privCount > 0) {
-                            RillFilterChip(
-                                label = "Private ($privCount)",
-                                selected = selectedFilterTab == 2,
-                                onClick = { selectedFilterTab = 2 },
-//                                leadingIcon = { Icon(ContactUtils.getAccountIcon(null, true), contentDescription = null, modifier = Modifier.size(16.dp)) }
+                                        AnimatedVisibility(
+                                            visible = micPermissionState.status == PermissionStatus.Granted && !hideVoiceSearch,
+                                            enter = fadeIn() + scaleIn(),
+                                            exit = fadeOut() + scaleOut()
+                                        ) {
+                                            IconButton(
+                                                onClick = {
+                                                    if (micPermissionState.status == PermissionStatus.Granted) {
+                                                        voiceSearchLauncher.launch(Unit)
+                                                    } else {
+                                                        micPermissionState.launchPermissionRequest()
+                                                    }
+                                                }
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Rounded.MicNone,
+                                                    contentDescription = stringResource(R.string.voice_input),
+                                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            }
+                                        }
+
+                                        Spacer(modifier = Modifier.size(4.dp))
+                                    }
+                                },
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = Color.Transparent,
+                                    unfocusedContainerColor = Color.Transparent,
+                                    disabledContainerColor = Color.Transparent,
+                                    focusedIndicatorColor = Color.Transparent,
+                                    unfocusedIndicatorColor = Color.Transparent
+                                ),
+                                singleLine = true
                             )
                         }
                     }
-                }
 
-                val cleanQuery = searchQuery.trim()
-                val isPhoneQuery = cleanQuery.any { it.isDigit() } || cleanQuery.startsWith("+")
-
-                if (isPhoneQuery) {
+                    // Filter Chips
                     item {
-                        val isCustomSelected = selectedPhoneNumbers.contains(cleanQuery)
-                        Surface(
+                        Row(
                             modifier = Modifier
-                                .fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 12.dp)
-                                .clip(MaterialTheme.shapes.large)
-                                .clickable {
-                                    view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                                    if (isMultiSelect) {
-                                        selectedPhoneNumbers = if (isCustomSelected) {
-                                            selectedPhoneNumbers - cleanQuery
-                                        } else {
-                                            selectedPhoneNumbers + cleanQuery
-                                        }
-                                    } else {
-                                        resultNavigator.navigateBack(result = cleanQuery)
-                                    }
-                                },
-                            shape = MaterialTheme.shapes.large,
-                            color = if (isCustomSelected) {
-                                MaterialTheme.colorScheme.primaryContainer
-                            } else {
-                                MaterialTheme.colorScheme.surfaceContainerLow
-                            },
-                            border = if (isCustomSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null
+                                .fillMaxWidth()
+                                .horizontalScroll(rememberScrollState())
+                                .padding(horizontal = 16.dp).padding(bottom = 12.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Row(
-                                modifier = Modifier.padding(14.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                if (isMultiSelect) {
-                                    Checkbox(
-                                        checked = isCustomSelected,
-                                        onCheckedChange = { checked ->
-                                            selectedPhoneNumbers = if (checked) {
-                                                selectedPhoneNumbers + cleanQuery
-                                            } else {
+                            RillFilterChip(
+                                label = stringResource(R.string.filter_all) + " (${allContacts.size})",
+                                selected = selectedFilterTab == 0,
+                                onClick = { selectedFilterTab = 0 },
+//                            leadingIcon = { Icon(Icons.Rounded.People, contentDescription = null, modifier = Modifier.size(16.dp)) }
+                            )
+                            val favCount = remember(allContacts) { allContacts.count { it.isFavorite } }
+                            RillFilterChip(
+                                label = stringResource(R.string.favorites) + " ($favCount)",
+                                selected = selectedFilterTab == 1,
+                                onClick = { selectedFilterTab = 1 },
+//                            leadingIcon = { Icon(Icons.Outlined.Star, contentDescription = null, modifier = Modifier.size(16.dp)) }
+                            )
+                            val privCount = remember(allContacts) { allContacts.count { it.isPrivate } }
+                            if (privCount > 0) {
+                                RillFilterChip(
+                                    label = "Private ($privCount)",
+                                    selected = selectedFilterTab == 2,
+                                    onClick = { selectedFilterTab = 2 },
+//                                leadingIcon = { Icon(ContactUtils.getAccountIcon(null, true), contentDescription = null, modifier = Modifier.size(16.dp)) }
+                                )
+                            }
+                        }
+                    }
+
+                    val cleanQuery = searchQuery.trim()
+                    val isPhoneQuery = cleanQuery.any { it.isDigit() } || cleanQuery.startsWith("+")
+
+                    if (isPhoneQuery) {
+                        item {
+                            val isCustomSelected = selectedPhoneNumbers.contains(cleanQuery)
+                            Surface(
+                                modifier = Modifier
+                                    .fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 12.dp)
+                                    .clip(MaterialTheme.shapes.large)
+                                    .clickable {
+                                        view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                                        if (isMultiSelect) {
+                                            selectedPhoneNumbers = if (isCustomSelected) {
                                                 selectedPhoneNumbers - cleanQuery
+                                            } else {
+                                                selectedPhoneNumbers + cleanQuery
                                             }
-                                        },
-                                        modifier = Modifier.padding(end = 8.dp)
-                                    )
-                                }
-                                Surface(
-                                    modifier = Modifier.size(44.dp),
-                                    shape = CircleShape,
-                                    color = MaterialTheme.colorScheme.primaryContainer,
-                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                        } else {
+                                            resultNavigator.navigateBack(result = cleanQuery)
+                                        }
+                                    },
+                                shape = MaterialTheme.shapes.large,
+                                color = if (isCustomSelected) {
+                                    MaterialTheme.colorScheme.primaryContainer
+                                } else {
+                                    MaterialTheme.colorScheme.surfaceContainerLow
+                                },
+                                border = if (isCustomSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(14.dp),
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Box(contentAlignment = Alignment.Center) {
-                                        Icon(Icons.Outlined.Dialpad, contentDescription = null, modifier = Modifier.size(22.dp))
+                                    if (isMultiSelect) {
+                                        Checkbox(
+                                            checked = isCustomSelected,
+                                            onCheckedChange = { checked ->
+                                                selectedPhoneNumbers = if (checked) {
+                                                    selectedPhoneNumbers + cleanQuery
+                                                } else {
+                                                    selectedPhoneNumbers - cleanQuery
+                                                }
+                                            },
+                                            modifier = Modifier.padding(end = 8.dp)
+                                        )
                                     }
-                                }
-                                Spacer(Modifier.width(16.dp))
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = stringResource(R.string.use_number, cleanQuery),
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Bold
-                                    )
+                                    Surface(
+                                        modifier = Modifier.size(44.dp),
+                                        shape = CircleShape,
+                                        color = MaterialTheme.colorScheme.primaryContainer,
+                                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Icon(Icons.Outlined.Dialpad, contentDescription = null, modifier = Modifier.size(22.dp))
+                                        }
+                                    }
+                                    Spacer(Modifier.width(16.dp))
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = stringResource(R.string.use_number, cleanQuery),
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Bold
+                                        )
 //                                    Spacer(Modifier.height(2.dp))
 //                                    Text(
 //                                        text = "Tap to select this custom number",
 //                                        style = MaterialTheme.typography.bodySmall,
 //                                        color = MaterialTheme.colorScheme.onSurfaceVariant
 //                                    )
+                                    }
+                                    Icon(
+                                        Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                        modifier = Modifier.size(20.dp)
+                                    )
                                 }
-                                Icon(
-                                    Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                                    modifier = Modifier.size(20.dp)
-                                )
                             }
                         }
                     }
-                }
 
-                if (filteredContacts.isEmpty() && !isPhoneQuery) {
-                    item {
-                        Box(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
-                            PlaceholderView(
-                                icon = Icons.Rounded.People,
-                                title = stringResource(R.string.no_contacts_found),
-                            )
-                        }
-                    }
-                } else {
-                    groupedContacts.forEach { (initial, contactsInGroup) ->
-                        // ── Letter header ──────────────────────────────────────────
-                        stickyHeader(key = "header_$initial", contentType = "letterHeader") {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(MaterialTheme.colorScheme.surface)
-                                    .padding(horizontal = 28.dp, vertical = 4.dp)
-                                    .padding(top = 8.dp)
-                            ) {
-                                Text(
-                                    text = if (initial == '❤'.toString()) stringResource(R.string.favorites) else initial,
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.padding(start = 8.dp)
+                    if (filteredContacts.isEmpty() && !isPhoneQuery) {
+                        item {
+                            Box(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+                                PlaceholderView(
+                                    icon = Icons.Rounded.People,
+                                    title = stringResource(R.string.no_contacts_found),
                                 )
                             }
                         }
+                    } else {
+                        groupedContacts.forEach { (initial, contactsInGroup) ->
+                            // ── Letter header ──────────────────────────────────────────
+                            stickyHeader(key = "header_$initial", contentType = "letterHeader") {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(MaterialTheme.colorScheme.surface)
+                                        .padding(horizontal = 28.dp, vertical = 4.dp)
+                                        .padding(top = 8.dp)
+                                ) {
+                                    Text(
+                                        text = if (initial == '❤') stringResource(R.string.favorites) else initial.toString(),
+                                        style = MaterialTheme.typography.labelLarge,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.padding(start = 8.dp)
+                                    )
+                                }
+                            }
 
-                        item(key = "group_$initial") {
-                            RillExpressiveCard(
-                                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                                containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-                            ) {
-                                contactsInGroup.forEachIndexed { index, contact ->
-                                    val primaryNumber = contact.phoneNumbers.firstOrNull() ?: ""
-                                    val isSelected = if (isMultiSelect) {
-                                        selectedContactIds.contains(contact.id) || selectedPhoneNumbers.contains(primaryNumber)
-                                    } else false
+                            item(key = "group_$initial") {
+                                RillExpressiveCard(
+                                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+                                ) {
+                                    contactsInGroup.forEachIndexed { index, contact ->
+                                        val primaryNumber = contact.phoneNumbers.firstOrNull() ?: ""
+                                        val isSelected = if (isMultiSelect) {
+                                            selectedContactIds.contains(contact.id) || selectedPhoneNumbers.contains(primaryNumber)
+                                        } else false
 
-                                    RillScrollAnimatedItem(delayMs = (index * 25L).coerceAtMost(250L)) {
-                                        RillListItem(
-                                            headline = contact.name,
-                                            supporting = if (contact.phoneNumbers.isNotEmpty()) {
-                                                if (contact.phoneNumbers.size > 1) {
-                                                    "${formatPhoneNumber(primaryNumber)} (+${contact.phoneNumbers.size - 1} more)"
-                                                } else {
-                                                    formatPhoneNumber(primaryNumber)
-                                                }
-                                            } else null,
-                                            avatarName = contact.name,
-                                            photoUri = contact.photoUri,
+                                        RillScrollAnimatedItem(delayMs = (index * 25L).coerceAtMost(250L)) {
+                                            RillListItem(
+                                                paddingVertical = 8.dp,
+                                                headline = getDisplayName(contact, displayOrder),
+                                                supporting = if (contact.phoneNumbers.isNotEmpty()) {
+                                                    if (contact.phoneNumbers.size > 1) {
+                                                        stringResource(R.string.plus_more, formatPhoneNumber(primaryNumber), contact.phoneNumbers.size)
+                                                    } else {
+                                                        formatPhoneNumber(primaryNumber)
+                                                    }
+                                                } else null,
+                                                avatarName = contact.displayName,
+                                                photoUri = contact.photoUri,
 //                                        badgeIcon = if (contact.isFavorite) Icons.Outlined.Star else if (contact.isPrivate) Icons.Outlined.Lock else null,
 //                                        badgeColor = if (contact.isFavorite) MaterialTheme.colorScheme.primary else null,
 //                                        selected = isSelected,
-                                            onClick = {
-                                                view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                                                if (isMultiSelect) {
-                                                    if (isSelected) {
-                                                        selectedContactIds =
-                                                            selectedContactIds - contact.id
-                                                        selectedPhoneNumbers =
-                                                            selectedPhoneNumbers - contact.phoneNumbers.toSet()
-                                                    } else {
-                                                        selectedContactIds =
-                                                            selectedContactIds + contact.id
-                                                        if (primaryNumber.isNotBlank()) {
+                                                onClick = {
+                                                    view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                                                    if (isMultiSelect) {
+                                                        if (isSelected) {
+                                                            selectedContactIds =
+                                                                selectedContactIds - contact.id
                                                             selectedPhoneNumbers =
-                                                                selectedPhoneNumbers + primaryNumber
-                                                        }
-                                                    }
-                                                } else {
-                                                    if (initialPhoneToAssign != null) {
-                                                        navigator.navigate(
-                                                            ContactEditScreenDestination(
-                                                                contactId = contact.id,
-                                                                initialPhone = initialPhoneToAssign
-                                                            )
-                                                        )
-                                                    } else if (returnContactId) {
-                                                        resultNavigator.navigateBack(result = contact.id)
-                                                    } else {
-                                                        if (contact.phoneNumbers.size > 1) {
-                                                            pendingMultiNumberContact = contact
-                                                        } else if (primaryNumber.isNotBlank()) {
-                                                            resultNavigator.navigateBack(result = primaryNumber)
-                                                        }
-                                                    }
-                                                }
-                                            },
-                                            trailingContent = {
-                                                if (isMultiSelect) {
-                                                    Checkbox(
-                                                        checked = isSelected,
-                                                        onCheckedChange = { checked ->
-                                                            if (checked) {
-                                                                selectedContactIds =
-                                                                    selectedContactIds + contact.id
-                                                                if (primaryNumber.isNotBlank()) {
-                                                                    selectedPhoneNumbers =
-                                                                        selectedPhoneNumbers + primaryNumber
-                                                                }
-                                                            } else {
-                                                                selectedContactIds =
-                                                                    selectedContactIds - contact.id
+                                                                selectedPhoneNumbers - contact.phoneNumbers.toSet()
+                                                        } else {
+                                                            selectedContactIds =
+                                                                selectedContactIds + contact.id
+                                                            if (primaryNumber.isNotBlank()) {
                                                                 selectedPhoneNumbers =
-                                                                    selectedPhoneNumbers - contact.phoneNumbers.toSet()
+                                                                    selectedPhoneNumbers + primaryNumber
                                                             }
                                                         }
-                                                    )
-                                                } else if (initialPhoneToAssign != null) {
-                                                    Surface(
-                                                        shape = CircleShape,
-                                                        color = MaterialTheme.colorScheme.primaryContainer,
-                                                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                                                    ) {
-                                                        Row(
-                                                            verticalAlignment = Alignment.CenterVertically,
-                                                            modifier = Modifier.padding(
-                                                                horizontal = 8.dp,
-                                                                vertical = 4.dp
+                                                    } else {
+                                                        if (initialPhoneToAssign != null) {
+                                                            navigator.navigate(
+                                                                ContactEditScreenDestination(
+                                                                    contactId = contact.id,
+                                                                    initialPhone = initialPhoneToAssign
+                                                                )
                                                             )
+                                                        } else if (isExternalPick) {
+                                                            val resultIntent = Intent().apply {
+                                                                data = Uri.withAppendedPath(
+                                                                    ContactsContract.Contacts.CONTENT_URI, contact.id)
+                                                            }
+                                                            val activity = context as? Activity
+                                                            activity?.setResult(Activity.RESULT_OK, resultIntent)
+                                                            activity?.finish()
+                                                        } else if (returnContactId) {
+                                                            resultNavigator.navigateBack(result = contact.id)
+                                                        } else {
+                                                            if (contact.phoneNumbers.size > 1) {
+                                                                pendingMultiNumberContact = contact
+                                                            } else if (primaryNumber.isNotBlank()) {
+                                                                resultNavigator.navigateBack(result = primaryNumber)
+                                                            }
+                                                        }
+                                                    }
+                                                },
+                                                trailingContent = {
+                                                    if (isMultiSelect) {
+                                                        Checkbox(
+                                                            checked = isSelected,
+                                                            onCheckedChange = { checked ->
+                                                                if (checked) {
+                                                                    selectedContactIds =
+                                                                        selectedContactIds + contact.id
+                                                                    if (primaryNumber.isNotBlank()) {
+                                                                        selectedPhoneNumbers =
+                                                                            selectedPhoneNumbers + primaryNumber
+                                                                    }
+                                                                } else {
+                                                                    selectedContactIds =
+                                                                        selectedContactIds - contact.id
+                                                                    selectedPhoneNumbers =
+                                                                        selectedPhoneNumbers - contact.phoneNumbers.toSet()
+                                                                }
+                                                            }
+                                                        )
+                                                    } else if (initialPhoneToAssign != null) {
+                                                        Surface(
+                                                            shape = CircleShape,
+                                                            color = MaterialTheme.colorScheme.primaryContainer,
+                                                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                                                         ) {
+                                                            Row(
+                                                                verticalAlignment = Alignment.CenterVertically,
+                                                                modifier = Modifier.padding(
+                                                                    horizontal = 8.dp,
+                                                                    vertical = 4.dp
+                                                                )
+                                                            ) {
 //                                                            Icon(
 //                                                                imageVector = Icons.Outlined.PersonAdd,
 //                                                                contentDescription = null,
 //                                                                modifier = Modifier.size(13.dp)
 //                                                            )
 //                                                            Spacer(Modifier.width(4.dp))
-                                                            Text(
-                                                                text = stringResource(R.string.add),
-                                                                style = MaterialTheme.typography.labelSmall,
-                                                                fontWeight = FontWeight.Bold
-                                                            )
+                                                                Text(
+                                                                    text = stringResource(R.string.add),
+                                                                    style = MaterialTheme.typography.labelSmall,
+                                                                    fontWeight = FontWeight.Bold
+                                                                )
+                                                            }
                                                         }
+                                                    } else {
+                                                        Icon(
+                                                            Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                                            contentDescription = null,
+                                                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                                                                alpha = 0.6f
+                                                            ),
+                                                            modifier = Modifier.size(20.dp)
+                                                        )
                                                     }
-                                                } else {
-                                                    Icon(
-                                                        Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                                                        contentDescription = null,
-                                                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                                                            alpha = 0.6f
-                                                        ),
-                                                        modifier = Modifier.size(20.dp)
-                                                    )
                                                 }
-                                            }
-                                        )
+                                            )
+                                        }
                                     }
                                 }
                             }

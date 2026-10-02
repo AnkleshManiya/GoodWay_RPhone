@@ -1,11 +1,14 @@
 package dev.goodwy.rphone.controller
 
+import android.Manifest
 import android.app.Application
 import android.content.ContentResolver
+import android.content.pm.PackageManager
 import android.database.ContentObserver
 import android.os.Handler
 import android.os.Looper
 import android.provider.CallLog
+import androidx.core.content.ContextCompat
 import dev.goodwy.rphone.modal.`interface`.ICallLogRepository
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -66,21 +69,33 @@ class CallLogViewModel(
         }
     }
 
+    private fun hasReadCallLogPermission(): Boolean {
+        return ContextCompat.checkSelfPermission(
+            getApplication(),
+            Manifest.permission.READ_CALL_LOG
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
     init {
-        contentResolver.registerContentObserver(
-            CallLog.Calls.CONTENT_URI,
-            true,
-            callLogObserver
-        )
-        // Step 1: serve disk cache immediately so UI is instant
-        viewModelScope.launch {
-            val diskCache = loadFromDisk()
-            if (diskCache.isNotEmpty()) {
-                cachedLogs = diskCache
-                _allCallLogs.value = diskCache
+        if (hasReadCallLogPermission()) {
+            contentResolver.registerContentObserver(
+                CallLog.Calls.CONTENT_URI,
+                true,
+                callLogObserver
+            )
+
+            // Step 1: serve disk cache immediately so UI is instant
+            viewModelScope.launch {
+                val diskCache = loadFromDisk()
+                if (diskCache.isNotEmpty()) {
+                    cachedLogs = diskCache
+                    _allCallLogs.value = diskCache
+                }
+                // Step 2: refresh from provider in background
+                fetchLogsInternal()
             }
-            // Step 2: refresh from provider in background
-            fetchLogsInternal()
+        } else {
+            _isLoading.value = false
         }
 
         viewModelScope.launch {
@@ -138,6 +153,7 @@ class CallLogViewModel(
     }
 
     private fun fetchLogs(forceRefresh: Boolean = false) {
+        if (!hasReadCallLogPermission()) return
         if (!forceRefresh && cachedLogs.isNotEmpty()) {
             _allCallLogs.value = cachedLogs
             return
@@ -153,19 +169,21 @@ class CallLogViewModel(
         isFetching = true
         _isLoading.value = true
         try {
-            val result = callLogRepo.getCallLogs()
-            // Only push an update to the UI if the data actually changed.
-            // This prevents a visible "refresh flicker" when the disk cache
-            // and the freshly-fetched data are identical (the common case on
-            // every app open after the first one).
-            val changed = result.size != cachedLogs.size ||
-                    result.zip(cachedLogs).any { (a, b) ->
-                        a.number != b.number || a.date != b.date || a.type != b.type || a.name != b.name || a.isBlocked != b.isBlocked
-                    }
-            cachedLogs = result
-            saveToDisk(result)
-            if (changed) {
-                _allCallLogs.value = result
+            if (hasReadCallLogPermission()) {
+                val result = callLogRepo.getCallLogs()
+                // Only push an update to the UI if the data actually changed.
+                // This prevents a visible "refresh flicker" when the disk cache
+                // and the freshly-fetched data are identical (the common case on
+                // every app open after the first one).
+                val changed = result.size != cachedLogs.size ||
+                        result.zip(cachedLogs).any { (a, b) ->
+                            a.number != b.number || a.date != b.date || a.type != b.type || a.name != b.name || a.isBlocked != b.isBlocked
+                        }
+                cachedLogs = result
+                saveToDisk(result)
+                if (changed) {
+                    _allCallLogs.value = result
+                }
             }
         } finally {
             isFetching = false

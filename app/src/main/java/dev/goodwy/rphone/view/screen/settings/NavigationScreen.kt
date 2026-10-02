@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.zIndex
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.view.components.NavigationIcon
 import dev.goodwy.rphone.view.components.RillAnimatedSection
@@ -70,22 +71,23 @@ import kotlin.math.roundToInt
 fun NavigationScreen(navigator: DestinationsNavigator) {
     val context = LocalContext.current
     val prefs = koinInject<PreferenceManager>()
+    val settingsState by prefs.settingsChanged.collectAsStateWithLifecycle()
 
-    var pillNav             by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_PILL_NAV, false)) }
+    var pillNav             by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_PILL_NAV, false)) }
     var showTabSectionsDialog by remember { mutableStateOf(false) }
-    var tabShowFavorites    by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, false)) }
-    var tabShowCalls        by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_CALLS,      true)) }
-    var tabShowContacts     by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_CONTACTS, true)) }
-    var tabShowDialpad      by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_DIALPAD, true)) }
-    var tabShowNotes        by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_NOTES, false)) }
-    var tabShowSearch       by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_SEARCH, false)) }
-    var tabShowSettings     by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_SETTINGS, true)) }
-    var iconOnlyNav         by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_ICON_ONLY_NAV, false)) }
-    var openDialpadDefault  by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_OPEN_DIALPAD_DEFAULT, false)) }
+    var tabShowFavorites    by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, false)) }
+    var tabShowCalls        by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_CALLS,      true)) }
+    var tabShowContacts     by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_CONTACTS, true)) }
+    var tabShowDialpad      by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_DIALPAD, true)) }
+    var tabShowNotes        by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_NOTES, false)) }
+    var tabShowSearch       by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_SEARCH, false)) }
+    var tabShowSettings     by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_SETTINGS, true)) }
+    var iconOnlyNav         by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_ICON_ONLY_NAV, false)) }
+    var openDialpadDefault  by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_OPEN_DIALPAD_DEFAULT, false)) }
 
     // Default Tab dialog
     var showDefaultTabDialog by remember { mutableStateOf(false) }
-    var defaultTab           by remember { mutableStateOf(prefs.getString(PreferenceManager.KEY_DEFAULT_TAB, "calls") ?: "calls") }
+    var defaultTab           by remember(settingsState) { mutableStateOf(prefs.getString(PreferenceManager.KEY_DEFAULT_TAB, "calls") ?: "calls") }
     data class TabOption(val key: String, val label: String, val icon: ImageVector, val enabled: Boolean, val clickable: Boolean)
     val labelRecents =
         if (!tabShowFavorites && !tabShowContacts) stringResource(R.string.home_tab) else stringResource(R.string.recents)
@@ -103,7 +105,7 @@ fun NavigationScreen(navigator: DestinationsNavigator) {
 
     // Custom order of tab keys, persisted as a comma-separated string. Any tab keys
     // missing from a previously-saved (older) order are appended so new tabs always show.
-    val tabOrder = remember {
+    val tabOrder = remember(settingsState) {
         mutableStateListOf<String>().apply {
             val saved = prefs.getString(PreferenceManager.KEY_TAB_ORDER, null)
             val savedKeys = saved?.split(",")?.map { it.trim() }?.filter { it.isNotBlank() } ?: emptyList()
@@ -256,6 +258,23 @@ fun NavigationScreen(navigator: DestinationsNavigator) {
             iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorCyan,
             confirmButton = {
                 TextButton(onClick = { showTabSectionsDialog = false }) { Text(stringResource(R.string.done)) }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+//                        showTabSectionsDialog = false
+                        prefs.setString(PreferenceManager.KEY_TAB_ORDER, null)
+                        tabShowFavorites = false;  prefs.setBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES,  false)
+                        tabShowCalls = true;       prefs.setBoolean(PreferenceManager.KEY_TAB_SHOW_CALLS,      true)
+                        tabShowContacts = true;    prefs.setBoolean(PreferenceManager.KEY_TAB_SHOW_CONTACTS,   true)
+                        tabShowDialpad = true;     prefs.setBoolean(PreferenceManager.KEY_TAB_SHOW_DIALPAD,    true)
+                        tabShowNotes = false;      prefs.setBoolean(PreferenceManager.KEY_TAB_SHOW_NOTES,      false)
+                        tabShowSearch = false;     prefs.setBoolean(PreferenceManager.KEY_TAB_SHOW_SEARCH,     false)
+                        tabShowSettings = true;    prefs.setBoolean(PreferenceManager.KEY_TAB_SHOW_SETTINGS,   true)
+                    }
+                ) {
+                    Text(stringResource(R.string.set_as_default))
+                }
             }
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {

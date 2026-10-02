@@ -119,7 +119,14 @@ fun AZListContent(
 ) {
     val prefs = koinInject<PreferenceManager>()
     val settingsState by prefs.settingsChanged.collectAsStateWithLifecycle()
-    val showFavorites = false //!prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, true)
+
+    val favoritesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, false)
+    val contactsEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_CONTACTS, true)
+    val dialpadEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_DIALPAD, true)
+    val notesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_NOTES, false)
+    val searchEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_SEARCH, false)
+    val settingsEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_SETTINGS, true)
+    val showBottomBar = favoritesEnabled || contactsEnabled || dialpadEnabled ||notesEnabled || searchEnabled || settingsEnabled
 
     val displayOrder = remember(settingsState) { prefs.getInt(PreferenceManager.KEY_CONTACT_DISPLAY_ORDER, 0) }
     val sortOrder = remember(settingsState) { prefs.getInt(PreferenceManager.KEY_CONTACT_SORT_ORDER, 0) }
@@ -278,6 +285,8 @@ fun AZListContent(
         if (draggingChar != null) {
             Surface(
                 modifier = Modifier
+                    .navigationBarsPadding()
+                    .padding(bottom = if (showBottomBar) bottomBarHeight + 24.dp else 36.dp)
                     .size(100.dp)
                     .align(Alignment.Center),
                 shape = RoundedCornerShape(36.dp),
@@ -321,7 +330,7 @@ fun ContactListItem(
         label = "contactItemScale"
     )
 
-    val headline =  getDisplayName(contact, displayOrder)
+    val headline = getDisplayName(contact, displayOrder)
 
     // Delete confirmation dialog
     if (showDeleteConfirm) {

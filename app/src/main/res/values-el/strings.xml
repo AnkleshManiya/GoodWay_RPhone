@@ -12,6 +12,7 @@
     <string name="select">Επιλογή</string>
     <string name="select_all">Επιλογή όλων</string>
     <string name="deselect_all">Αποεπιλογή όλων</string>
+    <string name="plus_more">%1$s (+%2$s ακόμη)</string>
     <string name="backspace">Διαγραφή</string>
     <string name="back">Πίσω</string>
     <string name="edit">Επεξεργασία</string>

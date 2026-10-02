@@ -90,6 +90,7 @@ import com.ramcosta.composedestinations.generated.destinations.CallerUIScreenDes
 import com.ramcosta.composedestinations.generated.destinations.ContactManagementScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.ContactMergeDuplicatesScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.ContactScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.ContactSelectionScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.ContactUnmergeDuplicatesScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.ContactVisibilityScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.ContributorsScreenDestination
@@ -217,8 +218,10 @@ class MainActivity : FragmentActivity() {
                     }
                     // Compute start destination from prefs — done once so no flash
                     val startDestination = remember {
+                        val isDefaultDialer = isAlreadyDefaultDialer(this@MainActivity)
+                        val isMainLauncher = intentState?.action == null || intentState?.action == Intent.ACTION_MAIN
                         when {
-                            !isAlreadyDefaultDialer(this@MainActivity) -> DefaultDialerScreenDestination
+                            !isDefaultDialer && isMainLauncher -> DefaultDialerScreenDestination
                             lastOpenedTab != null -> {
                                 when {
                                     lastOpenedTab.contains(FavoritesScreenDestination.route) && favouritesEnabled -> FavoritesScreenDestination
@@ -652,7 +655,9 @@ class MainActivity : FragmentActivity() {
                             }
 
                             LaunchedEffect(Unit) {
-                                if (!isAlreadyDefaultDialer(this@MainActivity)) {
+                                val isDefaultDialer = isAlreadyDefaultDialer(this@MainActivity)
+                                val isMainLauncher = intentState?.action == null || intentState?.action == Intent.ACTION_MAIN
+                                if (!isDefaultDialer && isMainLauncher) {
                                     navController.navigate(DefaultDialerScreenDestination.route) {
                                         popUpTo(ContactScreenDestination.route) {
                                             inclusive = true
@@ -733,19 +738,33 @@ class MainActivity : FragmentActivity() {
                 navController.navigate(DialPadScreenDestination(initialNumber = target.number).route)
             }
             is NavigationTarget.ContactDetails -> {
-                navController.navigate(ContactDetailsScreenDestination(contactId = target.contactId).route)
+                val isExternalView = intent.action == Intent.ACTION_VIEW ||
+                        intent.action == "com.android.contacts.action.QUICK_CONTACT" ||
+                        intent.action == "android.provider.action.QUICK_CONTACT"
+
+                navController.navigate(ContactDetailsScreenDestination(
+                    contactId = target.contactId,
+                    isExternalView = isExternalView
+                ).route)
             }
             is NavigationTarget.ContactEdit -> {
                 navController.navigate(ContactEditScreenDestination(
                     contactId = target.contactId,
                     initialName = target.initialName,
-                    initialPhone = target.initialPhone
+                    initialPhone = target.initialPhone,
+                    isExternalEdit = true
                 ).route) {
                     launchSingleTop = true
                     popUpTo(navController.graph.startDestinationId) {
                         saveState = true
                     }
                 }
+            }
+            is NavigationTarget.ContactSelection -> {
+                navController.navigate(ContactSelectionScreenDestination(
+                    returnContactId = true,
+                    isExternalPick = true
+                ).route)
             }
         }
     }

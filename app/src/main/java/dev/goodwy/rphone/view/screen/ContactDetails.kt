@@ -1,11 +1,14 @@
 package dev.goodwy.rphone.view.screen
 
+import android.Manifest
 import android.accounts.Account
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.media.RingtoneManager
 import android.net.Uri
@@ -78,6 +81,7 @@ import androidx.compose.material.icons.rounded.Email
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.LockOpen
 import androidx.compose.material.icons.rounded.MusicNote
+import androidx.compose.material.icons.rounded.People
 import androidx.compose.material.icons.rounded.PeopleAlt
 import androidx.compose.material.icons.rounded.PersonAdd
 import androidx.compose.material.icons.rounded.Phone
@@ -98,6 +102,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import dev.goodwy.rphone.R
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -187,6 +192,7 @@ private fun CallBackgroundRow(
 fun ContactDetailsScreen(
     contactId: String? = null,
     phoneNumber: String? = null,
+    isExternalView: Boolean = false,
     navController: NavController,
     navigator: DestinationsNavigator
 ) {
@@ -208,21 +214,45 @@ fun ContactDetailsScreen(
     var contactAccount by remember { mutableStateOf<Account?>(null) }
     var isFullLoading by remember { mutableStateOf(true) }
 
+    // ─── Checking Permissions ───────────────────────────────────
+    var hasContactsPermission by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED
+        )
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { permissions ->
+        hasContactsPermission = permissions
+    }
+    // ────────────────────────────────────────────────────────────
+
     // Entrance / exit animation
     var screenVisible by remember { mutableStateOf(false) }
     var isClosing by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
     fun navigateBack() {
+        if (isClosing) return // Double-Click Protection
         isClosing = true
         scope.launch {
             kotlinx.coroutines.delay(420.milliseconds)
-            navigator.navigateUp()
+
+            if (isExternalView) {
+                val activity = context as? Activity
+                activity?.setResult(Activity.RESULT_CANCELED)
+                activity?.finish()
+            } else {
+                navigator.navigateUp()
+            }
         }
     }
 
     val noContactsFound = stringResource(R.string.no_contacts_found)
-    LaunchedEffect(contactId, phoneNumber) {
+    LaunchedEffect(contactId, phoneNumber, hasContactsPermission) {
+        if (!hasContactsPermission) return@LaunchedEffect
+
         isFullLoading = true
         contact = if (contactId != null && contactId != "null") {
             contactsViewModel.getFullContactById(contactId)
@@ -427,7 +457,7 @@ fun ContactDetailsScreen(
         label = "screenOffsetY"
     )
     LaunchedEffect(Unit) { screenVisible = true }
-    BackHandler { navigateBack() }
+    BackHandler(enabled = !isClosing) { navigateBack() }
 
     val initiateCall = { number: String ->
         placeCallWithSimPreference(context, number, simPref) {
@@ -760,7 +790,14 @@ fun ContactDetailsScreen(
             .alpha(screenAlpha)
             .offset(y = screenOffsetY)
         ) {
-            if (isFullLoading) {
+            if (!hasContactsPermission) {
+                PermissionDeniedView(
+                    icon = Icons.Rounded.People,
+                    title = stringResource(R.string.contacts_permission),
+                    description = stringResource(R.string.contacts_permission_description),
+                    onGrantClick = { permissionLauncher.launch(Manifest.permission.READ_CONTACTS) }
+                )
+            } else if (isFullLoading) {
                 RillLoadingIndicatorView()
             } else {
                 val configuration = LocalConfiguration.current

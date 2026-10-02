@@ -13,6 +13,7 @@
     <string name="select">تحديد</string>
     <string name="select_all">تحديد الكل</string>
     <string name="deselect_all">إلغاء تحديد الكل</string>
+    <string name="plus_more">%1$s (+%2$s أخرى)</string>
     <string name="backspace">مسح</string>
     <string name="back">رجوع</string>
     <string name="edit">تحرير</string>

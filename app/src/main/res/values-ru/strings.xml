@@ -12,6 +12,7 @@
     <string name="select">Выбрать</string>
     <string name="select_all">Выделить всё</string>
     <string name="deselect_all">Отменить выбор</string>
+    <string name="plus_more">%1$s (+ ещё %2$s)</string>
     <string name="backspace">Удалить</string>
     <string name="back">Назад</string>
     <string name="edit">Изменить</string>

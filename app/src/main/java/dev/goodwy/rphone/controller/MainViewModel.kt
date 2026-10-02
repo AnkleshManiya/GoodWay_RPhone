@@ -10,6 +10,7 @@ import dev.goodwy.rphone.controller.util.makeCall
 
 sealed class NavigationTarget {
     object Recents : NavigationTarget()
+    object ContactSelection : NavigationTarget()
     data class Dialpad(val number: String) : NavigationTarget()
     data class ContactDetails(val contactId: String) : NavigationTarget()
     data class ContactEdit(val contactId: String? = null, val initialName: String? = null, val initialPhone: String? = null) : NavigationTarget()
@@ -23,7 +24,9 @@ class MainViewModel(private val prefs: PreferenceManager) : ViewModel() {
 
         return when (action) {
             "dev.goodwy.rphone.ACTION_VIEW_RECENTS" -> NavigationTarget.Recents
-            Intent.ACTION_VIEW -> {
+            Intent.ACTION_VIEW,
+            "com.android.contacts.action.QUICK_CONTACT",
+            "android.provider.action.QUICK_CONTACT" -> {
                 val mimeType = intent.type
                 if (mimeType == "vnd.android.cursor.dir/calls" ||
                     data?.toString()?.contains("call_log") == true ||
@@ -67,6 +70,7 @@ class MainViewModel(private val prefs: PreferenceManager) : ViewModel() {
                     NavigationTarget.ContactEdit(contactId = id)
                 } else null
             }
+            Intent.ACTION_PICK -> NavigationTarget.ContactSelection
             else -> null
         }
     }
