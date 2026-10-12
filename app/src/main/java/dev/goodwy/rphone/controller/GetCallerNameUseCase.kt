@@ -7,7 +7,7 @@ class GetCallerNameUseCase(private val repository: ICallerRepository) {
     suspend operator fun invoke(incomingNumber: String, cnamName: String?): CallerMetadata {
         val localContact = repository.getContactByNumber(incomingNumber)
         val cleanCnam = cnamName?.takeIf { it.isNotBlank() }
-        
+
         val hasLocalName = localContact?.hasLocalName() == true
 
         return when {

@@ -317,10 +317,9 @@ fun getSimSelectionList(askFirstResId: Int): List<Pair<String, Int>> {
                         null
                     }
 
-                    val isSimAccount = info != null &&
+                    val isSimAccount = info != null /*&&
                             info.isEnabled &&
-                            info.hasCapabilities(PhoneAccount.CAPABILITY_SIM_SUBSCRIPTION)
-
+                            info.hasCapabilities(PhoneAccount.CAPABILITY_SIM_SUBSCRIPTION)*/
                     if (!isSimAccount) return@filter false
 
                     val key = info!!.label?.toString().orEmpty() + "|" + info.address?.toString().orEmpty()
