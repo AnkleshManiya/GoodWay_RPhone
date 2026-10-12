@@ -722,4 +722,14 @@
     <string name="most_talked_persons">Πιο συχνές επαφές</string>
     <string name="no_call_records_this_period">Δεν βρέθηκαν αρχεία κλήσεων για αυτήν την περίοδο</string>
     <string name="total_calls_in_number">%1$s κλήσεις (εισ: %2$s, εξ: %3$s, αναπ: %4$s)</string>
+
+    <!-- Busy Mode -->
+    <string name="busy_mode">Λειτουργία απασχόλησης</string>
+    <string name="busy_mode_subtitle">Αυτόματη απόρριψη κλήσεων και αποστολή αυτόματης απάντησης SMS. Εναλλάσσεται μέσω των Γρήγορων ρυθμίσεων</string>
+    <string name="busy_mode_message">Μήνυμα αυτόματης απάντησης</string>
+    <string name="busy_mode_message_subtitle">Μήνυμα που αποστέλλεται αυτόματα όταν η λειτουργία απασχόλησης απορρίπτει μια κλήση</string>
+    <string name="busy_mode_default_message">Είμαι απασχολημένος τώρα, κάλεσέ με αργότερα</string>
+    <string name="busy_mode_call_rejected_toast">Η κλήση απορρίφθηκε (λειτουργία απασχόλησης). Το SMS στάλθηκε.</string>
+    <string name="edit_busy_message">Επεξεργασία μηνύματος λειτουργίας απασχόλησης</string>
+    <string name="busy_mode_permission_required">Παραχωρήστε άδεια αποστολής SMS στις ρυθμίσεις της εφαρμογής</string>
 </resources>

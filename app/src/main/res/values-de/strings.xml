@@ -722,4 +722,14 @@
     <string name="most_talked_persons">Häufigste Gesprächspartner</string>
     <string name="no_call_records_this_period">Für diesen Zeitraum wurden keine Anrufaufzeichnungen gefunden</string>
     <string name="total_calls_in_number">%1$s Anrufe (ein: %2$s, aus: %3$s, verp: %4$s)</string>
+
+    <!-- Busy Mode -->
+    <string name="busy_mode">Beschäftigt-Modus</string>
+    <string name="busy_mode_subtitle">Anrufe automatisch ablehnen und eine SMS-Antwort senden. Umschaltbar über die Schnelleinstellungen</string>
+    <string name="busy_mode_message">Auto-Antwort-Nachricht</string>
+    <string name="busy_mode_message_subtitle">Nachricht, die automatisch gesendet wird, wenn der Beschäftigt-Modus einen Anruf ablehnt</string>
+    <string name="busy_mode_default_message">Ich bin gerade beschäftigt, ruf mich später an</string>
+    <string name="busy_mode_call_rejected_toast">Anruf abgelehnt (Beschäftigt-Modus). SMS gesendet.</string>
+    <string name="edit_busy_message">Nachricht für den Beschäftigt-Modus bearbeiten</string>
+    <string name="busy_mode_permission_required">Erteilen Sie die Berechtigung zum Senden von SMS in den App-Einstellungen</string>
 </resources>

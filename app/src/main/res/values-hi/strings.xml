@@ -722,4 +722,14 @@
     <string name="most_talked_persons">सबसे अधिक बात करने वाले लोग</string>
     <string name="no_call_records_this_period">इस अवधि के लिए कोई कॉल रिकॉर्ड नहीं मिला</string>
     <string name="total_calls_in_number">%1$s कॉल (इन: %2$s, आउट: %3$s, मिस: %4$s)</string>
+
+    <!-- Busy Mode -->
+    <string name="busy_mode">व्यस्त मोड</string>
+    <string name="busy_mode_subtitle">स्वचालित रूप से कॉल अस्वीकार करें और स्वचालित SMS उत्तर भेजें। क्विक सेटिंग्स से टॉगल किया जा सकता है</string>
+    <string name="busy_mode_message">स्वचालित उत्तर संदेश</string>
+    <string name="busy_mode_message_subtitle">जब व्यस्त मोड किसी कॉल को अस्वीकार करता है तो स्वचालित रूप से भेजा जाने वाला संदेश</string>
+    <string name="busy_mode_default_message">मैं अभी व्यस्त हूँ, बाद में कॉल करें</string>
+    <string name="busy_mode_call_rejected_toast">कॉल अस्वीकृत (व्यस्त मोड)। SMS भेजा गया।</string>
+    <string name="edit_busy_message">व्यस्त मोड संदेश संपादित करें</string>
+    <string name="busy_mode_permission_required">ऐप सेटिंग्स में SMS भेजने की अनुमति दें</string>
 </resources>

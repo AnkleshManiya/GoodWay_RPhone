@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
@@ -41,11 +40,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Phone
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ImageBitmap
@@ -1075,6 +1076,110 @@ fun RillSwitchListItem(
             Switch(
                 checked = checked,
                 onCheckedChange = onCheckedChange,
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = MaterialTheme.colorScheme.primary,
+                    checkedTrackColor = MaterialTheme.colorScheme.primaryContainer,
+                    uncheckedThumbColor = MaterialTheme.colorScheme.outline,
+                    uncheckedTrackColor = MaterialTheme.colorScheme.surfaceContainerHighest
+                )
+            )
+        }
+    }
+}
+
+@Composable
+fun RillSwitchListItem(
+    headline: String,
+    supporting: String? = null,
+    leadingIcon: ImageVector? = null,
+    iconContainerColor: Color? = null,
+    iconBgContainerColor: Color? = null,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val context = LocalContext.current
+    val prefs = koinInject<PreferenceManager>()
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.96f else 1f,
+        animationSpec = spring(stiffness = Spring.StiffnessMedium),
+        label = "SwitchItemScale"
+    )
+    val alpha = if (checked) 1f else 0.6f
+
+    Surface(
+        onClick = {
+            if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
+                performAppHaptic(
+                    context,
+                    prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light",
+                    prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f)
+                )
+            }
+            onClick()
+        },
+        shape = RoundedCornerShape(cardCornerExtraSmall),
+        color = cardColor,
+        modifier = modifier
+            .fillMaxWidth()
+            .scale(scale),
+        shadowElevation = 0.dp,
+        interactionSource = interactionSource,
+        enabled = checked
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 16.dp, vertical = 10.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (leadingIcon != null) {
+                RillIconBox(
+                    icon = leadingIcon,
+                    iconContainerColor = iconContainerColor,
+                    iconBgContainerColor = iconBgContainerColor,
+                    modifier = Modifier.alpha(alpha)
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+            }
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = headline,
+                    style = MaterialTheme.typography.bodyLarge,
+                    lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
+//                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.alpha(alpha)
+                )
+                if (supporting != null) {
+                    Text(
+                        text = supporting,
+                        style = MaterialTheme.typography.bodyMedium,
+                        lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.8f),
+                        modifier = Modifier.alpha(alpha)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.width(6.dp))
+            Icon(
+                Icons.Default.ChevronRight, null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                modifier = Modifier.size(20.dp).alpha(alpha)
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            VerticalDivider(thickness = 1.dp, modifier = Modifier.height(38.dp))
+            Spacer(modifier = Modifier.width(12.dp))
+            Switch(
+                checked = checked,
+                onCheckedChange = onCheckedChange, //onCheckedChange(!checked)
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = MaterialTheme.colorScheme.primary,
                     checkedTrackColor = MaterialTheme.colorScheme.primaryContainer,

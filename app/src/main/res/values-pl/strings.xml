@@ -728,4 +728,14 @@
     <string name="most_talked_persons">Najczęściej kontaktowane osoby</string>
     <string name="no_call_records_this_period">Nie znaleziono zapisów połączeń w tym okresie</string>
     <string name="total_calls_in_number">%1$s połączeń (przych: %2$s, wych: %3$s, nieod: %4$s)</string>
+
+    <!-- Busy Mode -->
+    <string name="busy_mode">Tryb zajętości</string>
+    <string name="busy_mode_subtitle">Automatycznie odrzucaj połączenia i wysyłaj automatyczną odpowiedź SMS. Przełączany przez Szybkie ustawienia</string>
+    <string name="busy_mode_message">Wiadomość automatycznej odpowiedzi</string>
+    <string name="busy_mode_message_subtitle">Wiadomość wysyłana automatycznie, gdy tryb zajętości odrzuca połączenie</string>
+    <string name="busy_mode_default_message">Jestem teraz zajęty, zadzwoń później</string>
+    <string name="busy_mode_call_rejected_toast">Połączenie odrzucone (tryb zajętości). Wysłano SMS.</string>
+    <string name="edit_busy_message">Edytuj wiadomość trybu zajętości</string>
+    <string name="busy_mode_permission_required">Przyznaj uprawnienie do wysyłania SMS-ów w ustawieniach aplikacji</string>
 </resources>

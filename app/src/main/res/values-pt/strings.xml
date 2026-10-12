@@ -725,4 +725,14 @@
     <string name="most_talked_persons">Pessoas mais contactadas</string>
     <string name="no_call_records_this_period">Não foram encontrados registos de chamadas para este período</string>
     <string name="total_calls_in_number">%1$s chamadas (rec: %2$s, efet: %3$s, perd: %4$s)</string>
+
+    <!-- Busy Mode -->
+    <string name="busy_mode">Modo ocupado</string>
+    <string name="busy_mode_subtitle">Rejeitar chamadas automaticamente e enviar uma resposta SMS automática. Alternável através das Definições rápidas</string>
+    <string name="busy_mode_message">Mensagem de resposta automática</string>
+    <string name="busy_mode_message_subtitle">Mensagem enviada automaticamente quando o modo ocupado rejeita uma chamada</string>
+    <string name="busy_mode_default_message">Estou ocupado agora, liga-me mais tarde</string>
+    <string name="busy_mode_call_rejected_toast">Chamada rejeitada (modo ocupado). SMS enviado.</string>
+    <string name="edit_busy_message">Editar a mensagem do modo ocupado</string>
+    <string name="busy_mode_permission_required">Conceda permissão para enviar SMS nas definições da aplicação</string>
 </resources>

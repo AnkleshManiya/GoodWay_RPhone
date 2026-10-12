@@ -8,10 +8,13 @@ import android.provider.Settings
 import android.telecom.PhoneAccount
 import android.telecom.TelecomManager
 import android.view.Surface
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Dialpad
@@ -31,6 +34,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -38,6 +42,7 @@ import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.view.components.NavigationIcon
 import dev.goodwy.rphone.view.components.RillAnimatedSection
+import dev.goodwy.rphone.view.components.RillDialog
 import dev.goodwy.rphone.view.components.RillExpressiveCard
 import dev.goodwy.rphone.view.components.RillListItem
 import dev.goodwy.rphone.view.components.RillSwitchListItem
@@ -68,6 +73,25 @@ fun CallSettingScreen(navigator: DestinationsNavigator) {
     var defaultSim by remember(settingsState) { mutableStateOf(prefs.getInt(PreferenceManager.KEY_DEFAULT_SIM, prefs.getDefaultSimIndexDefault())) }
     var fullscreenCalls by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_ALWAYS_FULLSCREEN_CALLS, false)) }
     var speedDial by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_SPEED_DIAL, true)) }
+
+    val defaultBusyMsg = stringResource(R.string.busy_mode_default_message)
+    var busyMode by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_BUSY_MODE_ENABLED, false)) }
+    var busyMessageEnable by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_BUSY_MODE_MESSAGE_ENABLED, false)) }
+    var busyMessage by remember(settingsState) { mutableStateOf(prefs.getString(PreferenceManager.KEY_BUSY_MODE_MESSAGE, defaultBusyMsg) ?: defaultBusyMsg) }
+    var showBusyMessageDialog by remember { mutableStateOf(false) }
+    var editingBusyMsgText by remember { mutableStateOf("") }
+
+    val smsPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            busyMode = true
+            prefs.setBoolean(PreferenceManager.KEY_BUSY_MODE_ENABLED, true)
+        } else {
+            busyMode = false
+            prefs.setBoolean(PreferenceManager.KEY_BUSY_MODE_ENABLED, false)
+        }
+    }
 
     var visible by remember { mutableStateOf(false) }
     val screenAlpha by animateFloatAsState(
@@ -129,7 +153,7 @@ fun CallSettingScreen(navigator: DestinationsNavigator) {
 
             // ── Caller Accounts ───────────────────────────────────────────────
             item {
-                RillAnimatedSection(delayMs = 0L) {
+                RillAnimatedSection(delayMs = 60L) {
                     Column {
                         SettingsSectionLabel("SIM")
                         RillExpressiveCard {
@@ -181,9 +205,93 @@ fun CallSettingScreen(navigator: DestinationsNavigator) {
                 }
             }
 
+            // ── Incoming Call Behavior ─────────────────────────────────────────────────
+            item {
+                RillAnimatedSection(delayMs = 90L) {
+                    Column {
+                        SettingsSectionLabel(stringResource(R.string.filter_incoming))
+                        RillExpressiveCard {
+                            RillSwitchListItem(
+                                headline   = stringResource(R.string.fullscreen_calls),
+                                supporting = stringResource(R.string.fullscreen_calls_subtitle),
+                                leadingIcon = Icons.Rounded.CropFree,
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkBlue,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorBlue,
+                                checked = fullscreenCalls,
+                                onCheckedChange = {
+                                    fullscreenCalls = it
+                                    prefs.setBoolean(PreferenceManager.KEY_ALWAYS_FULLSCREEN_CALLS, it)
+                                }
+                            )
+                            RillSwitchListItem(
+                                headline   = stringResource(R.string.pocket_mode_prevention),
+                                supporting = stringResource(R.string.pocket_mode_prevention_subtitle),
+                                leadingIcon = Icons.Rounded.ScreenLockPortrait,
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOrange,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOrange,
+                                checked = pocketModePrevention,
+                                onCheckedChange = {
+                                    pocketModePrevention = it
+                                    prefs.setBoolean(PreferenceManager.KEY_POCKET_MODE, it)
+                                }
+                            )
+                            RillSwitchListItem(
+                                headline   = stringResource(R.string.busy_mode),
+                                supporting = stringResource(R.string.busy_mode_subtitle),
+                                leadingIcon = ImageVector.vectorResource(id = R.drawable.ic_phone_cancel),
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
+                                checked = busyMode,
+                                onCheckedChange = { enable ->
+                                    if (enable) {
+                                        if (ContextCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
+                                            smsPermissionLauncher.launch(Manifest.permission.SEND_SMS)
+                                        } else {
+                                            busyMode = true
+                                            prefs.setBoolean(PreferenceManager.KEY_BUSY_MODE_ENABLED, true)
+                                        }
+                                    } else {
+                                        busyMode = false
+                                        prefs.setBoolean(PreferenceManager.KEY_BUSY_MODE_ENABLED, false)
+                                    }
+                                }
+                            )
+                            if (busyMode) {
+                                RillSwitchListItem(
+                                    headline = stringResource(R.string.busy_mode_message),
+                                    supporting = busyMessage.ifEmpty { defaultBusyMsg },
+                                    leadingIcon = ImageVector.vectorResource(id = R.drawable.ic_quick_phrases),
+                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
+                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
+                                    checked = busyMessageEnable,
+                                    onCheckedChange = { enable ->
+                                        if (enable) {
+                                            if (ContextCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
+                                                smsPermissionLauncher.launch(Manifest.permission.SEND_SMS)
+                                            } else {
+                                                busyMessageEnable = true
+                                                prefs.setBoolean(PreferenceManager.KEY_BUSY_MODE_MESSAGE_ENABLED, true)
+                                            }
+                                        } else {
+                                            busyMessageEnable = false
+                                            prefs.setBoolean(PreferenceManager.KEY_BUSY_MODE_MESSAGE_ENABLED, false)
+                                        }
+                                    },
+                                    onClick = {
+                                        editingBusyMsgText = busyMessage
+                                        showBusyMessageDialog = true
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+
             // ── Call Behavior ─────────────────────────────────────────────────
             item {
-                RillAnimatedSection(delayMs = 60L) {
+                RillAnimatedSection(delayMs = 120L) {
                     Column {
                         SettingsSectionLabel(stringResource(R.string.call_behavior))
                         RillExpressiveCard {
@@ -209,23 +317,11 @@ fun CallSettingScreen(navigator: DestinationsNavigator) {
                                 }
                             )
                             RillSwitchListItem(
-                                headline   = stringResource(R.string.pocket_mode_prevention),
-                                supporting = stringResource(R.string.pocket_mode_prevention_subtitle),
-                                leadingIcon = Icons.Rounded.ScreenLockPortrait,
-                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOrange,
-                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOrange,
-                                checked = pocketModePrevention,
-                                onCheckedChange = {
-                                    pocketModePrevention = it
-                                    prefs.setBoolean(PreferenceManager.KEY_POCKET_MODE, it)
-                                }
-                            )
-                            RillSwitchListItem(
                                 headline   = stringResource(R.string.floating_ongoing_call),
                                 supporting = stringResource(R.string.floating_ongoing_call_subtitle),
                                 leadingIcon = Icons.Rounded.PictureInPicture,
-                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkGreen,
-                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorGreen,
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkBlue,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorBlue,
                                 checked = floatingCall,
                                 onCheckedChange = { newValue ->
                                     if (newValue && !Settings.canDrawOverlays(context)) {
@@ -239,18 +335,6 @@ fun CallSettingScreen(navigator: DestinationsNavigator) {
                                         floatingCall = newValue
                                         prefs.setBoolean(PreferenceManager.KEY_FLOATING_CALL, newValue)
                                     }
-                                }
-                            )
-                            RillSwitchListItem(
-                                headline   = stringResource(R.string.fullscreen_calls),
-                                supporting = stringResource(R.string.fullscreen_calls_subtitle),
-                                leadingIcon = Icons.Rounded.CropFree,
-                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkGreen,
-                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorGreen,
-                                checked = fullscreenCalls,
-                                onCheckedChange = {
-                                    fullscreenCalls = it
-                                    prefs.setBoolean(PreferenceManager.KEY_ALWAYS_FULLSCREEN_CALLS, it)
                                 }
                             )
                             RillSwitchListItem(
@@ -283,6 +367,44 @@ fun CallSettingScreen(navigator: DestinationsNavigator) {
             }
 
             item { SettingsBottomPadding() }
+        }
+
+        if (showBusyMessageDialog) {
+            RillDialog(
+                onDismissRequest = { showBusyMessageDialog = false },
+                title = stringResource(R.string.edit_busy_message),
+                icon = ImageVector.vectorResource(id = R.drawable.ic_quick_phrases),
+                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
+                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
+                confirmButton = {
+                    TextButton(onClick = {
+                        val trimmed = editingBusyMsgText.trim()
+                        val finalMsg = if (trimmed.isNotEmpty()) trimmed else defaultBusyMsg
+                        busyMessage = finalMsg
+                        prefs.setString(PreferenceManager.KEY_BUSY_MODE_MESSAGE, finalMsg)
+                        showBusyMessageDialog = false
+                    }) {
+                        Text(
+                            stringResource(R.string.save),
+                            textAlign = TextAlign.End,
+                        )
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showBusyMessageDialog = false }) {
+                        Text(stringResource(R.string.cancel))
+                    }
+                }
+            ) {
+                OutlinedTextField(
+                    value = editingBusyMsgText,
+                    onValueChange = { editingBusyMsgText = it },
+                    label = { Text(stringResource(R.string.busy_mode_message)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp),
+                    maxLines = 5
+                )
+            }
         }
     }
 }
@@ -317,10 +439,9 @@ fun getSimSelectionList(askFirstResId: Int): List<Pair<String, Int>> {
                         null
                     }
 
-                    val isSimAccount = info != null &&
+                    val isSimAccount = info != null /*&&
                             info.isEnabled &&
-                            info.hasCapabilities(PhoneAccount.CAPABILITY_SIM_SUBSCRIPTION)
-
+                            info.hasCapabilities(PhoneAccount.CAPABILITY_SIM_SUBSCRIPTION)*/
                     if (!isSimAccount) return@filter false
 
                     val key = info!!.label?.toString().orEmpty() + "|" + info.address?.toString().orEmpty()

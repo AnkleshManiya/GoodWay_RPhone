@@ -735,4 +735,14 @@
     <string name="most_talked_persons">الأشخاص الأكثر تواصلًا</string>
     <string name="no_call_records_this_period">لم يتم العثور على سجلات مكالمات لهذه الفترة</string>
     <string name="total_calls_in_number">%1$s مكالمة (واردة: %2$s، صادرة: %3$s، فائتة: %4$s)</string>
+
+    <!-- Busy Mode -->
+    <string name="busy_mode">وضع الانشغال</string>
+    <string name="busy_mode_subtitle">رفض المكالمات تلقائيًا وإرسال رد SMS تلقائي. يمكن تبديله عبر الإعدادات السريعة</string>
+    <string name="busy_mode_message">رسالة الرد التلقائي</string>
+    <string name="busy_mode_message_subtitle">الرسالة التي يتم إرسالها تلقائيًا عندما يرفض وضع الانشغال مكالمة</string>
+    <string name="busy_mode_default_message">أنا مشغول الآن، اتصل بي لاحقًا</string>
+    <string name="busy_mode_call_rejected_toast">تم رفض المكالمة (وضع الانشغال). تم إرسال SMS.</string>
+    <string name="edit_busy_message">تعديل رسالة وضع الانشغال</string>
+    <string name="busy_mode_permission_required">امنح الإذن بإرسال رسائل SMS في إعدادات التطبيق</string>
 </resources>

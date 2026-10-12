@@ -730,4 +730,14 @@
     <string name="most_talked_persons">С кем общались больше всего</string>
     <string name="no_call_records_this_period">"За этот период нет записей о звонках"</string>
     <string name="total_calls_in_number">%1$s зв. (вх: %2$s, исх: %3$s, проп: %4$s)</string>
+
+    <!-- Busy Mode -->
+    <string name="busy_mode">Режим «Занято»</string>
+    <string name="busy_mode_subtitle">Автоматически отклонять звонки и отправлять SMS-ответ. Доступно переключение через панель плиток</string>
+    <string name="busy_mode_message">Сообщение для режима «Занято»</string>
+    <string name="busy_mode_message_subtitle">Сообщение, отправляемое автоматически при отклонении вызова в режиме «Занят»</string>
+    <string name="busy_mode_default_message">Я сейчас занят, позвони мне позже</string>
+    <string name="busy_mode_call_rejected_toast">Звонок отклонен (режим «Занято»). SMS отправлено.</string>
+    <string name="edit_busy_message">Изменить сообщение в режиме «Занят»</string>
+    <string name="busy_mode_permission_required">Предоставьте разрешение на отправку SMS в настройках приложения</string>
 </resources>

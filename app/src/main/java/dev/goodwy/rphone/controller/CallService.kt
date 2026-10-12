@@ -1,9 +1,11 @@
 package dev.goodwy.rphone.controller
 
+import android.Manifest
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.provider.BlockedNumberContract
@@ -12,7 +14,9 @@ import android.telecom.CallAudioState
 import android.telecom.DisconnectCause
 import android.telecom.InCallService
 import android.telecom.TelecomManager
+import android.telephony.SmsManager
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.controller.util.toast
@@ -109,6 +113,14 @@ class CallService : InCallService() {
             super.onStateChanged(call, state)
             updateCallState()
 
+            if (state == Call.STATE_RINGING) {
+                val number = call.details.handle?.schemeSpecificPart?.let { Uri.decode(it) } ?: ""
+                if (preferenceManager.getBoolean(PreferenceManager.KEY_BUSY_MODE_ENABLED, false)) {
+                    handleBusyModeCall(call, number)
+                    return
+                }
+            }
+
             if (state == Call.STATE_ACTIVE) {
                 redialCount = 0
             }
@@ -134,7 +146,7 @@ class CallService : InCallService() {
             super.onDetailsChanged(call, details)
             val number = details.handle?.schemeSpecificPart?.let { android.net.Uri.decode(it) } ?: ""
             val cnam = if (details.callerDisplayNamePresentation == TelecomManager.PRESENTATION_ALLOWED) {
-                details.callerDisplayName
+                details.callerDisplayName?.takeIf { it.isNotBlank() }
             } else null
             callStateManager.onNewCallReceived(number, cnam)
             updateCallState()
@@ -196,8 +208,12 @@ class CallService : InCallService() {
 //                    val photoUri = getContactPhotoFromCache(number)
 //                    notificationManager.showMissedCallNotification(call, contactName, photoUri)
 
+                    val cnam = if (call.details.callerDisplayNamePresentation == TelecomManager.PRESENTATION_ALLOWED) {
+                        call.details.callerDisplayName?.takeIf { it.isNotBlank() }
+                    } else null
+
                     val metadata = withTimeoutOrNull(2000L.milliseconds) {
-                        callStateManager.onNewCallReceived(number, null)
+                        callStateManager.onNewCallReceived(number, cnam)
                         callStateManager.callerMetadataMap.first { map ->
                             map.containsKey(number)
                         }[number]
@@ -216,6 +232,52 @@ class CallService : InCallService() {
             BlockedNumberContract.isBlocked(this@CallService, number)
         } catch (_: Exception) {
             false
+        }
+    }
+
+    private val handledBusyCalls = java.util.Collections.synchronizedSet(HashSet<Call>())
+
+    private fun handleBusyModeCall(call: Call, number: String) {
+        if (!handledBusyCalls.add(call)) return
+
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                call.reject(Call.REJECT_REASON_DECLINED)
+            } else {
+                call.disconnect()
+            }
+        } catch (_: Exception) {
+            try { call.disconnect() } catch (_: Exception) {}
+        }
+
+        if (number.isNotBlank()) {
+            val busyMessage = preferenceManager.getString(
+                PreferenceManager.KEY_BUSY_MODE_MESSAGE,
+                null
+            )?.ifBlank { null } ?: getString(R.string.busy_mode_default_message)
+
+            sendBusySms(number, busyMessage)
+        }
+
+        serviceScope.launch(Dispatchers.Main) {
+            toast(getString(R.string.busy_mode_call_rejected_toast))
+        }
+    }
+
+    private fun sendBusySms(phoneNumber: String, message: String) {
+        if (phoneNumber.isBlank() || message.isBlank()) return
+        try {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED) {
+                val smsManager = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    getSystemService(SmsManager::class.java)
+                } else {
+                    @Suppress("DEPRECATION")
+                    SmsManager.getDefault()
+                }
+                smsManager.sendTextMessage(phoneNumber, null, message, null, null)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
@@ -354,7 +416,7 @@ class CallService : InCallService() {
 
         val number = call.details.handle?.schemeSpecificPart?.let { Uri.decode(it) } ?: ""
         val cnam = if (call.details.callerDisplayNamePresentation == TelecomManager.PRESENTATION_ALLOWED) {
-            call.details.callerDisplayName
+            call.details.callerDisplayName?.takeIf { it.isNotBlank() }
         } else null
 
         callStateManager.onNewCallReceived(number, cnam)
@@ -370,6 +432,12 @@ class CallService : InCallService() {
         serviceScope.launch {
             if (isNumberBlocked(number)) {
                 handleBlockedCall(call, number)
+                return@launch
+            }
+
+            val isIncoming = call.details.callDirection == Call.Details.DIRECTION_INCOMING || call.state == Call.STATE_RINGING
+            if (isIncoming && preferenceManager.getBoolean(PreferenceManager.KEY_BUSY_MODE_ENABLED, false)) {
+                handleBusyModeCall(call, number)
                 return@launch
             }
 
@@ -390,6 +458,7 @@ class CallService : InCallService() {
 
     override fun onCallRemoved(call: Call) {
         super.onCallRemoved(call)
+        handledBusyCalls.remove(call)
         call.unregisterCallback(callCallback)
 
         // If the call being deleted is the same one for which a floating window was launched,

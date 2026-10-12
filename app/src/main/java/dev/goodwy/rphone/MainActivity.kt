@@ -776,6 +776,9 @@ class MainActivity : FragmentActivity() {
                     isExternalPick = true
                 ).route)
             }
+            is NavigationTarget.CallSetting -> {
+                navController.navigate(CallSettingScreenDestination().route)
+            }
         }
     }
 }

@@ -722,4 +722,14 @@
     <string name="most_talked_persons">بیشترین مکالمه با</string>
     <string name="no_call_records_this_period">هیچ سابقه تماسی برای این دوره یافت نشد</string>
     <string name="total_calls_in_number">%1$s تماس (ورودی: %2$s، خروجی: %3$s، ازدست‌رفته: %4$s)</string>
+
+    <!-- Busy Mode -->
+    <string name="busy_mode">حالت مشغول</string>
+    <string name="busy_mode_subtitle">رد خودکار تماس‌ها و ارسال پاسخ SMS خودکار. قابل تغییر از طریق تنظیمات سریع</string>
+    <string name="busy_mode_message">پیام پاسخ خودکار</string>
+    <string name="busy_mode_message_subtitle">پیامی که به‌طور خودکار هنگام رد تماس توسط حالت مشغول ارسال می‌شود</string>
+    <string name="busy_mode_default_message">الان مشغولم، بعداً تماس بگیر</string>
+    <string name="busy_mode_call_rejected_toast">تماس رد شد (حالت مشغول). SMS ارسال شد.</string>
+    <string name="edit_busy_message">ویرایش پیام حالت مشغول</string>
+    <string name="busy_mode_permission_required">در تنظیمات برنامه اجازه ارسال SMS را اعطا کنید</string>
 </resources>
