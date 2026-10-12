@@ -722,4 +722,14 @@
     <string name="most_talked_persons">En çok konuşulan kişiler</string>
     <string name="no_call_records_this_period">Bu dönem için arama kaydı bulunamadı</string>
     <string name="total_calls_in_number">%1$s arama (gelen: %2$s, giden: %3$s, cevapsız: %4$s)</string>
+
+    <!-- Busy Mode -->
+    <string name="busy_mode">Meşgul modu</string>
+    <string name="busy_mode_subtitle">Aramaları otomatik olarak reddet ve otomatik SMS yanıtı gönder. Hızlı Ayarlar üzerinden açılıp kapatılabilir</string>
+    <string name="busy_mode_message">Otomatik yanıt mesajı</string>
+    <string name="busy_mode_message_subtitle">Meşgul modu bir aramayı reddettiğinde otomatik olarak gönderilen mesaj</string>
+    <string name="busy_mode_default_message">Şu an meşgulüm, beni sonra ara</string>
+    <string name="busy_mode_call_rejected_toast">Arama reddedildi (Meşgul modu). SMS gönderildi.</string>
+    <string name="edit_busy_message">Meşgul modu mesajını düzenle</string>
+    <string name="busy_mode_permission_required">Uygulama ayarlarında SMS gönderme iznini verin</string>
 </resources>

@@ -235,22 +235,6 @@ class CallService : InCallService() {
         }
     }
 
-    private fun handleBlockedCall(call: Call, number: String) {
-        val method = preferenceManager.getInt(PreferenceManager.KEY_BLOCK_METHOD, 0) // 0: Decline, 1: Silent
-
-        if (method == 0) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                call.reject(Call.REJECT_REASON_DECLINED)
-            } else {
-                call.disconnect()
-            }
-        }
-
-        if (preferenceManager.getBoolean(PreferenceManager.KEY_BLOCK_NOTIFICATION, true)) {
-            notificationManager.showBlockedNotification(number)
-        }
-    }
-
     private val handledBusyCalls = java.util.Collections.synchronizedSet(HashSet<Call>())
 
     private fun handleBusyModeCall(call: Call, number: String) {
@@ -294,6 +278,22 @@ class CallService : InCallService() {
             }
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    private fun handleBlockedCall(call: Call, number: String) {
+        val method = preferenceManager.getInt(PreferenceManager.KEY_BLOCK_METHOD, 0) // 0: Decline, 1: Silent
+
+        if (method == 0) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                call.reject(Call.REJECT_REASON_DECLINED)
+            } else {
+                call.disconnect()
+            }
+        }
+
+        if (preferenceManager.getBoolean(PreferenceManager.KEY_BLOCK_NOTIFICATION, true)) {
+            notificationManager.showBlockedNotification(number)
         }
     }
 

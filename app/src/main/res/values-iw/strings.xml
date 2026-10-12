@@ -726,4 +726,14 @@
     <string name="most_talked_persons">האנשים שדיברת איתם הכי הרבה</string>
     <string name="no_call_records_this_period">לא נמצאו רשומות שיחות לתקופה זו</string>
     <string name="total_calls_in_number">%1$s שיחות (נכנס: %2$s, יוצא: %3$s, הוחמץ: %4$s)</string>
+
+    <!-- Busy Mode -->
+    <string name="busy_mode">מצב עסוק</string>
+    <string name="busy_mode_subtitle">דחה שיחות אוטומטית ושלח תגובת SMS אוטומטית. ניתן להפעיל דרך ההגדרות המהירות</string>
+    <string name="busy_mode_message">הודעת תגובה אוטומטית</string>
+    <string name="busy_mode_message_subtitle">הודעה הנשלחת אוטומטית כאשר מצב עסוק דוחה שיחה</string>
+    <string name="busy_mode_default_message">אני עסוק עכשיו, תתקשר אליי מאוחר יותר</string>
+    <string name="busy_mode_call_rejected_toast">השיחה נדחתה (מצב עסוק). SMS נשלח.</string>
+    <string name="edit_busy_message">ערוך את הודעת מצב עסוק</string>
+    <string name="busy_mode_permission_required">הענק הרשאה לשלוח הודעות SMS בהגדרות האפליקציה</string>
 </resources>

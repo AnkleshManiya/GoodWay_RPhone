@@ -216,6 +216,9 @@
                 <data android:mimeType="vnd.android.cursor.dir/phone_v2" />
                 <data android:mimeType="vnd.android.cursor.dir/email_v2" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES" />
+            </intent-filter>
         </activity>
 
         <activity
@@ -272,6 +275,17 @@
                 android:value="true" />
             <intent-filter>
                 <action android:name="android.telecom.InCallService" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name="dev.goodwy.rphone.controller.tiles.BusyModeTileService"
+            android:exported="true"
+            android:icon="@drawable/ic_phone_cancel"
+            android:label="@string/busy_mode"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
         </service>
 

@@ -734,11 +734,12 @@
     <string name="total_calls_in_number">%1$s calls (in: %2$s, out: %3$s, miss: %4$s)</string>
 
     <!-- Busy Mode -->
-    <string name="busy_mode" tools:ignore="MissingTranslation">Busy Mode</string>
-    <string name="busy_mode_subtitle" tools:ignore="MissingTranslation">Automatically decline incoming calls and send an SMS auto-reply</string>
-    <string name="busy_mode_message" tools:ignore="MissingTranslation">Auto-reply message</string>
-    <string name="busy_mode_message_subtitle" tools:ignore="MissingTranslation">Message sent automatically when Busy Mode declines a call</string>
-    <string name="busy_mode_default_message" tools:ignore="MissingTranslation">I am busy now call me later</string>
-    <string name="busy_mode_call_rejected_toast" tools:ignore="MissingTranslation">Call declined (Busy Mode). SMS sent.</string>
-    <string name="edit_busy_message" tools:ignore="MissingTranslation">Edit Busy Mode Message</string>
+    <string name="busy_mode">Busy mode</string>
+    <string name="busy_mode_subtitle">Automatically decline calls and send an SMS auto-reply. Toggleable via Quick Settings</string>
+    <string name="busy_mode_message">Auto-reply message</string>
+    <string name="busy_mode_message_subtitle">Message sent automatically when Busy Mode declines a call</string>
+    <string name="busy_mode_default_message">I am busy now call me later</string>
+    <string name="busy_mode_call_rejected_toast">Call declined (Busy Mode). SMS sent.</string>
+    <string name="edit_busy_message">Edit the Busy Mode message</string>
+    <string name="busy_mode_permission_required">Grant permission to send SMS messages in the app settings</string>
 </resources>

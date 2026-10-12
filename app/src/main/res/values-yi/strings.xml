@@ -728,4 +728,14 @@
     <string name="most_talked_persons">מערסטע גערעדט מיט</string>
     <string name="no_call_records_this_period">קיין רוף רעקאָרדס נישט געפֿונען פֿאַר דעם פּעריאָד</string>
     <string name="total_calls_in_number">%1$s רופן (אַרײַן: %2$s, אַרויס: %3$s, פֿאַרפֿעלט: %4$s)</string>
+
+    <!-- Busy Mode -->
+    <string name="busy_mode">פֿאַרנומען מאָדע</string>
+    <string name="busy_mode_subtitle">אויטאָמאַטיש אָפּוואַרפן רופן און שיקן אַן אויטאָמאַטישע SMS ענטפֿער. קען ווערן איבערגעשטעלט דורך גיך איינשטעלונגען</string>
+    <string name="busy_mode_message">אויטאָמאַטישע ענטפֿער מעלדונג</string>
+    <string name="busy_mode_message_subtitle">מעלדונג וואָס ווערט אויטאָמאַטיש געשיקט ווען פֿאַרנומען מאָדע וואַרפֿט אָפּ אַ רוף</string>
+    <string name="busy_mode_default_message">איך בין איצט פֿאַרנומען, רוף מיך שפּעטער</string>
+    <string name="busy_mode_call_rejected_toast">רוף אָפּגעוואָרפֿן (פֿאַרנומען מאָדע). SMS געשיקט.</string>
+    <string name="edit_busy_message">רעדאַקטירן די פֿאַרנומען מאָדע מעלדונג</string>
+    <string name="busy_mode_permission_required">גיב דערלויבעניש צו שיקן SMS אין די אַפּ איינשטעלונגען</string>
 </resources>

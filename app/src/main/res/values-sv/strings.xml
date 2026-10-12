@@ -722,4 +722,14 @@
     <string name="most_talked_persons">Mest kontaktade personer</string>
     <string name="no_call_records_this_period">Inga samtalsposter hittades för denna period</string>
     <string name="total_calls_in_number">%1$s samtal (in: %2$s, ut: %3$s, miss: %4$s)</string>
+
+    <!-- Busy Mode -->
+    <string name="busy_mode">Upptagen-läge</string>
+    <string name="busy_mode_subtitle">Avvisa samtal automatiskt och skicka ett automatiskt SMS-svar. Växlas via Snabbinställningar</string>
+    <string name="busy_mode_message">Automatiskt svarsmeddelande</string>
+    <string name="busy_mode_message_subtitle">Meddelande som skickas automatiskt när Upptagen-läget avvisar ett samtal</string>
+    <string name="busy_mode_default_message">Jag är upptagen nu, ring mig senare</string>
+    <string name="busy_mode_call_rejected_toast">Samtal avvisat (Upptagen-läge). SMS skickat.</string>
+    <string name="edit_busy_message">Redigera meddelandet för Upptagen-läget</string>
+    <string name="busy_mode_permission_required">Bevilja behörighet att skicka SMS i appens inställningar</string>
 </resources>

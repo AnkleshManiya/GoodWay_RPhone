@@ -11,6 +11,7 @@ import dev.goodwy.rphone.controller.util.makeCall
 sealed class NavigationTarget {
     object Recents : NavigationTarget()
     object ContactSelection : NavigationTarget()
+    object CallSetting : NavigationTarget()
     data class Dialpad(val number: String) : NavigationTarget()
     data class ContactDetails(val contactId: String) : NavigationTarget()
     data class ContactEdit(val contactId: String? = null, val initialName: String? = null, val initialPhone: String? = null) : NavigationTarget()
@@ -71,6 +72,7 @@ class MainViewModel(private val prefs: PreferenceManager) : ViewModel() {
                 } else null
             }
             Intent.ACTION_PICK -> NavigationTarget.ContactSelection
+            "android.service.quicksettings.action.QS_TILE_PREFERENCES" -> NavigationTarget.CallSetting
             else -> null
         }
     }
