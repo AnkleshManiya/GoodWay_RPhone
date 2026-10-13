@@ -235,6 +235,9 @@
     <string name="pill_style_navigation_subtitle">Standart alt çubuk yerine yüzen bir hap stili navigasyon çubuğu göster</string>
     <string name="icon_only_bottom_bar">Yalnızca Simge Alt Çubuk</string>
     <string name="icon_only_bottom_bar_subtitle">Navigasyondan metin etiketlerini kaldırır</string>
+    <string name="startup_tab">Başlangıç sekmesi</string>
+    <string name="startup_tab_subtitle">Uygulama başlatıldığında hangi sekmenin açılacağını seçin</string>
+    <string name="last_used">Son kullanılan</string>
 
     <string name="calls_and_system">Aramalar ve Sistem</string>
     <string name="call_settings">Arama Ayarları</string>
@@ -729,7 +732,8 @@
     <string name="busy_mode_message">Otomatik yanıt mesajı</string>
     <string name="busy_mode_message_subtitle">Meşgul modu bir aramayı reddettiğinde otomatik olarak gönderilen mesaj</string>
     <string name="busy_mode_default_message">Şu an meşgulüm, beni sonra ara</string>
-    <string name="busy_mode_call_rejected_toast">Arama reddedildi (Meşgul modu). SMS gönderildi.</string>
+    <string name="busy_mode_call_rejected_toast">Arama reddedildi (Meşgul modu).</string>
+    <string name="busy_mode_call_rejected_sent_sms_toast">Arama reddedildi (Meşgul modu). SMS gönderildi.</string>
     <string name="edit_busy_message">Meşgul modu mesajını düzenle</string>
     <string name="busy_mode_permission_required">Uygulama ayarlarında SMS gönderme iznini verin</string>
 </resources>

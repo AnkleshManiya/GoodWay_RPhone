@@ -250,7 +250,9 @@ class CallService : InCallService() {
             try { call.disconnect() } catch (_: Exception) {}
         }
 
-        if (number.isNotBlank()) {
+        val sentMessage =
+            number.isNotBlank() && preferenceManager.getBoolean(PreferenceManager.KEY_BUSY_MODE_MESSAGE_ENABLED, false)
+        if (sentMessage) {
             val busyMessage = preferenceManager.getString(
                 PreferenceManager.KEY_BUSY_MODE_MESSAGE,
                 null
@@ -260,7 +262,7 @@ class CallService : InCallService() {
         }
 
         serviceScope.launch(Dispatchers.Main) {
-            toast(getString(R.string.busy_mode_call_rejected_toast))
+            toast(getString(if (sentMessage) R.string.busy_mode_call_rejected_sent_sms_toast else R.string.busy_mode_call_rejected_toast))
         }
     }
 

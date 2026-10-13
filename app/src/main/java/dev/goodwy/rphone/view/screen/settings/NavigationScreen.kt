@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Assistant
 import androidx.compose.material.icons.rounded.AccessTime
 import androidx.compose.material.icons.rounded.CallToAction
+import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Interests
 import androidx.compose.material.icons.rounded.MoveUp
@@ -45,7 +46,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.goodwy.rphone.controller.util.PreferenceManager
@@ -64,6 +64,8 @@ import dev.goodwy.rphone.view.components.RillListItem
 import dev.goodwy.rphone.view.components.Title
 import org.koin.compose.koinInject
 import kotlin.math.roundToInt
+
+data class TabOption(val key: String, val label: String, val icon: ImageVector, val enabled: Boolean, val clickable: Boolean)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Destination<RootGraph>
@@ -87,7 +89,6 @@ fun NavigationScreen(navigator: DestinationsNavigator) {
     // Default Tab dialog
     var showDefaultTabDialog by remember { mutableStateOf(false) }
     var defaultTab           by remember(settingsState) { mutableStateOf(prefs.getString(PreferenceManager.KEY_DEFAULT_TAB, "calls") ?: "calls") }
-    data class TabOption(val key: String, val label: String, val icon: ImageVector, val enabled: Boolean, val clickable: Boolean)
     val labelRecents =
         if (!tabShowFavorites && !tabShowContacts) stringResource(R.string.home_tab) else stringResource(R.string.recents)
     val iconRecents =
@@ -119,99 +120,46 @@ fun NavigationScreen(navigator: DestinationsNavigator) {
 
     // ── Default Tab Dialog ─────────────────────────────────────────────────
     if (showDefaultTabDialog) {
-        Dialog(onDismissRequest = { showDefaultTabDialog = false }) {
-            Surface(
-                shape = RoundedCornerShape(24.dp),
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(modifier = Modifier.padding(top = 20.dp, bottom = 8.dp, start = 20.dp, end = 20.dp), /*verticalArrangement = Arrangement.spacedBy(12.dp)*/) {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Surface(
-                            shape = RoundedCornerShape(10.dp),
-                            color = MaterialTheme.colorScheme.customColors.colorPurple,
-                            modifier = Modifier.size(32.dp)
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    Icons.Rounded.Home,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.customColors.colorDarkPurple,
-                                    modifier = Modifier.size(22.dp)
-                                )
-                            }
-                        }
-                        Text(stringResource(R.string.startup_tab_dialog_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                    }
-                    Spacer(Modifier.height(16.dp))
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text(
-                            stringResource(R.string.startup_tab_dialog_subtitle),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+        RillDialog(
+            onDismissRequest = { showDefaultTabDialog = false },
+            title = stringResource(R.string.startup_tab),
+            icon = Icons.Rounded.Home,
+            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
+            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
+            confirmButton = {
+                TextButton(onClick = { showDefaultTabDialog = false }) { Text(stringResource(R.string.done)) }
+            },
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    stringResource(R.string.startup_tab_subtitle),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 4.dp)
+                )
+                Spacer(Modifier.height(8.dp))
+                Column {
+                    TabOptionsItem(
+                        option =
+                            TabOption("last", stringResource(R.string.last_used), Icons.Rounded.History, true, true),
+                        isSelected = defaultTab == "last",
+                        onClick = {
+                            defaultTab = "last"
+                            prefs.setString(PreferenceManager.KEY_DEFAULT_TAB, "last")}
+                    )
+                    tabOrder.forEachIndexed { index, tabKey ->
+                        val option = tabOptions.firstOrNull { it.key == tabKey } ?: return@forEachIndexed
+                        val isSelected = defaultTab == option.key && option.enabled
+                        TabOptionsItem(
+                            option = option,
+                            isSelected = isSelected,
+                            onClick = {
+                                defaultTab = option.key
+                                prefs.setString(PreferenceManager.KEY_DEFAULT_TAB, option.key)}
                         )
-                        Spacer(Modifier.height(8.dp))
-                        tabOptions.forEach { option ->
-                            val isSelected = defaultTab == option.key && option.enabled
-                            val interactionSource = remember { MutableInteractionSource() }
-                            val isPressed by interactionSource.collectIsPressedAsState()
-                            val cornerRadius by animateDpAsState(
-                                if (isSelected || isPressed) 40.dp else 10.dp,
-                                spring(stiffness = Spring.StiffnessMediumLow),
-                                label = "ButtonShapeAnimation"
-                            )
-                            Surface(
-                                enabled = option.enabled,
-                                onClick = {
-                                    defaultTab = option.key
-                                    prefs.setString(PreferenceManager.KEY_DEFAULT_TAB, option.key)
-                                },
-                                shape = RoundedCornerShape(cornerRadius),
-                                color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else cardColor,
-                                modifier = Modifier.fillMaxWidth().alpha(if (option.enabled) 1f else 0.5f),
-                                interactionSource = interactionSource
-                            ) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 16.dp, vertical = 4.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        imageVector = option.icon,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(20.dp),
-                                        tint = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
-                                                else MaterialTheme.colorScheme.onSurface
-                                    )
-                                    Spacer(Modifier.width(12.dp))
-                                    Text(
-                                        option.label,
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        modifier = Modifier.weight(1f),
-                                        color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
-                                                else MaterialTheme.colorScheme.onSurface
-                                    )
-                                    RadioButton(
-                                        selected = isSelected,
-                                        enabled = option.enabled,
-                                        onClick = {
-                                            defaultTab = option.key
-                                            prefs.setString(PreferenceManager.KEY_DEFAULT_TAB, option.key)
-                                        },
-                                        colors = RadioButtonDefaults.colors(
-                                            selectedColor = MaterialTheme.colorScheme.primary,
-                                            unselectedColor = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-                    Spacer(Modifier.height(8.dp))
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                        TextButton(onClick = { showDefaultTabDialog = false }) { Text(stringResource(R.string.done)) }
                     }
                 }
             }
@@ -282,7 +230,9 @@ fun NavigationScreen(navigator: DestinationsNavigator) {
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 4.dp)
                 )
                 Spacer(Modifier.height(8.dp))
                 Column {
@@ -364,11 +314,17 @@ fun NavigationScreen(navigator: DestinationsNavigator) {
                                                     onDrag = { change, dragAmount ->
                                                         change.consume()
                                                         dragOffsetY += dragAmount.y
-                                                        val moveBy = (dragOffsetY / rowHeightPx).roundToInt()
+                                                        val moveBy =
+                                                            (dragOffsetY / rowHeightPx).roundToInt()
                                                         if (moveBy != 0 && draggedIndex >= 0) {
-                                                            val newIndex = (draggedIndex + moveBy).coerceIn(0, tabOrder.lastIndex)
+                                                            val newIndex =
+                                                                (draggedIndex + moveBy).coerceIn(
+                                                                    0,
+                                                                    tabOrder.lastIndex
+                                                                )
                                                             if (newIndex != draggedIndex) {
-                                                                val moving = tabOrder.removeAt(draggedIndex)
+                                                                val moving =
+                                                                    tabOrder.removeAt(draggedIndex)
                                                                 tabOrder.add(newIndex, moving)
                                                                 dragOffsetY -= moveBy * rowHeightPx
                                                                 draggedIndex = newIndex
@@ -443,6 +399,18 @@ fun NavigationScreen(navigator: DestinationsNavigator) {
                                 trailingIcon = Icons.Default.ChevronRight,
                                 onClick = { showTabSectionsDialog = true }
                             )
+                            RillListItem(
+                                headline = stringResource(R.string.startup_tab),
+                                supporting = if (defaultTab == "last") stringResource(R.string.last_used)
+                                    else tabOptions.firstOrNull { it.key == defaultTab && it.enabled }?.label
+                                        ?: if (!tabShowFavorites && !tabShowContacts) stringResource(R.string.home_tab)
+                                        else stringResource(R.string.recents),
+                                leadingIcon = Icons.Rounded.Home,
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPink,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPink,
+                                trailingIcon = Icons.Default.ChevronRight,
+                                onClick = { showDefaultTabDialog = true }
+                            )
                         }
                     }
                 }
@@ -470,8 +438,8 @@ fun NavigationScreen(navigator: DestinationsNavigator) {
                                 headline = stringResource(R.string.icon_only_bottom_bar),
                                 supporting = stringResource(R.string.icon_only_bottom_bar_subtitle),
                                 leadingIcon = Icons.Rounded.Interests,
-                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOrange,
-                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOrange,
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
                                 checked = iconOnlyNav,
                                 onCheckedChange = { iconOnlyNav = it; prefs.setBoolean(PreferenceManager.KEY_ICON_ONLY_NAV, it) }
                             )
@@ -480,28 +448,70 @@ fun NavigationScreen(navigator: DestinationsNavigator) {
                 }
             }
 
-            // ── Startup ─────────────────────────────────────────
-            item {
-                RillAnimatedSection(delayMs = 120L) {
-                    Column {
-                        SettingsSectionLabel(stringResource(R.string.startup_section))
-                        RillExpressiveCard {
-                            RillListItem(
-                                headline = stringResource(R.string.startup_tab),
-                                supporting = tabOptions.firstOrNull { it.key == defaultTab && it.enabled }?.label
-                                    ?: stringResource(R.string.startup_tab_subtitle),
-                                leadingIcon = Icons.Rounded.Home,
-                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
-                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
-                                trailingIcon = Icons.Default.ChevronRight,
-                                onClick = { showDefaultTabDialog = true }
-                            )
-                        }
-                    }
-                }
-            }
-
             item { SettingsBottomPadding(120.dp) }
+        }
+    }
+}
+
+@Composable
+fun TabOptionsItem(
+    option: TabOption,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+) {
+    val density = LocalDensity.current
+    val rowHeightDp = 52.dp
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val cornerRadius by animateDpAsState(
+        if (isSelected || isPressed) 40.dp else 10.dp,
+        spring(stiffness = Spring.StiffnessMediumLow),
+        label = "ButtonShapeAnimation"
+    )
+
+    Surface(
+        enabled = option.enabled,
+        onClick = onClick,
+        shape = RoundedCornerShape(cornerRadius),
+        color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else cardColor,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 2.dp)
+            .alpha(if (option.enabled) 1f else 0.5f),
+        interactionSource = interactionSource
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(rowHeightDp)
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = option.icon,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+                tint = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
+                else MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(Modifier.width(10.dp))
+            Text(
+                option.label,
+                style = if (option.enabled) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyLarge,
+                fontWeight = if (option.enabled) FontWeight.Bold else FontWeight.SemiBold,
+                color = if (option.enabled) MaterialTheme.colorScheme.onPrimaryContainer
+                else MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f)
+            )
+            RadioButton(
+                selected = isSelected,
+                enabled = option.enabled,
+                onClick = onClick,
+                colors = RadioButtonDefaults.colors(
+                    selectedColor = MaterialTheme.colorScheme.primary,
+                    unselectedColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            )
         }
     }
 }

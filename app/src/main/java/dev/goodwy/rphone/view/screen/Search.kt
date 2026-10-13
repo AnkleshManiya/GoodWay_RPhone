@@ -73,6 +73,7 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinActivityViewModel
 import kotlin.text.ifEmpty
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Destination<RootGraph>
@@ -149,6 +150,7 @@ fun ContactSearchContent(
     val displayOrder = remember(settingsVer) { prefs.getInt(PreferenceManager.KEY_CONTACT_DISPLAY_ORDER, 0) }
     val hideVoiceSearch = remember(settingsVer) { prefs.getBoolean(PreferenceManager.KEY_HIDE_VOICE_SEARCH, false) }
     val simPref = remember(settingsVer) { prefs.getInt(PreferenceManager.KEY_DEFAULT_SIM, prefs.getDefaultSimIndexDefault()) }
+    val searchEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_SEARCH, false)
 
     var showSimPicker by remember { mutableStateOf(false) }
     var pendingNumber by remember { mutableStateOf<String?>(null) }
@@ -253,7 +255,7 @@ fun ContactSearchContent(
     LaunchedEffect(Unit) {
         if (autoStartVoiceSearch && !isVoiceSearchTriggered) {
             // Allow time for the UI to fully initialize
-            delay(300)
+            delay(300.milliseconds)
 
             if (micPermissionState.status == PermissionStatus.Granted) {
                 isVoiceSearchTriggered = true
@@ -287,7 +289,7 @@ fun ContactSearchContent(
                 modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
                 placeholder = { Text(stringResource(R.string.search)) },
                 leadingIcon = {
-                    IconButton(onClick = { navigator.navigateUp() }) {
+                    if (!searchEnabled) IconButton(onClick = { navigator.navigateUp() }) {
                         Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },

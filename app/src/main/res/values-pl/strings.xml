@@ -235,6 +235,9 @@
     <string name="pill_style_navigation_subtitle">Pokaż pływający pasek nawigacji w stylu pigułki zamiast standardowego dolnego paska</string>
     <string name="icon_only_bottom_bar">Dolny pasek tylko z ikonami</string>
     <string name="icon_only_bottom_bar_subtitle">Usuwa etykiety tekstowe z nawigacji</string>
+    <string name="startup_tab">Karta startowa</string>
+    <string name="startup_tab_subtitle">Wybierz, która karta otwiera się przy uruchomieniu aplikacji</string>
+    <string name="last_used">Ostatnio używana</string>
 
     <string name="calls_and_system">Połączenia i system</string>
     <string name="call_settings">Ustawienia połączeń</string>
@@ -735,7 +738,8 @@
     <string name="busy_mode_message">Wiadomość automatycznej odpowiedzi</string>
     <string name="busy_mode_message_subtitle">Wiadomość wysyłana automatycznie, gdy tryb zajętości odrzuca połączenie</string>
     <string name="busy_mode_default_message">Jestem teraz zajęty, zadzwoń później</string>
-    <string name="busy_mode_call_rejected_toast">Połączenie odrzucone (tryb zajętości). Wysłano SMS.</string>
+    <string name="busy_mode_call_rejected_toast">Połączenie odrzucone (tryb zajętości).</string>
+    <string name="busy_mode_call_rejected_sent_sms_toast">Połączenie odrzucone (tryb zajętości). Wysłano SMS.</string>
     <string name="edit_busy_message">Edytuj wiadomość trybu zajętości</string>
     <string name="busy_mode_permission_required">Przyznaj uprawnienie do wysyłania SMS-ów w ustawieniach aplikacji</string>
 </resources>

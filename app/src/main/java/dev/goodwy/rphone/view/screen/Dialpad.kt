@@ -389,8 +389,6 @@ fun DialPadContent(
 
         var showOverflowMenu by remember { mutableStateOf(false) }
 
-        
-
         val topLogs by remember(logs, allContacts) {
             derivedStateOf {
                 logs.asSequence().take(200)

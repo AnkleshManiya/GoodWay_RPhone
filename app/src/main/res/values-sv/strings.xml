@@ -235,6 +235,9 @@
     <string name="pill_style_navigation_subtitle">Visa en flytande pillerformad navigering istället för standardfältet längst ner</string>
     <string name="icon_only_bottom_bar">Endast ikoner i nedre fältet</string>
     <string name="icon_only_bottom_bar_subtitle">Tar bort textetiketter från navigeringen</string>
+    <string name="startup_tab">Startflik</string>
+    <string name="startup_tab_subtitle">Välj vilken flik som öppnas när appen startar</string>
+    <string name="last_used">Senast använd</string>
 
     <string name="calls_and_system">Samtal och system</string>
     <string name="call_settings">Samtalsinställningar</string>
@@ -729,7 +732,8 @@
     <string name="busy_mode_message">Automatiskt svarsmeddelande</string>
     <string name="busy_mode_message_subtitle">Meddelande som skickas automatiskt när Upptagen-läget avvisar ett samtal</string>
     <string name="busy_mode_default_message">Jag är upptagen nu, ring mig senare</string>
-    <string name="busy_mode_call_rejected_toast">Samtal avvisat (Upptagen-läge). SMS skickat.</string>
+    <string name="busy_mode_call_rejected_toast">Samtal avvisat (Upptagen-läge).</string>
+    <string name="busy_mode_call_rejected_sent_sms_toast">Samtal avvisat (Upptagen-läge). SMS skickat.</string>
     <string name="edit_busy_message">Redigera meddelandet för Upptagen-läget</string>
     <string name="busy_mode_permission_required">Bevilja behörighet att skicka SMS i appens inställningar</string>
 </resources>

@@ -156,7 +156,7 @@ class MainActivity : FragmentActivity() {
                 val notesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_NOTES, false)
                 val searchEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_SEARCH, false)
                 val settingsEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_SETTINGS, true)
-//                val dialpadEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_DIALPAD, true)
+                val dialpadEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_DIALPAD, true)
                 val defaultTab = prefs.getString(PreferenceManager.KEY_DEFAULT_TAB, "calls") ?: "calls"
 
 //                val defBar = prefs.getInt(PreferenceManager.KEY_DEFAULT_BOTTOM_NAV, 0)
@@ -218,6 +218,7 @@ class MainActivity : FragmentActivity() {
                     )
                 } else {
                     // Resolve the configured startup tab. Done once so no flash.
+                    val lastOpenedTab = prefs.getString(PreferenceManager.KEY_LAST_OPENED_TAB, null)
                     val startDestination = remember {
                         val isDefaultDialer = isAlreadyDefaultDialer(this@MainActivity)
                         val isMainLauncher = intentState?.action == null || intentState?.action == Intent.ACTION_MAIN
@@ -225,6 +226,17 @@ class MainActivity : FragmentActivity() {
                             DefaultDialerScreenDestination
                         } else {
                             when (defaultTab) {
+                                "last" -> {
+                                    when {
+                                        lastOpenedTab == null -> RecentScreenDestination
+                                        lastOpenedTab.contains(FavoritesScreenDestination.route) && favouritesEnabled -> FavoritesScreenDestination
+                                        lastOpenedTab.contains(ContactScreenDestination.route) && contactsEnabled -> ContactScreenDestination
+                                        lastOpenedTab.contains(NotesScreenDestination.route) && notesEnabled -> NotesScreenDestination()
+                                        lastOpenedTab.contains(DialPadScreenDestination.route) && dialpadEnabled -> DialPadScreenDestination()
+                                        lastOpenedTab.contains(SearchScreenDestination.route) && searchEnabled -> SearchScreenDestination()
+                                        else -> RecentScreenDestination
+                                    }
+                                }
                                 "favorites" -> if (favouritesEnabled) FavoritesScreenDestination else RecentScreenDestination
                                 "contacts" -> if (contactsEnabled) ContactScreenDestination else RecentScreenDestination
                                 "notes" -> if (notesEnabled) NotesScreenDestination() else RecentScreenDestination
@@ -380,34 +392,21 @@ class MainActivity : FragmentActivity() {
                             fun saveCurrentTab(route: String) {
                                 when {
                                     route.contains(FavoritesScreenDestination.route) ->
-                                        prefs.setString(
-                                            PreferenceManager.KEY_LAST_OPENED_TAB,
-                                            FavoritesScreenDestination.route
-                                        )
+                                        prefs.setString(PreferenceManager.KEY_LAST_OPENED_TAB, FavoritesScreenDestination.route)
 
                                     route.contains(ContactScreenDestination.route) ->
-                                        prefs.setString(
-                                            PreferenceManager.KEY_LAST_OPENED_TAB,
-                                            ContactScreenDestination.route
-                                        )
+                                        prefs.setString(PreferenceManager.KEY_LAST_OPENED_TAB, ContactScreenDestination.route)
 
                                     route.contains(NotesScreenDestination.route) ->
-                                        prefs.setString(
-                                            PreferenceManager.KEY_LAST_OPENED_TAB,
-                                            NotesScreenDestination.route
-                                        )
+                                        prefs.setString(PreferenceManager.KEY_LAST_OPENED_TAB, NotesScreenDestination.route)
 
                                     route.contains(DialPadScreenDestination.route) ->
-                                        prefs.setString(
-                                            PreferenceManager.KEY_LAST_OPENED_TAB,
-                                            DialPadScreenDestination.route
-                                        )
+                                        prefs.setString(PreferenceManager.KEY_LAST_OPENED_TAB, DialPadScreenDestination.route)
 
-                                    else ->
-                                        prefs.setString(
-                                            PreferenceManager.KEY_LAST_OPENED_TAB,
-                                            RecentScreenDestination.route
-                                        )
+                                    route.contains(SearchScreenDestination.route) ->
+                                        prefs.setString(PreferenceManager.KEY_LAST_OPENED_TAB, SearchScreenDestination.route)
+
+                                    else -> prefs.setString(PreferenceManager.KEY_LAST_OPENED_TAB, RecentScreenDestination.route)
                                 }
                             }
 
@@ -549,7 +548,7 @@ class MainActivity : FragmentActivity() {
                                                             icon = { sel ->
                                                                 Icon(
                                                                     if (sel) tab.selectedIcon else tab.unselectedIcon,
-                                                                    "Calls",
+                                                                    tab.label,
                                                                     modifier = Modifier.size(24.dp)
                                                                 )
                                                             },
@@ -567,16 +566,11 @@ class MainActivity : FragmentActivity() {
                                                     Spacer(Modifier.height(8.dp))
 
                                                     RailItem(
-                                                        selected = currentDest?.hierarchy?.any {
-                                                            it.route?.contains(
-                                                                "search",
-                                                                ignoreCase = true
-                                                            ) == true
-                                                        } == true,
+                                                        selected = currentDest?.hierarchy?.any { it.route?.contains("search", ignoreCase = true) == true } == true,
                                                         icon = { _ ->
                                                             Icon(
                                                                 Icons.Default.Search,
-                                                                "Search",
+                                                                stringResource(R.string.search),
                                                                 modifier = Modifier.size(24.dp)
                                                             )
                                                         },

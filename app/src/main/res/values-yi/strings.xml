@@ -235,6 +235,9 @@
     <string name="pill_style_navigation_subtitle">ווײַזן אַ פֿלאָטענדיקן פּיל-סטיל נאַוויגאַציע באַר אַנשטאָט דעם סטאַנדאַרדן אונטערשטן באַר</string>
     <string name="icon_only_bottom_bar">נאָר איקאָנען אונטערשטער באַר</string>
     <string name="icon_only_bottom_bar_subtitle">אַראָפּנעמט טעקסט פֿון נאַוויגאַציע</string>
+    <string name="startup_tab">אָנהייב טאַב</string>
+    <string name="startup_tab_subtitle">קלויב וועלכע טאַב עפֿנט זיך ווען די אַפּ הייבט אָן</string>
+    <string name="last_used">לעצט גענוצט</string>
 
     <string name="calls_and_system">רופן און סיסטעם</string>
     <string name="call_settings">רוף איינשטעלונגען</string>
@@ -735,7 +738,8 @@
     <string name="busy_mode_message">אויטאָמאַטישע ענטפֿער מעלדונג</string>
     <string name="busy_mode_message_subtitle">מעלדונג וואָס ווערט אויטאָמאַטיש געשיקט ווען פֿאַרנומען מאָדע וואַרפֿט אָפּ אַ רוף</string>
     <string name="busy_mode_default_message">איך בין איצט פֿאַרנומען, רוף מיך שפּעטער</string>
-    <string name="busy_mode_call_rejected_toast">רוף אָפּגעוואָרפֿן (פֿאַרנומען מאָדע). SMS געשיקט.</string>
+    <string name="busy_mode_call_rejected_toast">רוף אָפּגעוואָרפֿן (פֿאַרנומען מאָדע).</string>
+    <string name="busy_mode_call_rejected_sent_sms_toast">רוף אָפּגעוואָרפֿן (פֿאַרנומען מאָדע). SMS געשיקט.</string>
     <string name="edit_busy_message">רעדאַקטירן די פֿאַרנומען מאָדע מעלדונג</string>
     <string name="busy_mode_permission_required">גיב דערלויבעניש צו שיקן SMS אין די אַפּ איינשטעלונגען</string>
 </resources>

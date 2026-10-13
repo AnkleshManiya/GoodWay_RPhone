@@ -236,6 +236,9 @@
     <string name="pill_style_navigation_subtitle">הצג סרגל ניווט צף בסגנון גלולה במקום הסרגל התחתון הסטנדרטי</string>
     <string name="icon_only_bottom_bar">סרגל תחתון עם סמלים בלבד</string>
     <string name="icon_only_bottom_bar_subtitle">מסיר תוויות טקסט מהניווט</string>
+    <string name="startup_tab">לשונית הפעלה</string>
+    <string name="startup_tab_subtitle">בחר איזו לשונית תיפתח בעת הפעלת האפליקציה</string>
+    <string name="last_used">האחרון בשימוש</string>
 
     <string name="calls_and_system">שיחות ומערכת</string>
     <string name="call_settings">הגדרות שיחות</string>
@@ -733,7 +736,8 @@
     <string name="busy_mode_message">הודעת תגובה אוטומטית</string>
     <string name="busy_mode_message_subtitle">הודעה הנשלחת אוטומטית כאשר מצב עסוק דוחה שיחה</string>
     <string name="busy_mode_default_message">אני עסוק עכשיו, תתקשר אליי מאוחר יותר</string>
-    <string name="busy_mode_call_rejected_toast">השיחה נדחתה (מצב עסוק). SMS נשלח.</string>
+    <string name="busy_mode_call_rejected_toast">השיחה נדחתה (מצב עסוק).</string>
+    <string name="busy_mode_call_rejected_sent_sms_toast">השיחה נדחתה (מצב עסוק). SMS נשלח.</string>
     <string name="edit_busy_message">ערוך את הודעת מצב עסוק</string>
     <string name="busy_mode_permission_required">הענק הרשאה לשלוח הודעות SMS בהגדרות האפליקציה</string>
 </resources>

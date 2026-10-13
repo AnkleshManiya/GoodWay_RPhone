@@ -235,6 +235,9 @@
     <string name="pill_style_navigation_subtitle">मानक निचली बार के बजाय एक फ़्लोटिंग पिल-स्टाइल नेविगेशन बार दिखाएँ</string>
     <string name="icon_only_bottom_bar">केवल आइकन निचली बार</string>
     <string name="icon_only_bottom_bar_subtitle">नेविगेशन से टेक्स्ट लेबल हटाता है</string>
+    <string name="startup_tab">स्टार्टअप टैब</string>
+    <string name="startup_tab_subtitle">चुनें कि ऐप शुरू होने पर कौन सा टैब खुलेगा</string>
+    <string name="last_used">अंतिम बार उपयोग किया गया</string>
 
     <string name="calls_and_system">कॉल और सिस्टम</string>
     <string name="call_settings">कॉल सेटिंग्स</string>
@@ -729,7 +732,8 @@
     <string name="busy_mode_message">स्वचालित उत्तर संदेश</string>
     <string name="busy_mode_message_subtitle">जब व्यस्त मोड किसी कॉल को अस्वीकार करता है तो स्वचालित रूप से भेजा जाने वाला संदेश</string>
     <string name="busy_mode_default_message">मैं अभी व्यस्त हूँ, बाद में कॉल करें</string>
-    <string name="busy_mode_call_rejected_toast">कॉल अस्वीकृत (व्यस्त मोड)। SMS भेजा गया।</string>
+    <string name="busy_mode_call_rejected_toast">कॉल अस्वीकृत (व्यस्त मोड)।</string>
+    <string name="busy_mode_call_rejected_sent_sms_toast">कॉल अस्वीकृत (व्यस्त मोड)। SMS भेजा गया।</string>
     <string name="edit_busy_message">व्यस्त मोड संदेश संपादित करें</string>
     <string name="busy_mode_permission_required">ऐप सेटिंग्स में SMS भेजने की अनुमति दें</string>
 </resources>

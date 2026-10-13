@@ -234,6 +234,9 @@
     <string name="pill_style_navigation_subtitle">Отображать плавающую панель навигации в виде таблетки вместо стандартной нижней панели</string>
     <string name="icon_only_bottom_bar">Только значки в нижней панели</string>
     <string name="icon_only_bottom_bar_subtitle">Удаляет текстовые метки из панели навигации</string>
+    <string name="startup_tab">Стартовая вкладка</string>
+    <string name="startup_tab_subtitle">Выберите, какая вкладка будет открываться при запуске приложения</string>
+    <string name="last_used">Последняя использованная</string>
 
     <string name="calls_and_system">Звонки и система</string>
     <string name="call_settings">Настройки вызовов</string>
@@ -737,7 +740,8 @@
     <string name="busy_mode_message">Сообщение для режима «Занято»</string>
     <string name="busy_mode_message_subtitle">Сообщение, отправляемое автоматически при отклонении вызова в режиме «Занят»</string>
     <string name="busy_mode_default_message">Я сейчас занят, позвони мне позже</string>
-    <string name="busy_mode_call_rejected_toast">Звонок отклонен (режим «Занято»). SMS отправлено.</string>
+    <string name="busy_mode_call_rejected_toast">Звонок отклонен (режим «Занято»).</string>
+    <string name="busy_mode_call_rejected_sent_sms_toast">Звонок отклонен (режим «Занято»). SMS отправлено.</string>
     <string name="edit_busy_message">Изменить сообщение в режиме «Занят»</string>
     <string name="busy_mode_permission_required">Предоставьте разрешение на отправку SMS в настройках приложения</string>
 </resources>

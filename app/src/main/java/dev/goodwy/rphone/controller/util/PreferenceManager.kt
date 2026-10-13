@@ -2,7 +2,6 @@ package dev.goodwy.rphone.controller.util
 
 import android.content.Context
 import android.os.Build
-
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.SharedPreferencesMigration
 import androidx.datastore.preferences.core.*
@@ -424,8 +423,6 @@ class PreferenceManager(context: Context) {
         const val KEY_CALL_ANALYTICS_TRACKING = "call_analytics_tracking"
 
         // Ever
-        const val KEY_BLOCK_UNKNOWN         = "block_unknown_callers"
-        const val KEY_BLOCK_HIDDEN          = "block_hidden_callers"
         const val KEY_APP_HAPTICS              = "app_haptics_enabled"
         const val KEY_APP_HAPTICS_STRENGTH     = "app_haptics_strength"
         const val KEY_HAPTICS_CUSTOM_INTENSITY = "haptics_custom_intensity"

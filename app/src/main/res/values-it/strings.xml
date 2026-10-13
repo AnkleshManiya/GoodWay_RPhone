@@ -234,6 +234,9 @@
     <string name="pill_style_navigation_subtitle">Mostra una barra di navigazione fluttuante a pillola invece della barra inferiore standard</string>
     <string name="icon_only_bottom_bar">Barra inferiore solo icone</string>
     <string name="icon_only_bottom_bar_subtitle">Rimuove le etichette di testo dalla navigazione</string>
+    <string name="startup_tab">Scheda iniziale</string>
+    <string name="startup_tab_subtitle">Scegli quale scheda si apre all\'avvio dell\'app</string>
+    <string name="last_used">Ultima usata</string>
 
     <string name="calls_and_system">Chiamate e sistema</string>
     <string name="call_settings">Impostazioni chiamate</string>
@@ -730,7 +733,8 @@
     <string name="busy_mode_message">Messaggio di risposta automatica</string>
     <string name="busy_mode_message_subtitle">Messaggio inviato automaticamente quando la modalità occupato rifiuta una chiamata</string>
     <string name="busy_mode_default_message">Sono occupato ora, richiamami più tardi</string>
-    <string name="busy_mode_call_rejected_toast">Chiamata rifiutata (modalità occupato). SMS inviato.</string>
+    <string name="busy_mode_call_rejected_toast">Chiamata rifiutata (modalità occupato).</string>
+    <string name="busy_mode_call_rejected_sent_sms_toast">Chiamata rifiutata (modalità occupato). SMS inviato.</string>
     <string name="edit_busy_message">Modifica il messaggio della modalità occupato</string>
     <string name="busy_mode_permission_required">Concedi l\'autorizzazione per inviare SMS nelle impostazioni dell\'app</string>
 </resources>

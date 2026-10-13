@@ -236,6 +236,9 @@
     <string name="pill_style_navigation_subtitle">إظهار شريط تنقل عائم على شكل حبة بدلاً من الشريط السفلي القياسي</string>
     <string name="icon_only_bottom_bar">شريط سفلي بأيقونات فقط</string>
     <string name="icon_only_bottom_bar_subtitle">يزيل تسميات النص من التنقل</string>
+    <string name="startup_tab">علامة تبويب البدء</string>
+    <string name="startup_tab_subtitle">اختر علامة التبويب التي تُفتح عند بدء التطبيق</string>
+    <string name="last_used">آخر استخدام</string>
 
     <string name="calls_and_system">المكالمات والنظام</string>
     <string name="call_settings">إعدادات المكالمات</string>
@@ -742,7 +745,8 @@
     <string name="busy_mode_message">رسالة الرد التلقائي</string>
     <string name="busy_mode_message_subtitle">الرسالة التي يتم إرسالها تلقائيًا عندما يرفض وضع الانشغال مكالمة</string>
     <string name="busy_mode_default_message">أنا مشغول الآن، اتصل بي لاحقًا</string>
-    <string name="busy_mode_call_rejected_toast">تم رفض المكالمة (وضع الانشغال). تم إرسال SMS.</string>
+    <string name="busy_mode_call_rejected_toast">تم رفض المكالمة (وضع الانشغال).</string>
+    <string name="busy_mode_call_rejected_sent_sms_toast">تم رفض المكالمة (وضع الانشغال). تم إرسال SMS.</string>
     <string name="edit_busy_message">تعديل رسالة وضع الانشغال</string>
     <string name="busy_mode_permission_required">امنح الإذن بإرسال رسائل SMS في إعدادات التطبيق</string>
 </resources>

@@ -235,6 +235,9 @@
     <string name="pill_style_navigation_subtitle">Afficher une barre de navigation flottante en forme de pilule au lieu de la barre inférieure standard</string>
     <string name="icon_only_bottom_bar">Barre inférieure avec icônes uniquement</string>
     <string name="icon_only_bottom_bar_subtitle">Supprime les étiquettes de texte de la navigation</string>
+    <string name="startup_tab">Onglet de démarrage</string>
+    <string name="startup_tab_subtitle">Choisissez l\'onglet qui s\'ouvre au lancement de l\'application</string>
+    <string name="last_used">Dernier utilisé</string>
 
     <string name="calls_and_system">Appels &amp; Système</string>
     <string name="call_settings">Paramètres d\'appel</string>
@@ -729,7 +732,8 @@
     <string name="busy_mode_message">Message de réponse automatique</string>
     <string name="busy_mode_message_subtitle">Message envoyé automatiquement lorsque le mode occupé refuse un appel</string>
     <string name="busy_mode_default_message">Je suis occupé, rappelle-moi plus tard</string>
-    <string name="busy_mode_call_rejected_toast">Appel refusé (mode occupé). SMS envoyé.</string>
+    <string name="busy_mode_call_rejected_toast">Appel refusé (mode occupé).</string>
+    <string name="busy_mode_call_rejected_sent_sms_toast">Appel refusé (mode occupé). SMS envoyé.</string>
     <string name="edit_busy_message">Modifier le message du mode occupé</string>
     <string name="busy_mode_permission_required">Accordez l\'autorisation d\'envoyer des SMS dans les paramètres de l\'application</string>
 </resources>

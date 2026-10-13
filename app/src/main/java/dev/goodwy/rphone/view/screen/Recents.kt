@@ -137,12 +137,6 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
         selectedEntries = emptySet()
     }
 
-//    LaunchedEffect(Unit) {
-//        fabVisible = true
-//
-//        CallService.clearAllMissedCallNotifications(context)
-//    }
-
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->

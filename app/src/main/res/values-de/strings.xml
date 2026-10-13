@@ -235,6 +235,9 @@
     <string name="pill_style_navigation_subtitle">Eine schwebende Pillen-Navigation anstelle der Standard-Unterleiste anzeigen</string>
     <string name="icon_only_bottom_bar">Unterleiste nur mit Symbolen</string>
     <string name="icon_only_bottom_bar_subtitle">Entfernt Textbeschriftungen aus der Navigation</string>
+    <string name="startup_tab">Start-Tab</string>
+    <string name="startup_tab_subtitle">Wählen Sie, welcher Tab beim Start der App geöffnet wird</string>
+    <string name="last_used">Zuletzt verwendet</string>
 
     <string name="calls_and_system">Anrufe &amp; System</string>
     <string name="call_settings">Anrufeinstellungen</string>
@@ -729,7 +732,8 @@
     <string name="busy_mode_message">Auto-Antwort-Nachricht</string>
     <string name="busy_mode_message_subtitle">Nachricht, die automatisch gesendet wird, wenn der Beschäftigt-Modus einen Anruf ablehnt</string>
     <string name="busy_mode_default_message">Ich bin gerade beschäftigt, ruf mich später an</string>
-    <string name="busy_mode_call_rejected_toast">Anruf abgelehnt (Beschäftigt-Modus). SMS gesendet.</string>
+    <string name="busy_mode_call_rejected_toast">Anruf abgelehnt (Beschäftigt-Modus).</string>
+    <string name="busy_mode_call_rejected_sent_sms_toast">Anruf abgelehnt (Beschäftigt-Modus). SMS gesendet.</string>
     <string name="edit_busy_message">Nachricht für den Beschäftigt-Modus bearbeiten</string>
     <string name="busy_mode_permission_required">Erteilen Sie die Berechtigung zum Senden von SMS in den App-Einstellungen</string>
 </resources>

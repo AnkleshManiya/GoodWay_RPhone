@@ -235,6 +235,9 @@
     <string name="pill_style_navigation_subtitle">نمایش نوار ناوبری شناور به سبک قرص به جای نوار پایینی استاندارد</string>
     <string name="icon_only_bottom_bar">نوار پایینی فقط با آیکون</string>
     <string name="icon_only_bottom_bar_subtitle">برچسب‌های متنی را از ناوبری حذف می‌کند</string>
+    <string name="startup_tab">زبانه شروع</string>
+    <string name="startup_tab_subtitle">انتخاب کنید هنگام اجرای برنامه کدام زبانه باز شود</string>
+    <string name="last_used">آخرین استفاده‌شده</string>
 
     <string name="calls_and_system">تماس‌ها و سیستم</string>
     <string name="call_settings">تنظیمات تماس</string>
@@ -729,7 +732,8 @@
     <string name="busy_mode_message">پیام پاسخ خودکار</string>
     <string name="busy_mode_message_subtitle">پیامی که به‌طور خودکار هنگام رد تماس توسط حالت مشغول ارسال می‌شود</string>
     <string name="busy_mode_default_message">الان مشغولم، بعداً تماس بگیر</string>
-    <string name="busy_mode_call_rejected_toast">تماس رد شد (حالت مشغول). SMS ارسال شد.</string>
+    <string name="busy_mode_call_rejected_toast">تماس رد شد (حالت مشغول).</string>
+    <string name="busy_mode_call_rejected_sent_sms_toast">تماس رد شد (حالت مشغول). SMS ارسال شد.</string>
     <string name="edit_busy_message">ویرایش پیام حالت مشغول</string>
     <string name="busy_mode_permission_required">در تنظیمات برنامه اجازه ارسال SMS را اعطا کنید</string>
 </resources>

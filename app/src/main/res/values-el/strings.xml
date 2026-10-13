@@ -235,6 +235,9 @@
     <string name="pill_style_navigation_subtitle">Εμφάνιση πλωτής γραμμής πλοήγησης σε στυλ χαπιού αντί της τυπικής κάτω γραμμής</string>
     <string name="icon_only_bottom_bar">Κάτω γραμμή μόνο με εικονίδια</string>
     <string name="icon_only_bottom_bar_subtitle">Καταργεί τις ετικέτες κειμένου από την πλοήγηση</string>
+    <string name="startup_tab">Καρτέλα εκκίνησης</string>
+    <string name="startup_tab_subtitle">Επιλέξτε ποια καρτέλα ανοίγει κατά την εκκίνηση της εφαρμογής</string>
+    <string name="last_used">Τελευταία χρήση</string>
 
     <string name="calls_and_system">Κλήσεις &amp; Σύστημα</string>
     <string name="call_settings">Ρυθμίσεις κλήσεων</string>
@@ -729,7 +732,8 @@
     <string name="busy_mode_message">Μήνυμα αυτόματης απάντησης</string>
     <string name="busy_mode_message_subtitle">Μήνυμα που αποστέλλεται αυτόματα όταν η λειτουργία απασχόλησης απορρίπτει μια κλήση</string>
     <string name="busy_mode_default_message">Είμαι απασχολημένος τώρα, κάλεσέ με αργότερα</string>
-    <string name="busy_mode_call_rejected_toast">Η κλήση απορρίφθηκε (λειτουργία απασχόλησης). Το SMS στάλθηκε.</string>
+    <string name="busy_mode_call_rejected_toast">Η κλήση απορρίφθηκε (λειτουργία απασχόλησης).</string>
+    <string name="busy_mode_call_rejected_sent_sms_toast">Η κλήση απορρίφθηκε (λειτουργία απασχόλησης). Το SMS στάλθηκε.</string>
     <string name="edit_busy_message">Επεξεργασία μηνύματος λειτουργίας απασχόλησης</string>
     <string name="busy_mode_permission_required">Παραχωρήστε άδεια αποστολής SMS στις ρυθμίσεις της εφαρμογής</string>
 </resources>
