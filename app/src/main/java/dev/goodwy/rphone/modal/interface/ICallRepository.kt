@@ -2,8 +2,10 @@ package dev.goodwy.rphone.modal.`interface`
 
 import android.telecom.Call
 import android.telecom.CallAudioState
+import androidx.compose.runtime.Stable
 import kotlinx.coroutines.flow.StateFlow
 
+@Stable
 data class CallSession(
     val call: Call,
     val state: Int,

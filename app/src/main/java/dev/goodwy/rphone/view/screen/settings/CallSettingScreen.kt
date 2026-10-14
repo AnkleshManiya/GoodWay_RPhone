@@ -430,28 +430,18 @@ fun getSimSelectionList(askFirstResId: Int): List<Pair<String, Int>> {
         if (telecomManager != null) {
             try {
                 val rawAccounts = telecomManager.callCapablePhoneAccounts
-                val seen = HashSet<String>()
-
                 val validAccounts = rawAccounts.filter { handle ->
+                    try {
+                        telecomManager.getPhoneAccount(handle) != null
+                    } catch (_: Exception) {
+                        false
+                    }
+                }.distinct()
+
+                validAccounts.forEachIndexed { index, handle ->
                     val info = try {
                         telecomManager.getPhoneAccount(handle)
-                    } catch (e: Exception) {
-                        null
-                    }
-
-                    val isSimAccount = info != null /*&&
-                            info.isEnabled &&
-                            info.hasCapabilities(PhoneAccount.CAPABILITY_SIM_SUBSCRIPTION)*/
-                    if (!isSimAccount) return@filter false
-
-                    val key = info!!.label?.toString().orEmpty() + "|" + info.address?.toString().orEmpty()
-                    seen.add(key)
-                }
-
-                validAccounts.forEachIndexed { index, _ ->
-                    val info = try {
-                        telecomManager.getPhoneAccount(validAccounts[index])
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         null
                     }
 
@@ -459,7 +449,11 @@ fun getSimSelectionList(askFirstResId: Int): List<Pair<String, Int>> {
                     val operatorName = info?.label?.toString()
 
                     val label = if (!operatorName.isNullOrEmpty()) {
-                        "SIM $simNumber: $operatorName"
+                        if (operatorName.startsWith("SIM", ignoreCase = true)) {
+                            operatorName
+                        } else {
+                            "SIM $simNumber: $operatorName"
+                        }
                     } else {
                         "SIM $simNumber"
                     }

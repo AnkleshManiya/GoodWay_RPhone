@@ -1,5 +1,8 @@
 package dev.goodwy.rphone.modal.data
 
+import androidx.compose.runtime.Immutable
+
+@Immutable
 data class CallerMetadata(
     val number: String,
     val name: String,
