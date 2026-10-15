@@ -223,7 +223,7 @@
 
         <activity
             android:name=".controller.CallActivity"
-            android:exported="true"
+            android:exported="false"
             android:launchMode="singleTask"
             android:excludeFromRecents="true"
             android:showForAllUsers="true"

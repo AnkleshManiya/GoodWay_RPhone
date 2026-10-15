@@ -8,7 +8,7 @@ import android.telecom.PhoneAccountHandle
 import android.telecom.TelecomManager
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.SimCard
@@ -38,21 +38,13 @@ fun SimPickerDialog(
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
             try {
                 val raw = telecomManager.callCapablePhoneAccounts
-                val seen = HashSet<String>()
                 raw.filter { handle ->
-                    val info = try {
-                        telecomManager.getPhoneAccount(handle)
-                    } catch (e: Exception) {
-                        null
+                    try {
+                        telecomManager.getPhoneAccount(handle) != null
+                    } catch (_: Exception) {
+                        false
                     }
-                    val isSimAccount = info != null /*&&
-                            info.isEnabled &&
-                            info.hasCapabilities(PhoneAccount.CAPABILITY_SIM_SUBSCRIPTION)*/
-                    if (!isSimAccount) return@filter false
-
-                    val key = info!!.label?.toString().orEmpty() + "|" + info.address?.toString().orEmpty()
-                    seen.add(key)
-                }
+                }.distinct()
             } catch (e: SecurityException) {
                 emptyList()
             }
@@ -93,11 +85,23 @@ fun SimPickerDialog(
                             verticalArrangement = Arrangement.spacedBy(2.dp),
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            items(phoneAccounts) { accountHandle ->
+                            itemsIndexed(phoneAccounts) { index, accountHandle ->
                                 val info = try {
                                     telecomManager.getPhoneAccount(accountHandle)
                                 } catch (_: Exception) {
                                     null
+                                }
+
+                                val simNumber = index + 1
+                                val operatorName = info?.label?.toString()
+                                val displayLabel = if (!operatorName.isNullOrEmpty()) {
+                                    if (operatorName.startsWith("SIM", ignoreCase = true)) {
+                                        operatorName
+                                    } else {
+                                        "SIM $simNumber: $operatorName"
+                                    }
+                                } else {
+                                    "SIM $simNumber"
                                 }
 
                                 Surface(
@@ -128,13 +132,14 @@ fun SimPickerDialog(
 
                                         Column {
                                             Text(
-                                                text = info?.label?.toString() ?: "Unknown SIM",
+                                                text = displayLabel,
                                                 style = MaterialTheme.typography.titleMedium,
                                                 fontWeight = FontWeight.SemiBold
                                             )
-                                            if (info?.shortDescription != null) {
+                                            val description = info?.shortDescription?.toString()
+                                            if (!description.isNullOrEmpty() && description != operatorName) {
                                                 Text(
-                                                    text = info.shortDescription.toString(),
+                                                    text = description,
                                                     style = MaterialTheme.typography.bodyMedium,
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                                 )

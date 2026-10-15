@@ -53,6 +53,7 @@ data class Contact(
     val name: String get() = displayName
 }
 
+@Immutable
 @Serializable
 data class ContactEvent(
     val type: Int,
@@ -60,6 +61,7 @@ data class ContactEvent(
     val date: String
 )
 
+@Immutable
 @Serializable
 data class ContactPhoneDetail(
     val type: Int = Phone.TYPE_MOBILE,
@@ -68,6 +70,7 @@ data class ContactPhoneDetail(
     val isPrimary: Boolean = false
 )
 
+@Immutable
 @Serializable
 data class ContactEmail(
     val type: Int = Email.TYPE_HOME,
@@ -75,6 +78,7 @@ data class ContactEmail(
     val value: String
 )
 
+@Immutable
 @Serializable
 data class ContactAddress(
     val type: Int,

@@ -2,6 +2,7 @@ package dev.goodwy.rphone.controller
 
 import android.annotation.SuppressLint
 import android.provider.CallLog
+import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.goodwy.rphone.R
@@ -22,6 +23,7 @@ enum class AnalyticsTimeRange(val stringRes: Int) {
     ALL_TIME(R.string.all_time)
 }
 
+@Immutable
 data class TopContactStat(
     val number: String,
     val name: String,
@@ -33,11 +35,13 @@ data class TopContactStat(
     val missedCount: Int
 )
 
+@Immutable
 data class ChartDataPoint(
     val label: String,
     val value: Int
 )
 
+@Immutable
 data class CallAnalyticsSummary(
     val totalTalkTimeSeconds: Long = 0L,
     val totalCalls: Int = 0,
